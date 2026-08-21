@@ -382,14 +382,23 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 # commands
 # --------------------------------------------------------------------------
 
-def build_install_tasks(cfg: dict, base: Path) -> list[Task]:
+def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Task]:
+    """Build the install sequence.
+
+    `optimize` covers the lockdown steps - turning off system and app
+    updates and disabling the manufacturers' update services. Wanted on an
+    issued device, unwanted on someone's personal phone, so it can be
+    skipped with --no-optimize.
+    """
     apks = [(base / a).resolve() for a in cfg["kit"]["apks"]]
-    tasks = [
-        task_stay_awake(),
-        task_settings(cfg["settings"]["install"]),
-        task_packages(cfg["packages"]["core"], cfg["packages"].get("vendor", {}), enable=False),
-        task_install(apks),
-    ]
+    tasks = [task_stay_awake()]
+    if optimize:
+        tasks += [
+            task_settings(cfg["settings"]["install"]),
+            task_packages(cfg["packages"]["core"], cfg["packages"].get("vendor", {}),
+                          enable=False),
+        ]
+    tasks += [task_install(apks)]
     tasks += [task_push(e, base) for e in cfg["push"]]
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
@@ -489,7 +498,12 @@ def main(argv: list[str] | None = None) -> int:
 
     sub = ap.add_subparsers(dest="command", required=True)
     sub.add_parser("devices", help="list attached devices and exit")
-    sub.add_parser("install", help="install apps and push configuration")
+    p_install = sub.add_parser("install", help="install apps and push configuration")
+    p_install.add_argument(
+        "--no-optimize", action="store_true",
+        help="skip the lockdown steps: leave system and app updates, the "
+             "package verifier and the manufacturer's update services alone. "
+             "Use this on a personal phone.")
     p_restore = sub.add_parser("restore", help="uninstall apps and remove ATAK files")
     p_restore.add_argument("--wipe-media", action="store_true",
                            help="also delete Download, DCIM, Pictures and Documents")
@@ -544,12 +558,26 @@ def main(argv: list[str] | None = None) -> int:
             if not confirm_word("Proceed?", "WIPE"):
                 out.info("Aborted.")
                 return 1
+        elif args.command == "install" and not args.yes:
+            print()
+            if args.no_optimize:
+                print("  Install WITHOUT lockdown: system and app updates are left")
+                print("  as they are. Apps and configuration are still installed.")
+            else:
+                print("  Install WITH lockdown - on every device listed above:")
+                print("    - system and app updates turned OFF")
+                print("    - package verifier turned OFF")
+                print("    - the manufacturer's update services disabled")
+                print("  Not what you want on a personal phone; use --no-optimize.")
+            if not confirm(f"Run install on {len(devices)} device(s)?"):
+                out.info("Aborted.")
+                return 1
         elif not args.yes and not confirm(f"Run '{args.command}' on {len(devices)} device(s)?"):
             out.info("Aborted.")
             return 1
 
         if args.command == "install":
-            tasks = build_install_tasks(cfg, base)
+            tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

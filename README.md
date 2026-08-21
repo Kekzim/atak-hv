@@ -107,6 +107,7 @@ Exemplen visar Windows-varianten; på Linux/macOS byter du
 ```
 provision.bat devices                Visa anslutna enheter och avsluta
 provision.bat install                Installera appar och lägg ut konfiguration
+provision.bat install --no-optimize  Samma, men rör inte telefonens uppdateringar
 provision.bat restore                Avinstallera appar, ta bort ATAK-filer
 provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 ```
@@ -114,6 +115,26 @@ provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 **`install`** stänger av system- och appuppdateringar, installerar apparna i
 `payload/apks/`, lägger ut `atak/`, `ATAK-installation/` och `VPN-clients/`
 under `/sdcard/`, och placerar `atak-box.zip` i `/sdcard/Download/`.
+
+### Testa på en egen telefon
+
+Standardläget låser ner enheten. På ett utlämnat system är det meningen,
+men på någons privata telefon är det inte det:
+
+* system- och appuppdateringar stängs av — telefonen slutar få
+  säkerhetsuppdateringar
+* paketverifieraren stängs av
+* tillverkarens uppdateringstjänster inaktiveras
+
+Kör därför `install --no-optimize` när du provar verktyget på en telefon
+som används privat. Appar och konfiguration installeras precis som vanligt,
+men telefonens uppdateringsinställningar lämnas orörda.
+
+Verktyget skriver ut vilket läge det kör i och väntar på bekräftelse innan
+det börjar, så du hinner avbryta om du valt fel.
+
+Har du redan kört en full `install` på en privat telefon: `restore` slår på
+uppdateringarna igen och avinstallerar ATAK-apparna.
 
 **`restore`** gör tvärtom: avinstallerar ATAK-apparna, tar bort de utlagda
 mapparna och slår på uppdateringarna igen. `--wipe-media` rensar dessutom
@@ -123,6 +144,7 @@ Download, DCIM, Pictures och Documents.
 
 | Flagga | Betydelse |
 |---|---|
+| `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
 | `-j N` | Provisionera N enheter parallellt (standard 1) |

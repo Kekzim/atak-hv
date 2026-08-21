@@ -8,7 +8,7 @@ För installation och avrustning av enheter, se [repots README](../README.md).
 
 | Dokument | Avsnitt | Innehåll |
 |---|---:|---|
-| [ATAK-handbok](atak-handbok.md) | 36 | Handhavande: layout, menyer, kartor, navigation, point dropper, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, tips och felsökning |
+| [ATAK-handbok](atak-handbok.md) | 31 | Handhavande: layout, menyer, kartor, navigation, point dropper, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, tips och felsökning |
 | [Installation med VPN från dator](atak-installation-med-vpn-fran-dator.md) | 5 | Installation av enhet från dator |
 | [Uppstart efter återställd ATAK](atak-uppstart-efter-aterstalld.md) | 1 | Konfiguration av en avrustad telefon, inkl. färgsättning |
 | [Avrustning och grundinställning](atak-avrustning-grundinstallning.md) | 1 | Fabriksåterställning och packning av TAK-väska |

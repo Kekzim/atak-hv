@@ -36,19 +36,6 @@ MÖRKBLÅ
 
 ---
 
-## INSTALLATION AV ENHETER
-- Se ATAK installation med VPN från Dator.pptx
-- Eller
-- ATAK installation med VPN från USB-sticka.pptx
-Note:
-Utbildningens grund, och vad tanken är…
-
----
-
-## Knappologi
-
----
-
 ## GRUNDLAYOUT
 ![Bildobjekt 4](assets/atak-handbok/slide19-17.jpg)
 ![Bildobjekt 5](assets/atak-handbok/slide19-18.png)
@@ -437,10 +424,6 @@ MNEMONICS
 
 ---
 
-## KOMMUNIKATION:FEED
-
----
-
 ## FEED
 FEED (SYNKRONISERAT INFORMATIONSFLÖDE)
 - Med en FEED upprätthåller man läget på alla enheter som man skickar informationen till eller från
@@ -487,10 +470,6 @@ Gruppfeed
 
 ---
 
-## SKAPA FEED
-
----
-
 ## HUR SKAPAR VI EN FEED I ATAK?
 - Öppna: overlay manager
 - Klicka:  Feeds
@@ -511,10 +490,6 @@ Gruppfeed
 ![Bildobjekt 2](assets/atak-handbok/slide59-111.png)
 ![Bildobjekt 3](assets/atak-handbok/slide59-112.png)
 ![Bildobjekt 4](assets/atak-handbok/slide59-113.png)
-
----
-
-## Bygga Datapaket
 
 ---
 

@@ -20,8 +20,13 @@ apks = [
     "payload/apks/HVreports.apk",
 ]
 
-# Removed after pushing: the folder push drags a stale copy along.
-cleanup_after_push = ["/sdcard/ATAK-installation/atak-box.zip"]
+# Removed after pushing.
+#   atak-box.zip - the folder push drags a stale copy along.
+#   .gitkeep     - a git placeholder that has no business on a phone.
+cleanup_after_push = [
+    "/sdcard/ATAK-installation/atak-box.zip",
+    "/sdcard/VPN-clients/.gitkeep",
+]
 
 [adb]
 # Where to look for adb, in order. "bundled" = platform-tools/ next to

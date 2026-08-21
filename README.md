@@ -146,8 +146,9 @@ det börjar, så du hinner avbryta om du valt fel.
 Har du redan kört en full `install` på en privat telefon: `restore` slår på
 uppdateringarna igen och avinstallerar ATAK-apparna.
 
-**`restore`** gör tvärtom: avinstallerar ATAK-apparna, tar bort de utlagda
-mapparna och slår på uppdateringarna igen. `--wipe-media` rensar dessutom
+**`restore`** gör tvärtom: avinstallerar ATAK-apparna, tar bort deras
+undantag ur Doze, tar bort de utlagda mapparna och slår på uppdateringarna
+igen. `--wipe-media` rensar dessutom
 Download, DCIM, Pictures och Documents.
 
 ### Flaggor

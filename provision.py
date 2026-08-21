@@ -706,7 +706,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     tasks += [task_push(e, base) for e in cfg["push"]]
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
-        tasks.append(task_remove(cleanup, "Clean stale atak-box.zip"))
+        tasks.append(task_remove(cleanup, "Clean up after push"))
     doze = cfg.get("doze", {}).get("verify", [])
     if doze:
         tasks.append(task_doze_check(doze))
@@ -811,7 +811,8 @@ def main(argv: list[str] | None = None) -> int:
     common.add_argument("--wait", type=int, default=argparse.SUPPRESS,
                         help="seconds to wait for devices (default: 300)")
     common.add_argument("--dry-run", action="store_true", default=argparse.SUPPRESS,
-                        help="print adb commands, change nothing")
+                        help="show the plan without changing anything; the "
+                             "adb commands go to the device log")
     common.add_argument("-y", "--yes", action="store_true", default=argparse.SUPPRESS,
                         help="do not ask for confirmation")
     common.add_argument("-q", "--quiet", action="store_true", default=argparse.SUPPRESS)

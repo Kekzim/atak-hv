@@ -33,6 +33,35 @@ if not exist "%ADB%" (
     exit /b 1
 )
 
+REM =====================================================
+REM CHECK REQUIRED FILES
+REM =====================================================
+if not exist "%ATAK_BOX%" (
+    echo.
+    echo ERROR: atak-box.zip saknas
+    echo   Forvantad plats: %ATAK_BOX%
+    echo.
+    echo   Filen innehaller er TAK-servers adress och certifikat, och
+    echo   levereras separat - den ligger inte i git. Lagg in ert eget
+    echo   atak-box.zip innan skriptet kors, annars far enheterna ingen
+    echo   serverkontakt.
+    echo.
+    pause
+    exit /b 1
+)
+
+set "MISSING="
+for %%A in ("%APK1%" "%APK2%" "%APK3%" "%APK4%") do (
+    if not exist %%A set "MISSING=!MISSING! %%~nxA"
+)
+if defined MISSING (
+    echo.
+    echo ERROR: foljande APK-filer saknas under Filer\:!MISSING!
+    echo.
+    pause
+    exit /b 1
+)
+
 cls
 echo =====================================================
 echo              MANUAL USB ACCESS REQUIRED

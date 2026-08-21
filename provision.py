@@ -409,15 +409,30 @@ def task_permissions(perms: dict, appops: dict, exempt: list[str]) -> Task:
     so it is granted here rather than relying on the operator tapping
     through every dialog - and ACCESS_BACKGROUND_LOCATION cannot be
     granted from those dialogs at all.
+
+    A package none of these tables can find on the device is reported,
+    not passed over. A mistyped package id is otherwise indistinguishable
+    from success: nothing is granted, nothing fails, and the setting is
+    missing in the field. Under --dry-run this also fires for a package
+    the same run would have sideloaded - which is the right moment to
+    notice a typo, at the cost of a warning that a real run will not
+    repeat.
     """
     def run(adb, dev, log):
         installed = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False).stdout
-        granted = skipped = missing = 0
+        granted = skipped = 0
+        absent: list[str] = []
+
+        def present(pkg: str) -> bool:
+            if f"package:{pkg}" in installed:
+                return True
+            if pkg not in absent:
+                log.write(f"{pkg} not installed - nothing applied\n")
+                absent.append(pkg)
+            return False
 
         for pkg, permissions in perms.items():
-            if f"package:{pkg}" not in installed:
-                log.write(f"{pkg} not installed - skipping permissions\n")
-                missing += 1
+            if not present(pkg):
                 continue
             for perm in permissions:
                 p = adb.shell(["pm", "grant", pkg, perm], dev.serial)
@@ -430,14 +445,14 @@ def task_permissions(perms: dict, appops: dict, exempt: list[str]) -> Task:
                     skipped += 1
 
         for pkg, ops in appops.items():
-            if f"package:{pkg}" not in installed:
+            if not present(pkg):
                 continue
             for op, mode in ops:
                 p = adb.shell(["appops", "set", pkg, op, mode], dev.serial)
                 _logged(log, p)
 
         for pkg in exempt:
-            if f"package:{pkg}" not in installed:
+            if not present(pkg):
                 continue
             p = adb.shell(["dumpsys", "deviceidle", "whitelist", f"+{pkg}"], dev.serial)
             _logged(log, p)
@@ -445,8 +460,9 @@ def task_permissions(perms: dict, appops: dict, exempt: list[str]) -> Task:
         note = f"{granted} granted" + (" (dry-run)" if adb.dry_run else "")
         if skipped:
             note += f", {skipped} n/a"
-        if missing:
-            note += f", {missing} app(s) not installed"
+        if absent:
+            # WARNING puts it in the summary, where the operator sees it.
+            note = f"WARNING: {note}; nothing applied to " + ", ".join(absent)
         return True, note
     return Task("Grant ATAK permissions", run)
 

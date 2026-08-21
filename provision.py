@@ -567,6 +567,47 @@ def task_remove(paths: list[str], label: str) -> Task:
     return Task(label, run)
 
 
+def task_unexempt(match: list[str], protected: list[str]) -> Task:
+    """Take the provisioned apps back out of the Doze allowlist.
+
+    Uninstalling does not clear the entry: Android keeps it, pointing at
+    a uid that no longer exists. Without this, an avrustad telefon is
+    handed on still carrying the exemptions install put there.
+
+    Matched against uninstall_match rather than [battery] exempt, because
+    that also catches an entry left behind by an older kit whose app is
+    no longer listed - and it is the same set restore removes the apps
+    themselves from.
+    """
+    def run(adb, dev, log):
+        p = adb.shell(["dumpsys", "deviceidle", "whitelist"], dev.serial,
+                      mutating=False)
+        _logged(log, p)
+
+        removed = []
+        for line in p.stdout.splitlines():
+            # "user,<package>,<uid>". The system entries are not ours.
+            parts = line.strip().split(",")
+            if len(parts) < 2 or parts[0] != "user":
+                continue
+            pkg = parts[1]
+            low = pkg.lower()
+            if not any(m.lower() in low for m in match):
+                continue
+            if any(low == q.lower() or low.startswith(q.lower()) for q in protected):
+                log.write(f"protected, skipping: {pkg}\n")
+                continue
+            q = adb.shell(["dumpsys", "deviceidle", "whitelist", f"-{pkg}"],
+                          dev.serial)
+            _logged(log, q)
+            removed.append(pkg)
+
+        if adb.dry_run:
+            return True, f"{len(removed)} would be cleared (dry-run)"
+        return True, f"{len(removed)} cleared" if removed else "nothing to clear"
+    return Task("Clear Doze allowlist", run)
+
+
 def task_uninstall(match: list[str], protected: list[str]) -> Task:
     def run(adb, dev, log):
         listing = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False)
@@ -643,8 +684,11 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
 
 def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
     r = cfg["restore"]
+    match = r["uninstall_match"]
+    protected = r.get("protected_prefixes", [])
     tasks = [
-        task_uninstall(r["uninstall_match"], r.get("protected_prefixes", [])),
+        task_uninstall(match, protected),
+        task_unexempt(match, protected),
         task_remove(r["remove_paths"], "Remove ATAK files"),
     ]
     if wipe_media:

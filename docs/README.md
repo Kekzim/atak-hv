@@ -11,7 +11,7 @@ tillsammans med provisioneringsverktyget.
 |---|---|
 | [ATAK-handbok](handbok.md) | Handhavande: styrningar och färgsättning, layout, menyer, kartor, navigation, markörer, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, uppdateringsintervall, tips och felsökning |
 | [Avrustning och uppstart](avrustning.md) | Återställ ATAK, fabriksåterställning, packlista för TAK-väskan, uppstart av en avrustad telefon |
-| [Video och kameror](video-och-kameror.md) | RTSP-streaming från TAK ICU, ATAK och UAS, samt Reolink-övervakningskameror |
+| [Video och kameror](video-och-kameror.md) | RTSP-streaming från ATAK och UAS, samt Reolink-övervakningskameror |
 
 Dessutom:
 

@@ -18,7 +18,6 @@
 apks = [
     "payload/apks/Ramsor.apk",
     "payload/apks/HVreports.apk",
-    "payload/apks/Icu.apk",
 ]
 
 # Removed after pushing: the folder push drags a stale copy along.
@@ -295,9 +294,7 @@ restore = []
 # Undantag fran batterioptimering. Utan det stryper Doze
 # positionsrapportering och serversynk i bakgrunden.
 [battery]
-# com.atakmap.takcam ar TAK ICU, som installeras fran payload/apks/Icu.apk.
-# Den behover samma undantag som ATAK for att kunna stromma i bakgrunden.
-exempt = ["com.atakmap.app.civ", "com.atakmap.takcam"]
+exempt = ["com.atakmap.app.civ"]
 
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).
@@ -307,7 +304,7 @@ exempt = ["com.atakmap.app.civ", "com.atakmap.takcam"]
 # om undantaget saknas.
 # ---------------------------------------------------------------------
 [doze]
-verify = ["com.atakmap.app.civ", "com.atakmap.takcam"]
+verify = ["com.atakmap.app.civ"]
 
 # ---------------------------------------------------------------------
 # Restore behaviour
@@ -319,15 +316,14 @@ verify = ["com.atakmap.app.civ", "com.atakmap.takcam"]
 # it (a long-standing bug in the old .bat scripts).
 uninstall_match = [
     "atak",
-    "icu",
     "geocam",
     "reolink",
     "securesms",   # Signal
     "openvpn",
 ]
 
-# Never uninstalled, even on a match - stops a substring like "icu"
-# from taking out a system component.
+# Never uninstalled, even on a match - stops a broad substring like
+# "atak" from taking out a system component.
 protected_prefixes = ["android", "com.android.", "com.google.android."]
 
 # Removed by `restore`.

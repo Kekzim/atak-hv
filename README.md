@@ -85,7 +85,7 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 
 **Sidladdas av verktyget** från `payload/apks/`:
 
-`Ramsor.apk` · `HVreports.apk` · `Icu.apk` (TAK ICU)
+`Ramsor.apk` · `HVreports.apk`
 
 Verktyget **kontrollerar först att Play Store-apparna finns** och avbryter
 om ATAK saknas — det är ingen idé att lägga ut konfiguration på en telefon

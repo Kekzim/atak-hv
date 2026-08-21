@@ -7,29 +7,12 @@ Att få rörlig bild in i ATAK: strömmande video via RTSP, och fasta
 
 Till TAK kan flera källor kopplas för att strömma information:
 
-* TAK-telefon
 * Drönare (UAS)
 * Externa kameror
 
 Viktigast är **metoden** — vem bestämmer var, när och hur.
 
 Streamingprotokoll: **RTSP** (används just nu), http/https med flera.
-
-### Setup TAK ICU på TAK-telefon
-
-1. Öppna appen **ICU TAK** (egen app).
-2. Under ”Hamburgaren” → kugghjulet → **Broadcast Pref…**
-3. **Select Delivery Method** — RTSP.
-4. **Broadcast Alias** — din anropssignal enligt FAL-A.
-5. Skrolla ner.
-6. **RTSP Server Address** — `xxx.xxx.xxx.xxx:8554/"callsign"?tcp`
-7. Skrolla ner.
-8. **Wowza Server Username** — tilldelas av ansvarig.
-9. **Wowza Server Password** — tilldelas av ansvarig.
-10. Backa ett steg.
-11. Starta strömmen med den röda pricken till höger.
-12. Nere till vänster ska ”Broadcasting Video” blinka grönt.
-13. Stäng av strömmen med den blå fyrkanten till höger.
 
 ### Setup i ATAK
 

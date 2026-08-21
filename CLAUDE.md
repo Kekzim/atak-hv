@@ -78,10 +78,13 @@ change. Prefer extending the config over adding code.
   `pm list packages`. The stay-awake revert must stay last, and is marked
   `always=True` so a failed `atak-box.zip` push cannot leave the screen
   pinned on.
-- **That skip is silent.** A typo'd package id in `[permissions]`,
-  `[appops]` or `[battery]` produces no warning — only `[permissions]` even
-  counts it. Verify ids against the APK manifest rather than trusting the
-  config.
+- **A package id the device does not have is reported, not skipped.**
+  `task_permissions` collects the names and prefixes its note with
+  `WARNING` so they reach the summary; the run still succeeds, since an
+  app may legitimately be absent. Under `--dry-run` this also fires for a
+  package the same run would have sideloaded. Package ids can be read out
+  of an APK's manifest when in doubt — that is how `com.atakmap.takcam`
+  was confirmed.
 - **Leave no trace.** `install` must hand the device back as it found it.
   Anything it changes for the duration of the run — the package verifier,
   the stay-awake setting — gets saved and restored, and `restore` must undo

@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------
+# Enhets-/förbandsspecifikt — distribueras separat, aldrig i git
+# ---------------------------------------------------------------
+# Serverpaket med TAK-serveradress och certifikat. Varje förband
+# lägger in sin egen fil med exakt namnet atak-box.zip.
+atak-box.zip
+
+# OpenVPN-klienter
+ATAKautoinstall/Filer/VPN-clients/*
+!ATAKautoinstall/Filer/VPN-clients/.gitkeep
+
+# Certifikat och nycklar
+*.p12
+*.pfx
+*.jks
+*.key
+*.pem
+*.crt
+*.cer
+*.ovpn
+
+# ---------------------------------------------------------------
+# Appar som installeras från Google Play (sidladdas inte längre)
+# ---------------------------------------------------------------
+ATAKautoinstall/Filer/ATAK.apk
+ATAKautoinstall/Filer/OpenVPN.apk
+ATAKautoinstall/Filer/Geocam.apk
+ATAKautoinstall/Filer/Signal.apk
+ATAKautoinstall/Filer/Reolink.apk
+ATAKautoinstall/Filer/FileManager.apk
+
+# ---------------------------------------------------------------
+# Tredjepartsbinärer — hämtas från leverantören, se README
+# ---------------------------------------------------------------
+# Android SDK Platform-Tools (adb.exe m.m.), ~15 MB, egen licens
+ATAKautoinstall/platform-tools/
+
+# ---------------------------------------------------------------
+# För stort för git
+# ---------------------------------------------------------------
+# Originaldokument (.pptx/.docx/.pdf) som konverterats till Markdown
+_source/
+
+# ---------------------------------------------------------------
+# Loggar och skräp
+# ---------------------------------------------------------------
+*.log
+ATAKautoinstall/logs/
+Thumbs.db
+desktop.ini
+.DS_Store

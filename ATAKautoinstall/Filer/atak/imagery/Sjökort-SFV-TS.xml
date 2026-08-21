@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customWmsMapSource>
+    <name>Sjökort on Sjökort - Transportstyrelsen</name>
+    <version>1.1.1</version>
+    <minZoom>0</minZoom>
+    <maxZoom>23</maxZoom>
+    <tileType>png</tileType>
+    <url>https://geokatalog.sjofartsverket.se/mapservice/wms.axd/Sjokort_TS?</url>
+    <coordinatesystem>EPSG:3857</coordinatesystem>
+    <layers>Sjokort</layers>
+    <styles></styles>
+    <north>70.0</north>
+    <east>37.0</east>
+    <south>55.0</south>
+    <west>-2.0</west>
+    <backgroundColor>#000000</backgroundColor>
+    <aditionalparameters>&amp;transparent=true</aditionalparameters>
+</customWmsMapSource>

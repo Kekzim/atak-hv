@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATAK HV — presentationer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  .reveal section img { max-height: 60vh; width: auto; border: none; box-shadow: none; }
+  .reveal h2 { text-transform: none; font-size: 1.5em; }
+  .reveal section { font-size: 0.8em; }
+  #picker { font: 16px/1.5 system-ui, sans-serif; padding: 2rem; max-width: 40rem; margin: 0 auto; }
+  #picker a { display: block; padding: .5rem 0; }
+</style>
+</head>
+<body>
+<div id="picker" hidden>
+  <h1>Presentationer</h1>
+  <p>Välj en presentation:</p>
+  <div id="list"></div>
+</div>
+<div class="reveal"><div class="slides">
+  <section data-markdown data-separator="^\r?\n---\r?\n" data-separator-notes="^Note:"></section>
+</div></div>
+
+<script type="module">
+const DECKS = [
+  ["atak-handbok",                        "ATAK-handbok"],
+  ["atak-installation-med-vpn-fran-dator", "Installation med VPN från dator"],
+  ["atak-uppstart-efter-aterstalld",      "Uppstart efter återställd ATAK"],
+  ["atak-avrustning-grundinstallning",    "Avrustning och grundinställning"],
+  ["atak-streaming-setup",                "Streaming setup"],
+  ["atak-kamera-reolink-setup",           "Kamera – Reolink setup"],
+  ["stall-om-uppdateringsintervallen",    "Ställa om uppdateringsintervallen"],
+];
+
+const deck = new URLSearchParams(location.search).get("deck");
+
+if (!deck || !DECKS.some(([id]) => id === deck)) {
+  document.querySelector(".reveal").hidden = true;
+  const picker = document.getElementById("picker");
+  picker.hidden = false;
+  document.getElementById("list").innerHTML =
+    DECKS.map(([id, name]) => `<a href="?deck=${id}">${name}</a>`).join("");
+} else {
+  document.querySelector("[data-markdown]").setAttribute("data-markdown", `${deck}.md`);
+  const [{default: Reveal}, {default: Markdown}, {default: Notes}, {default: Highlight}] =
+    await Promise.all([
+      import("https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.esm.js"),
+      import("https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/markdown/markdown.esm.js"),
+      import("https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.esm.js"),
+      import("https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.esm.js"),
+    ]);
+  Reveal.initialize({ hash: true, slideNumber: "c/t", plugins: [Markdown, Notes, Highlight] });
+}
+</script>
+</body>
+</html>

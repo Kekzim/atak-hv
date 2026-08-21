@@ -1,0 +1,391 @@
+<?xml version='1.0' standalone='yes'?>
+<preferences>
+<preference version="1" name="cot_inputs">
+</preference>
+<preference version="1" name="cot_outputs">
+</preference>
+<preference version="1" name="cot_streams">
+</preference>
+<preference version="1" name="com.atakmap.app.civ_preferences">
+<entry key="Mobile-transparency.type30" class="class java.lang.String">Google - Roadmap Alt</entry>
+<entry key="prefs_layer_grg_map_interaction" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.type31" class="class java.lang.String">USGS NAIP Plus</entry>
+<entry key="atakControlOtherUserNotification" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.type34" class="class java.lang.String">GRG - Google Road Only Overlay</entry>
+<entry key="Mobile-transparency.type35" class="class java.lang.String">Esri - USA Topo Maps</entry>
+<entry key="Mobile-transparency.type32" class="class java.lang.String">GRG - USDA Fstopo Overlay</entry>
+<entry key="Mobile-transparency.type33" class="class java.lang.String">NRL Open Street Map</entry>
+<entry key="bpha_custom_col" class="class java.lang.Integer">2</entry>
+<entry key="rab_preference_show_eta" class="class java.lang.Boolean">false</entry>
+<entry key="locationUseWRCallsign" class="class java.lang.Boolean">false</entry>
+<entry key="dynamicReportingRateMinUnreliable" class="class java.lang.String">20</entry>
+<entry key="eud_api_disable_option" class="class java.lang.Boolean">true</entry>
+<entry key="atak.hint.textContainer.osd" class="class java.lang.Boolean">false</entry>
+<entry key="disable_autolink_mapitem_links" class="class java.lang.Boolean">false</entry>
+<entry key="relativeOverlaysScalingRadioList" class="class java.lang.String">1.0</entry>
+<entry key="filesharingEnabled" class="class java.lang.Boolean">true</entry>
+<entry key="clearingContent" class="class java.lang.Boolean">false</entry>
+<entry key="dispatchLocationHidden" class="class java.lang.Boolean">false</entry>
+<entry key="map_zoom_visible" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.type20" class="class java.lang.String">Bing - Hybrid</entry>
+<entry key="iconset.display.hint2" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.type23" class="class java.lang.String">GRG - Google Road Only Overlay</entry>
+<entry key="Mobile-transparency.type24" class="class java.lang.String">Esri - USA Topo Maps</entry>
+<entry key="num-mobile-type-coverage-colors" class="class java.lang.Integer">0</entry>
+<entry key="Mobile-transparency.type21" class="class java.lang.String">Google - Roadmap Alt</entry>
+<entry key="Mobile-transparency.type22" class="class java.lang.String">GRG - USDA Fstopo Overlay</entry>
+<entry key="Mobile-transparency.type27" class="class java.lang.String">NRL DRG Mosaic</entry>
+<entry key="pluginSafeMode" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.type28" class="class java.lang.String">Google - Terrain</entry>
+<entry key="Mobile-transparency.type25" class="class java.lang.String">USGSImageryTopo</entry>
+<entry key="Mobile-transparency.type26" class="class java.lang.String">Google - Hybrid</entry>
+<entry key="dpgkRootVisibilityToggle" class="class java.lang.Boolean">true</entry>
+<entry key="num-Native-type-visibility" class="class java.lang.Integer">0</entry>
+<entry key="Mobile-transparency.type29" class="class java.lang.String">Bing - Hybrid</entry>
+<entry key="PerformedDeviceSetupWizard" class="class java.lang.Boolean">true</entry>
+<entry key="repoSyncedVersion" class="class java.lang.Integer">1768312075</entry>
+<entry key="filesharingConnectionTimeoutSecs" class="class java.lang.String">10</entry>
+<entry key="alt_display_agl" class="class java.lang.Boolean">false</entry>
+<entry key="pref_import_pref_action" class="class java.lang.String">ALLOW</entry>
+<entry key="Mobile-transparency.type12" class="class java.lang.String">USGS - Usgsbasemap</entry>
+<entry key="Mobile-transparency.type13" class="class java.lang.String">GRG - Google Terrain Shading Overlay</entry>
+<entry key="dim_map_with_brightness_key" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.type10" class="class java.lang.String">CycleOSM - OSM Cycle</entry>
+<entry key="fileshareDownloadAttempts" class="class java.lang.String">10</entry>
+<entry key="Mobile-transparency.type11" class="class java.lang.String">Michelin - OSM Michelin</entry>
+<entry key="Mobile-transparency.value6" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.type16" class="class java.lang.String">OpenTopo - Opentopomap</entry>
+<entry key="Mobile-transparency.value7" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.type17" class="class java.lang.String">USGS - Usgsshadedrelief</entry>
+<entry key="Mobile-transparency.value8" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-visibility.value10" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.type14" class="class java.lang.String">USGS - Usgsimagerytopo</entry>
+<entry key="imagery_tab_name" class="class java.lang.String">Imagery</entry>
+<entry key="Mobile-transparency.value9" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.type15" class="class java.lang.String">Esri - Clarity</entry>
+<entry key="bundledProductProvider" class="class java.lang.String">bundleProvider-civ</entry>
+<entry key="Mobile-transparency.type18" class="class java.lang.String">Google - Hybrid</entry>
+<entry key="Mobile-transparency.type19" class="class java.lang.String">Google - Terrain</entry>
+<entry key="vehicle.model.selected.group" class="class java.lang.String">Aircraft</entry>
+<entry key="Mobile-transparency.value0" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value1" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value2" class="class java.lang.Float">1.0</entry>
+<entry key="location_marker_scale_key" class="class java.lang.String">-1</entry>
+<entry key="Mobile-transparency.value3" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value4" class="class java.lang.Float">1.0</entry>
+<entry key="shouldLoad-com.atakmap.android.reports.plugin" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.value5" class="class java.lang.Float">1.0</entry>
+<entry key="datasyncShowNonFeedContent" class="class java.lang.Boolean">true</entry>
+<entry key="rng_feet_display_pref" class="class java.lang.String">5280</entry>
+<entry key="num-Mobile-type-visibility" class="class java.lang.Integer">25</entry>
+<entry key="dh_data_row_1" class="class java.lang.String">Bearing to Next</entry>
+<entry key="atakDeveloperTools" class="class java.lang.Boolean">false</entry>
+<entry key="dh_data_row_2" class="class java.lang.String">Distance to Next</entry>
+<entry key="atakControlReverseOrientation" class="class java.lang.Boolean">false</entry>
+<entry key="dh_data_row_0" class="class java.lang.String">Turnpoint ID</entry>
+<entry key="onlyStreamingWithVPN" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value21" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value20" class="class java.lang.Boolean">true</entry>
+<entry key="alt_display_pref" class="class java.lang.String">MSL</entry>
+<entry key="tcpConnectTimeout" class="class java.lang.String">20</entry>
+<entry key="repoRemoteServerLastTimeMillis" class="class java.lang.Long">1769499960501</entry>
+<entry key="Mobile-visibility.value16" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value15" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value18" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value17" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value12" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value11" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value14" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value13" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value19" class="class java.lang.Boolean">true</entry>
+<entry key="acra.lastVersionNr" class="class java.lang.Integer">1768312075</entry>
+<entry key="filesharingTransferTimeoutSecs" class="class java.lang.String">10</entry>
+<entry key="saHasPhoneNumber" class="class java.lang.Boolean">true</entry>
+<entry key="lastViewedLayer.active" class="class java.lang.String">Mobile</entry>
+<entry key="Mobile-visibility.value30" class="class java.lang.Boolean">true</entry>
+<entry key="selected_loadout_key" class="class java.lang.String">44b98d12-bae9-4158-b665-0376d26e652c</entry>
+<entry key="Mobile-visibility.value32" class="class java.lang.Boolean">true</entry>
+<entry key="coordinate_entry_tabs" class="class java.util.HashSet">
+<element>mgrs_pane_id</element>
+<element>dms_pane_id</element>
+<element>addr_pane_id</element>
+<element>dd_pane_id</element>
+<element>dm_pane_id</element>
+<element>utm_pane_id</element>
+</entry>
+<entry key="Mobile-visibility.value31" class="class java.lang.Boolean">true</entry>
+<entry key="volumemapswitcher" class="class java.lang.Boolean">true</entry>
+<entry key="rab_dist_slant_range" class="class java.lang.String">clamped</entry>
+<entry key="network_quic_enabled" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value27" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value26" class="class java.lang.Boolean">true</entry>
+<entry key="ppp0_highspeed_capable" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value29" class="class java.lang.Boolean">true</entry>
+<entry key="toggle_offscreen_indicators" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value28" class="class java.lang.Boolean">true</entry>
+<entry key="point_pick_center_designator" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value23" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value22" class="class java.lang.Boolean">true</entry>
+<entry key="faux_nav_bar" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value25" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value24" class="class java.lang.Boolean">true</entry>
+<entry key="compass_tilt_locked" class="class java.lang.Boolean">false</entry>
+<entry key="constantReportingRateReliable" class="class java.lang.String">15</entry>
+<entry key="quickpic.camera_chooser" class="class java.lang.String">TakGeoCam</entry>
+<entry key="displayServerConnectionWidget" class="class java.lang.Boolean">true</entry>
+<entry key="bpha_custom_row" class="class java.lang.Integer">2</entry>
+<entry key="offscreen_indicator_dist_threshold" class="class java.lang.String">10</entry>
+<entry key="apiUnsecureServerPort" class="class java.lang.String">8080</entry>
+<entry key="grgRootVisibilityToggle" class="class java.lang.Boolean">true</entry>
+<entry key="alert_audible" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value34" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value33" class="class java.lang.Boolean">true</entry>
+<entry key="repoLastSyncTime" class="class java.lang.Long">1769499960634</entry>
+<entry key="Mobile-visibility.value35" class="class java.lang.Boolean">true</entry>
+<entry key="preferAltNumber" class="class java.lang.Boolean">false</entry>
+<entry key="wms_deployed2" class="class java.lang.Boolean">true</entry>
+<entry key="lastRecordedLocation" class="class java.lang.String">59.04209,17.298756,46.9051752984399</entry>
+<entry key="udpNoDataTimeout" class="class java.lang.String">30</entry>
+<entry key="shouldLoad-com.atakmap.android.hvmnemonics.plugin" class="class java.lang.Boolean">true</entry>
+<entry key="MobileLayerSelectionAdapter.isOfflineOnly" class="class java.lang.Boolean">false</entry>
+<entry key="num-GRG rasters-type-visibility" class="class java.lang.Integer">0</entry>
+<entry key="default_gps_icon" class="class java.lang.Boolean">true</entry>
+<entry key="dispatchLocationCotExternalAtStart" class="class java.lang.Boolean">true</entry>
+<entry key="atakAdjustCurvedDisplay" class="class java.lang.Boolean">false</entry>
+<entry key="insertDestInDirectedCoT" class="class java.lang.Boolean">false</entry>
+<entry key="atakControlShortenLabels" class="class java.lang.Boolean">false</entry>
+<entry key="filesharingWebServerPort" class="class java.lang.String">8080</entry>
+<entry key="Mobile-visibility.type33" class="class java.lang.String">NRL Open Street Map</entry>
+<entry key="Mobile-visibility.type32" class="class java.lang.String">GRG - USDA Fstopo Overlay</entry>
+<entry key="Mobile-visibility.type31" class="class java.lang.String">USGS NAIP Plus</entry>
+<entry key="dynamicReportingRateMaxReliable" class="class java.lang.String">2</entry>
+<entry key="Mobile-visibility.type30" class="class java.lang.String">Google - Roadmap Alt</entry>
+<entry key="Mobile-visibility.type35" class="class java.lang.String">Esri - USA Topo Maps</entry>
+<entry key="QXRha0NlcnRpZmljYXRlRGF0YWJhc2U=" class="class java.lang.String">556376c6-7e73-45ec-aacb-19752e7a85ae</entry>
+<entry key="Mobile-visibility.type34" class="class java.lang.String">GRG - Google Road Only Overlay</entry>
+<entry key="atakControlShowLabels" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.value19" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-visibility.type29" class="class java.lang.String">Bing - Hybrid</entry>
+<entry key="Mobile-transparency.value18" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-visibility.type28" class="class java.lang.String">Google - Terrain</entry>
+<entry key="Mobile-transparency.value17" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-visibility.type27" class="class java.lang.String">NRL DRG Mosaic</entry>
+<entry key="Mobile-transparency.value16" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value15" class="class java.lang.Float">1.0</entry>
+<entry key="atakForcedBrightness" class="class java.lang.String">-1</entry>
+<entry key="Mobile-transparency.value14" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value13" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value12" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value11" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value10" class="class java.lang.Float">1.0</entry>
+<entry key="num-grgs-type-coverage-colors" class="class java.lang.Integer">0</entry>
+<entry key="Mobile-visibility.value8" class="class java.lang.Boolean">true</entry>
+<entry key="deviceProfileEnableOnConnect" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value9" class="class java.lang.Boolean">true</entry>
+<entry key="set_domain_pref" class="class java.lang.String">Ground</entry>
+<entry key="label_text_size" class="class java.lang.String">14</entry>
+<entry key="elevationSourcesConfig" class="class java.lang.String">[{\u0022name\u0022:\u0022DTED\u0022,\u0022visible\u0022:true,\u0022zorder\u0022:0}]</entry>
+<entry key="Mobile-visibility.value0" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type22" class="class java.lang.String">GRG - USDA Fstopo Overlay</entry>
+<entry key="Mobile-visibility.value1" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type21" class="class java.lang.String">Google - Roadmap Alt</entry>
+<entry key="Mobile-visibility.value2" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type20" class="class java.lang.String">Bing - Hybrid</entry>
+<entry key="Mobile-visibility.value3" class="class java.lang.Boolean">true</entry>
+<entry key="httpClientPermissiveMode" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.value4" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type26" class="class java.lang.String">Google - Hybrid</entry>
+<entry key="apiCertEnrollmentPort" class="class java.lang.String">8446</entry>
+<entry key="Mobile-visibility.value5" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type25" class="class java.lang.String">USGSImageryTopo</entry>
+<entry key="textContainer.textShowing" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.value6" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type24" class="class java.lang.String">Esri - USA Topo Maps</entry>
+<entry key="Mobile-visibility.value7" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type23" class="class java.lang.String">GRG - Google Road Only Overlay</entry>
+<entry key="self_coord_action" class="class java.lang.String">cyclecoordinate</entry>
+<entry key="filesharingAllServers" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.type19" class="class java.lang.String">Google - Terrain</entry>
+<entry key="map_scale_rounding" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.type18" class="class java.lang.String">Google - Hybrid</entry>
+<entry key="rng_meters_display_pref" class="class java.lang.String">1000</entry>
+<entry key="Mobile-visibility.type17" class="class java.lang.String">USGS - Usgsshadedrelief</entry>
+<entry key="Mobile-transparency.value29" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-visibility.type16" class="class java.lang.String">OpenTopo - Opentopomap</entry>
+<entry key="Mobile-transparency.value28" class="class java.lang.Float">1.0</entry>
+<entry key="iconset.selected.uid" class="class java.lang.String">aaf7d519-b3e3-4a5f-ba96-16e6c972ecff</entry>
+<entry key="Mobile-transparency.value27" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value26" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value25" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value24" class="class java.lang.Float">1.0</entry>
+<entry key="coord_display_pref" class="class java.lang.String">UTM</entry>
+<entry key="Mobile-transparency.value23" class="class java.lang.Float">1.0</entry>
+<entry key="atakScreenLock" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.value22" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value21" class="class java.lang.Float">1.0</entry>
+<entry key="map_eyealt_visible" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.value20" class="class java.lang.Float">1.0</entry>
+<entry key="document_version" class="class java.lang.String">5.6.0.9.CIV</entry>
+<entry key="rab_color_pref" class="class java.lang.String">red</entry>
+<entry key="map_center_designator" class="class java.lang.Boolean">false</entry>
+<entry key="deviceProfileOnConnectSyncTime78.79.215.33" class="class java.lang.Long">1758818861</entry>
+<entry key="nav_orientation_right" class="class java.lang.Boolean">true</entry>
+<entry key="num-native-type-coverage-colors" class="class java.lang.Integer">0</entry>
+<entry key="prefs_enable_smart_cache" class="class java.lang.Boolean">false</entry>
+<entry key="savePrefs" class="class java.lang.String">default</entry>
+<entry key="atak.hint.iconset" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-visibility.type11" class="class java.lang.String">Michelin - OSM Michelin</entry>
+<entry key="Mobile-visibility.type10" class="class java.lang.String">CycleOSM - OSM Cycle</entry>
+<entry key="atakGlobeModeEnabled" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-visibility.type15" class="class java.lang.String">Esri - Clarity</entry>
+<entry key="Mobile-visibility.type14" class="class java.lang.String">USGS - Usgsimagerytopo</entry>
+<entry key="dispatchTAKVersionNumber" class="class java.lang.Boolean">true</entry>
+<entry key="dhPrefs_percentDownLeg" class="class java.lang.Float">0.5</entry>
+<entry key="Mobile-visibility.type13" class="class java.lang.String">GRG - Google Terrain Shading Overlay</entry>
+<entry key="Mobile-visibility.type12" class="class java.lang.String">USGS - Usgsbasemap</entry>
+<entry key="certEnrollmentExport" class="class java.lang.Boolean">false</entry>
+<entry key="Mobile-transparency.type0" class="class java.lang.String">National Land Survey of Finland - MML</entry>
+<entry key="Mobile-transparency.type1" class="class java.lang.String">Google - Roadmap No Poi</entry>
+<entry key="Mobile-transparency.type2" class="class java.lang.String">GRG - WaymarkedTrails Cycle Routes Overlay</entry>
+<entry key="alert_notification" class="class java.lang.Boolean">true</entry>
+<entry key="track_last_color" class="class java.lang.Integer">-65536</entry>
+<entry key="Mobile-transparency.type3" class="class java.lang.String">Bing - Maps</entry>
+<entry key="Mobile-transparency.type4" class="class java.lang.String">MTBMap.cz - MTB Map Europe</entry>
+<entry key="Mobile-transparency.value35" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value34" class="class java.lang.Float">1.0</entry>
+<entry key="tilt_rotation_menu_auto_close" class="class java.lang.Boolean">true</entry>
+<entry key="Mobile-transparency.value33" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value32" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value31" class="class java.lang.Float">1.0</entry>
+<entry key="Mobile-transparency.value30" class="class java.lang.Float">1.0</entry>
+<entry key="override_background_permission_request" class="class java.lang.Boolean">false</entry>
+<entry key="bg_startup_tracing" class="class java.lang.Boolean">false</entry>
+<entry key="filesharingWebServerLegacyHttpEnabled" class="class java.lang.Boolean">false</entry>
+<entry key="loadout_entry_key_default_loadout_key" class="class java.util.HashSet">
+<element>title=Default</element>
+<element>uid=default_loadout_key</element>
+<element>buttons=com.atakmap.app.civ:id/tak_nav_button_4###overlay.xml,com.atakmap.app.civ:id/tak_nav_button_3###mapsandfavorites.xml,com.atakmap.app.civ:id/tak_nav_button_6###goto.xml,com.atakmap.app.civ:id/tak_nav_zoom###zoom,com.atakmap.app.civ:id/tak_nav_button_5###contacts.xml,com.atakmap.app.civ:id/tak_nav_button_0###bloodhound.xml,com.atakmap.app.civ:id/tak_nav_button_2###pointdropper.xml,com.atakmap.app.civ:id/tak_nav_button_1###redx.xml,com.atakmap.app.civ:id/tak_nav_button_8###importmanager.xml,com.atakmap.app.civ:id/tak_nav_button_7###rangeandbearing.xml</element>
+<element>version=2</element>
+</entry>
+<entry key="filesharingSizeThresholdNoGo" class="class java.lang.String">20</entry>
+<entry key="iconset.default.loaded" class="class java.lang.Boolean">false</entry>
+<entry key="locationTeam" class="class java.lang.String">Blue</entry>
+<entry key="largeTextMode" class="class java.lang.Boolean">false</entry>
+<entry key="repoRemoteServerLastStatus" class="class java.lang.Boolean">false</entry>
+<entry key="screenViewLon" class="class java.lang.Float">-24.587734</entry>
+<entry key="dynamicReportingRateMaxUnreliable" class="class java.lang.String">2</entry>
+<entry key="Mobile-transparency.type5" class="class java.lang.String">Esri - Nat Geo World</entry>
+<entry key="waveRelayRedirect" class="class java.lang.Boolean">false</entry>
+<entry key="pull_elevation_mode" class="class java.lang.String">dted</entry>
+<entry key="screenViewMapScale" class="class java.lang.Float">4.546265E-9</entry>
+<entry key="Mobile-transparency.type6" class="class java.lang.String">Google - Roadmap Standard</entry>
+<entry key="mockingOption" class="class java.lang.String">WRGPS</entry>
+<entry key="Mobile-transparency.type7" class="class java.lang.String">Google - Satellite Only</entry>
+<entry key="Mobile-transparency.type8" class="class java.lang.String">Esri - World Topo</entry>
+<entry key="Mobile-transparency.type9" class="class java.lang.String">USGS - Usgsimageryonly</entry>
+<entry key="secureDeleteTimeout" class="class java.lang.String">10</entry>
+<entry key="plugin.version.loaded.Data Sync" class="class java.lang.String">3.7.0 (1d8f4249) - [5.6.0]-1767415859</entry>
+<entry key="compass_heading_display" class="class java.lang.String">Numeric</entry>
+<entry key="rab_brg_units_pref" class="class java.lang.String">1</entry>
+<entry key="multicastTTL" class="class java.lang.String">64</entry>
+<entry key="autoDisableMeshSAWhenStreaming" class="class java.lang.Boolean">false</entry>
+<entry key="MobileLayerSelectionAdapter.selected" class="class java.lang.String">NRL-OpenStreetMap</entry>
+<entry key="atakForceAirplaneRadioList" class="class java.lang.String">none</entry>
+<entry key="selfcoord_legacy_enlarge" class="class java.lang.Boolean">true</entry>
+<entry key="prefs_dted_stream" class="class java.lang.Boolean">true</entry>
+<entry key="datasyncMultipartFileDownload" class="class java.lang.Boolean">true</entry>
+<entry key="prefs_dted_visible" class="class java.lang.Boolean">false</entry>
+<entry key="individual_alert_notification" class="class java.lang.Boolean">false</entry>
+<entry key="screenViewMapTilt" class="class java.lang.Float">0.0</entry>
+<entry key="shouldLoad-com.atakmap.android.hvreports.plugin" class="class java.lang.Boolean">true</entry>
+<entry key="atakDisableSoftkeyIllumination" class="class java.lang.Boolean">true</entry>
+<entry key="screenViewMapRotation" class="class java.lang.Float">0.0</entry>
+<entry key="dynamicReportingRateMinReliable" class="class java.lang.String">20</entry>
+<entry key="lastViewedLayer.autoselect" class="class java.lang.Boolean">true</entry>
+<entry key="offscreen_indicator_timeout_threshold" class="class java.lang.String">60</entry>
+<entry key="dispatchLocationCotExternal" class="class java.lang.Boolean">true</entry>
+<entry key="network_multicast_loopback" class="class java.lang.Boolean">false</entry>
+<entry key="plugin.version.loaded.Ramsor" class="class java.lang.String">0.2 () - [5.5.0]-1</entry>
+<entry key="user_iconset_updates_version" class="class java.lang.Integer">8</entry>
+<entry key="filesharingSecureWebServerPort" class="class java.lang.String">8443</entry>
+<entry key="dynamicReportingRateStationaryUnreliable" class="class java.lang.String">30</entry>
+<entry key="Mobile-visibility.type6" class="class java.lang.String">Google - Roadmap Standard</entry>
+<entry key="dynamicReportingRateStationaryReliable" class="class java.lang.String">180</entry>
+<entry key="Mobile-visibility.type5" class="class java.lang.String">Esri - Nat Geo World</entry>
+<entry key="Mobile-visibility.type4" class="class java.lang.String">MTBMap.cz - MTB Map Europe</entry>
+<entry key="Mobile-visibility.type3" class="class java.lang.String">Bing - Maps</entry>
+<entry key="Mobile-visibility.type9" class="class java.lang.String">USGS - Usgsimageryonly</entry>
+<entry key="Mobile-visibility.type8" class="class java.lang.String">Esri - World Topo</entry>
+<entry key="Mobile-visibility.type7" class="class java.lang.String">Google - Satellite Only</entry>
+<entry key="dhPrefs_displayLocation" class="class java.lang.Integer">0</entry>
+<entry key="Mobile-visibility.type2" class="class java.lang.String">GRG - WaymarkedTrails Cycle Routes Overlay</entry>
+<entry key="Mobile-visibility.type1" class="class java.lang.String">Google - Roadmap No Poi</entry>
+<entry key="fade_notification" class="class java.lang.String">90</entry>
+<entry key="Mobile-visibility.type0" class="class java.lang.String">National Land Survey of Finland - MML</entry>
+<entry key="displayAsSymbologyGraphic" class="class java.lang.Boolean">false</entry>
+<entry key="lastViewedLayer.name" class="class java.lang.String">Google - Satellite Only</entry>
+<entry key="forceEnglish" class="class java.lang.Boolean">false</entry>
+<entry key="largeActionBar" class="class java.lang.Boolean">false</entry>
+<entry key="importedDpkg" class="class java.util.HashSet">
+</entry>
+<entry key="sidepane_handle_shade" class="class java.lang.String">Dark</entry>
+<entry key="apiSecureServerPort" class="class java.lang.String">8443</entry>
+<entry key="saSipAddressAssignment" class="class java.lang.String">No VoIP</entry>
+<entry key="prefs_dted_stream_server" class="class java.lang.String">tak.gov</entry>
+<entry key="shouldLoad-com.atakmap.android.eights.plugin" class="class java.lang.Boolean">true</entry>
+<entry key="atak.hint.mobile.display" class="class java.lang.Boolean">false</entry>
+<entry key="atakUpdateServerUrl" class="class java.lang.String"></entry>
+<entry key="dhPrefs_dxFromLeg" class="class java.lang.Integer">100</entry>
+<entry key="map_scale_visible" class="class java.lang.Boolean">true</entry>
+<entry key="loadout_entry_key_44b98d12-bae9-4158-b665-0376d26e652c" class="class java.util.HashSet">
+<element>title=default toolbar</element>
+<element>buttons=com.atakmap.app.civ:id/tak_nav_button_4###overlay.xml,com.atakmap.app.civ:id/tak_nav_button_3###mapsandfavorites.xml,com.atakmap.app.civ:id/tak_nav_button_6###plugin://com.atakmap.android.datasync.plugin/com.atakmap.android.datasync.plugin.DataSyncTool,com.atakmap.app.civ:id/tak_nav_button_5###quickpic.xml,com.atakmap.app.civ:id/tak_nav_button_0###de1cd0c3-bd2f-4ac6-87ba-30e82da9539b,com.atakmap.app.civ:id/tak_nav_button_2###chatnext.xml,com.atakmap.app.civ:id/tak_nav_button_1###contacts.xml,com.atakmap.app.civ:id/tak_nav_button_8###pointdropper.xml,com.atakmap.app.civ:id/tak_nav_button_7###lasso.xml,com.atakmap.app.civ:id/tak_nav_button_9###drawing.xml</element>
+<element>uid=44b98d12-bae9-4158-b665-0376d26e652c</element>
+<element>version=2</element>
+</entry>
+<entry key="enableNonStreamingConnections" class="class java.lang.Boolean">false</entry>
+<entry key="prefs_smart_cache_download_limit" class="class java.lang.String">5000000</entry>
+<entry key="ElevationProfileViewshedOpacityTogether" class="class java.lang.Boolean">true</entry>
+<entry key="atakLoadTime" class="class java.lang.Long">6550</entry>
+<entry key="overlay_manager_width_height" class="class java.lang.String">33</entry>
+<entry key="prefs_use_klv_elevation" class="class java.lang.Boolean">false</entry>
+<entry key="rab_north_ref_pref" class="class java.lang.String">1</entry>
+<entry key="scrollToSelfOnStart" class="class java.lang.Boolean">true</entry>
+<entry key="AgreedToEULA" class="class java.lang.Boolean">true</entry>
+<entry key="broadcast_disable" class="class java.lang.Boolean">false</entry>
+<entry key="alt_unit_pref" class="class java.lang.String">1</entry>
+<entry key="legacyPointDropNaming" class="class java.lang.Boolean">true</entry>
+<entry key="lastCoTTypeSet" class="class java.lang.String">a-x-X</entry>
+<entry key="apiCertEnrollmentKeyLength" class="class java.lang.String">4096</entry>
+<entry key="screenViewLat" class="class java.lang.Float">2.014791</entry>
+<entry key="monitorServerConnections" class="class java.lang.Boolean">true</entry>
+<entry key="grgs.outlines-visible" class="class java.lang.Boolean">false</entry>
+<entry key="speed_unit_pref" class="class java.lang.String">1</entry>
+<entry key="compass_tilt_state" class="class java.lang.Integer">3</entry>
+<entry key="screenViewAlt" class="class java.lang.Float">9.313226E-10</entry>
+<entry key="lastIconsetPath" class="class java.lang.String">aaf7d519-b3e3-4a5f-ba96-16e6c972ecff/Rapporter/METHANE.png</entry>
+<entry key="atakRoleType" class="class java.lang.String">Team Member</entry>
+<entry key="self_coord_info_display" class="class java.lang.String">bottom_right</entry>
+<entry key="lastDirectory" class="class java.lang.String">/storage/emulated/0/Kopiera dessa filer till mappen atak-tools-datapackage-incoming</entry>
+<entry key="compass_rotation_locked" class="class java.lang.Boolean">false</entry>
+<entry key="restoreRecordedLocation" class="class java.lang.Boolean">false</entry>
+<entry key="prompt_photo_rename" class="class java.lang.Boolean">false</entry>
+<entry key="frame_limit" class="class java.lang.String">0</entry>
+<entry key="shouldLoad-com.atakmap.android.datasync.plugin" class="class java.lang.Boolean">true</entry>
+<entry key="landscape_extended_buttons" class="class java.lang.Boolean">true</entry>
+<entry key="locationReportingStrategy" class="class java.lang.String">Dynamic</entry>
+<entry key="rab_rng_units_pref" class="class java.lang.String">1</entry>
+<entry key="override_permission_request" class="class java.lang.Boolean">false</entry>
+<entry key="enableGeocoder" class="class java.lang.Boolean">true</entry>
+<entry key="faux_nav_bar_reverse" class="class java.lang.Boolean">false</entry>
+<entry key="centerDesignatorDuringPointDrop" class="class java.lang.Boolean">false</entry>
+<entry key="nonBluetoothLaserRangeFinder" class="class java.lang.Boolean">true</entry>
+<entry key="alert_vibration" class="class java.lang.Boolean">true</entry>
+<entry key="plugin.version.loaded.HV Rapporter" class="class java.lang.String">1.1.5 () - [5.5.0]-1</entry>
+<entry key="night_vision_widget" class="class java.lang.Boolean">false</entry>
+<entry key="core_sessionid" class="class java.lang.String">e391dc0c-85eb-4688-87e4-178cab07253d</entry>
+<entry key="PerformedLegacyPrompt" class="class java.lang.Boolean">true</entry>
+<entry key="constantReportingRateUnreliable" class="class java.lang.String">3</entry>
+<entry key="datasyncAutoRetryFailedDownloads" class="class java.lang.Boolean">true</entry>
+</preference>
+</preferences>

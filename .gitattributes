@@ -1,0 +1,30 @@
+* text=auto eol=lf
+
+# Windows batch scripts must keep CRLF or cmd.exe mis-parses them
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# ATAK configuration
+*.pref  text eol=lf
+*.xml   text eol=lf
+*.kml   text eol=lf
+
+# never normalise these
+*.apk   binary
+*.zip   binary
+*.pdf   binary
+*.pptx  binary
+*.docx  binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.emf   binary
+*.mp4   binary
+*.exe   binary
+*.dll   binary
+*.p12   binary
+
+# GitHub language stats: docs and vendored config are not "source"
+docs/**             linguist-documentation
+ATAKautoinstall/Filer/atak/**  linguist-vendored

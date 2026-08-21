@@ -204,6 +204,9 @@ class Task:
     label: str
     action: object          # callable(adb, device, log) -> (ok, note)
     fatal: bool = False
+    # Runs even after a fatal task has aborted the device. For steps that
+    # hand the device back rather than change it further.
+    always: bool = False
 
 
 @dataclass
@@ -231,7 +234,9 @@ class Runner:
 
         with log_path.open("w", encoding="utf-8") as log:
             log.write(f"{datetime.now().isoformat(timespec='seconds')}  {device}\n")
-            for i, task in enumerate(tasks, 1):
+            pending = list(enumerate(tasks, 1))
+            while pending:
+                i, task = pending.pop(0)
                 self.out.step(i, len(tasks), task.label)
                 log.write(f"\n--- {task.label} ---\n")
                 log.flush()   # so an interrupted run still leaves a record
@@ -248,9 +253,10 @@ class Runner:
                     self.out.fail(note or "see log")
                     result.failures.append(task.label)
                     if task.fatal:
+                        # Skip to the steps that hand the device back. A
+                        # failed push must not leave the screen pinned on.
                         log.write("fatal - aborting this device\n")
-                        log.flush()
-                        break
+                        pending = [(j, t) for j, t in pending if t.always]
                 log.flush()
         return result
 
@@ -307,7 +313,7 @@ def tasks_stay_awake() -> tuple[Task, Task]:
         return p.returncode == 0, note
 
     return (Task("Keep screen awake", enable),
-            Task("Let the screen sleep again", revert))
+            Task("Let the screen sleep again", revert, always=True))
 
 
 def task_settings(groups: dict) -> Task:
@@ -553,7 +559,14 @@ def task_push(entry: dict, base: Path) -> Task:
             return (False, msg) if entry.get("required") else (True, "skipped (not present)")
         p = adb.run(["push", str(source), target], serial=dev.serial, timeout=1800)
         _logged(log, p)
-        return p.returncode == 0, "ok"
+        if p.returncode != 0:
+            # Without this a failed push was reported as "FAILED (ok)".
+            # adb puts the reason on stderr and still prints a cheerful
+            # "n files pushed" summary on stdout, so stderr comes first.
+            detail = [l.strip() for l in p.stderr.splitlines() if l.strip()]
+            detail = detail or [l.strip() for l in p.stdout.splitlines() if l.strip()]
+            return False, detail[0] if detail else "see log"
+        return True, "ok"
     return Task(label, run, fatal=bool(entry.get("required")))
 
 

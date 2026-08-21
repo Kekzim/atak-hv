@@ -476,9 +476,22 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
         finally:
             if restore_verifier:
                 for key, value in previous.items():
+                    # A key that was never set reads back as "null". Writing
+                    # that string, or skipping it, both leave the verifier
+                    # sitting at 0 - the lockdown --no-optimize promised not
+                    # to make. Deleting the key hands the device back the way
+                    # it was found. An unreadable value is treated the same:
+                    # the default is verification on, so deleting is never
+                    # the less safe guess.
                     if value and value != "null":
-                        adb.shell(["settings", "put", "global", key, value], dev.serial)
-                log.write("verifier restored to previous values\n")
+                        q = adb.shell(["settings", "put", "global", key, value],
+                                      dev.serial)
+                        log.write(f"verifier {key} restored to {value}\n")
+                    else:
+                        q = adb.shell(["settings", "delete", "global", key],
+                                      dev.serial)
+                        log.write(f"verifier {key} was unset, deleted\n")
+                    _logged(log, q)
 
         if failed or conflicts:
             parts = []

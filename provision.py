@@ -109,8 +109,11 @@ class Adb:
         if self.dry_run and mutating:
             return subprocess.CompletedProcess(cmd, 0, f"[dry-run] {' '.join(cmd)}\n", "")
         try:
+            # stdin=DEVNULL: adb subprocesses otherwise inherit our stdin and
+            # can swallow the operator's keystrokes before a prompt is read.
             return subprocess.run(cmd, capture_output=True, text=True,
-                                  timeout=timeout, errors="replace")
+                                  timeout=timeout, errors="replace",
+                                  stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
             return subprocess.CompletedProcess(cmd, 124, "", f"timed out after {timeout}s")
 

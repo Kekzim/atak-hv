@@ -165,6 +165,13 @@ provision.bat install --dry-run
 provision.bat install --serial R58N1234ABC
 ```
 
+Flaggorna går att kombinera. Ska ni prova på egna telefoner är det här
+körningen som varken låser ner något eller ändrar något:
+
+```
+provision.bat install --dry-run --no-optimize
+```
+
 ### Bekräftelse
 
 Verktyget listar anslutna enheter och frågar innan det gör något.

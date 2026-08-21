@@ -10,9 +10,22 @@ Linux och macOS.
   Linux: `sudo apt install python3` (finns oftast redan).
   Windows: <https://www.python.org/downloads/> — kryssa i
   *"Add python.exe to PATH"* i installationsprogrammet.
-* **Android SDK Platform-Tools** (`adb`). Verktyget letar först i
-  `ATAKautoinstall/platform-tools/`, sedan i `PATH`. Peka annars ut den med
-  `--adb`.
+* **`adb`** (Android Debug Bridge, ur Android SDK Platform-Tools). Det är
+  `adb` som gör själva jobbet — installerar appar, kopierar filer och sätter
+  inställningar. Verktyget styr bara `adb`, så utan den händer ingenting.
+
+  | System | Hämtas så här |
+  |---|---|
+  | Windows | Ligger i `ATAKautoinstall/platform-tools/`. Saknas den: [ladda ner från Google](https://developer.android.com/tools/releases/platform-tools) och packa upp så att `adb.exe` hamnar direkt i mappen. |
+  | Linux | `sudo apt install adb android-sdk-platform-tools-common` — det andra paketet lägger in udev-reglerna som annars ger `no permissions`. |
+  | macOS | `brew install android-platform-tools` |
+
+  **Obs:** `platform-tools/` i paketet innehåller bara Windows-binärer
+  (`adb.exe`). På Linux och macOS måste `adb` installeras med
+  paket&shy;hanteraren enligt tabellen ovan.
+
+  Verktyget letar i tur och ordning i `ATAKautoinstall/platform-tools/`,
+  sedan i `PATH`. Peka annars ut den med `--adb`.
 * Utvecklarläge och USB-felsökning aktiverat på telefonerna.
 
 Paketet kan ligga var som helst — USB-sticka, hemkatalog, `C:\`. Alla
@@ -82,7 +95,7 @@ Vanliga fall:
 |---|---|
 | `unauthorized` | Godkänn USB-felsökning på telefonen |
 | `offline` | Koppla ur och i kabeln |
-| `no permissions` (Linux) | udev-regler saknas för telefonen |
+| `no permissions` (Linux) | udev-regler saknas — `sudo apt install android-sdk-platform-tools-common`, koppla sedan ur och i telefonen |
 | `adb not found` | Se Krav ovan, eller använd `--adb` |
 
 ## Konfiguration

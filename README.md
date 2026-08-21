@@ -49,7 +49,7 @@ atak-hv/
    ```
 
 Paketet kan ligga var som helst; sökvägarna löses relativt konfigurationen.
-Kräver Python 3.11+ och `adb`.
+Kräver Python 3.11+ och `adb` — se [Före utskick](#före-utskick).
 
 ## Appar
 
@@ -74,9 +74,12 @@ Kräver Python 3.11+ och `adb`.
    TAK-server och distribueras utanför repot.
 2. **Lägg era OpenVPN-klienter** i `ATAKautoinstall/Filer/VPN-clients/`.
    Använder ni inte OpenVPN kan mappen lämnas tom.
-3. **Hämta Android SDK Platform-Tools** och packa upp till
-   `ATAKautoinstall/platform-tools/` så att `adb.exe` hamnar direkt i mappen:
-   <https://developer.android.com/tools/releases/platform-tools>
+3. **Se till att `adb` finns.** Windows: packa upp
+   [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools)
+   till `ATAKautoinstall/platform-tools/` så att `adb.exe` hamnar direkt i
+   mappen. Linux: `sudo apt install adb android-sdk-platform-tools-common`.
+   macOS: `brew install android-platform-tools`.
+   Mappen `platform-tools/` i paketet innehåller bara Windows-binärer.
 
 ## Vad som inte ligger i git
 

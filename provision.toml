@@ -291,7 +291,9 @@ restore = []
 # Undantag fran batterioptimering. Utan det stryper Doze
 # positionsrapportering och serversynk i bakgrunden.
 [battery]
-exempt = ["com.atakmap.app.civ"]
+# com.atakmap.takcam ar TAK ICU, som installeras fran payload/apks/Icu.apk.
+# Den behover samma undantag som ATAK for att kunna stromma i bakgrunden.
+exempt = ["com.atakmap.app.civ", "com.atakmap.takcam"]
 
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).

@@ -79,7 +79,7 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 |---|---|
 | **ATAK** | **Måste installeras först.** ATAK-Sync är ett plugin, och konfigurationen som läggs ut kräver att ATAK redan finns på enheten. Verktyget installerar inte ATAK. |
 | **ATAK-Sync** | Datasync-plugin. Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
-| OpenVPN | Om ni använder OpenVPN |
+| **OpenVPN Connect** | Om ni använder OpenVPN. Verktyget söker efter `net.openvpn.openvpn` och varnar under det namnet om den saknas |
 | Geocam | |
 | Reolink | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
 
@@ -132,13 +132,17 @@ meningen, men på någons privata telefon är det inte det:
   säkerhetsuppdateringar
 * paketverifieraren stängs av
 * tillverkarens uppdateringstjänster inaktiveras
-* ett tjugotal Google-appar och tillverkarens appar inaktiveras, inklusive
+* 25 Google-appar och tillverkarens appar inaktiveras, inklusive
   telefoni, kontakter och SMS
 * bakgrundssynk, animationer och adaptiv batterihantering stängs av
 
 Kör därför `install --no-optimize` när du provar verktyget på en telefon
 som används privat. Appar och konfiguration installeras precis som vanligt,
 men telefonens uppdateringsinställningar lämnas orörda.
+
+Ett undantag: paketverifieraren stängs av även då, eftersom Android annars
+vägrar sidladdningen. Den sätts tillbaka som den var direkt efteråt — var
+den aldrig satt från början tas nyckeln bort igen.
 
 Verktyget skriver ut vilket läge det kör i och väntar på bekräftelse innan
 det börjar, så du hinner avbryta om du valt fel.
@@ -156,7 +160,7 @@ Download, DCIM, Pictures och Documents.
 | Flagga | Betydelse |
 |---|---|
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
-| `--dry-run` | Visar vad som skulle köras, ändrar ingenting |
+| `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
 | `-j N` | Provisionera N enheter parallellt (standard 1) |
 | `--adb SÖKVÄG` | Använd en specifik `adb` |
@@ -164,6 +168,7 @@ Download, DCIM, Pictures och Documents.
 | `--log-dir KATALOG` | Loggar hamnar här (standard `logs/`) |
 | `--wait SEK` | Hur länge verktyget väntar på enheter (standard 300) |
 | `-y` | Fråga inte om bekräftelse |
+| `-q` | Skriv bara ut det nödvändiga |
 
 **Prova alltid med `--dry-run` först**, och kör en enskild telefon med
 `--serial` innan du kör en hel omgång:
@@ -346,6 +351,11 @@ Rättigheter som appen inte deklarerar, eller som inte finns i den
 Android-versionen, hoppas över utan att räknas som fel. Listan ligger under
 `[permissions]` i `provision.toml`.
 
+Står det däremot ett paketnamn i `[permissions]`, `[appops]` eller
+`[battery]` som inte finns på telefonen, varnar verktyget och namnger det i
+sammanfattningen. Ett felstavat paketnamn ska inte kunna se ut som att allt
+gick bra.
+
 Detta steg körs **även med `--no-optimize`** — det handlar om att ATAK ska
 fungera, inte om att låsa ner telefonen.
 
@@ -426,6 +436,7 @@ Lägg sedan till en rad:
 [packages.vendor]
 samsung  = ["com.wssyncmldm", "com.sec.android.soagent"]
 xiaomi   = ["com.miui.updater"]
+oneplus  = ["cn.oneplus.photos", "com.oneplus.calculator", ...]
 motorola = ["com.motorola.ccc.ota"]   # ny
 ```
 

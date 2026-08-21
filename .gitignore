@@ -6,8 +6,8 @@
 atak-box.zip
 
 # OpenVPN-klienter
-ATAKautoinstall/Filer/VPN-clients/*
-!ATAKautoinstall/Filer/VPN-clients/.gitkeep
+payload/VPN-clients/*
+!payload/VPN-clients/.gitkeep
 
 # Certifikat och nycklar
 *.p12
@@ -22,12 +22,12 @@ ATAKautoinstall/Filer/VPN-clients/*
 # ---------------------------------------------------------------
 # Appar som installeras från Google Play (sidladdas inte längre)
 # ---------------------------------------------------------------
-ATAKautoinstall/Filer/ATAK.apk
-ATAKautoinstall/Filer/OpenVPN.apk
-ATAKautoinstall/Filer/Geocam.apk
-ATAKautoinstall/Filer/Signal.apk
-ATAKautoinstall/Filer/Reolink.apk
-ATAKautoinstall/Filer/FileManager.apk
+payload/apks/ATAK.apk
+payload/apks/OpenVPN.apk
+payload/apks/Geocam.apk
+payload/apks/Signal.apk
+payload/apks/Reolink.apk
+payload/apks/FileManager.apk
 
 # ---------------------------------------------------------------
 # Tredjepartsbinärer — hämtas från leverantören, se README
@@ -36,11 +36,11 @@ ATAKautoinstall/Filer/FileManager.apk
 # adb.exe + DLL:er, licens och versionsinfo. fastboot, sqlite3, mke2fs
 # m.fl. anvands inte av paketet och halls utanfor - fastboot kan dessutom
 # radera en telefon om nagon kor fel verktyg.
-ATAKautoinstall/platform-tools/*
-!ATAKautoinstall/platform-tools/adb.exe
-!ATAKautoinstall/platform-tools/AdbWinApi.dll
-!ATAKautoinstall/platform-tools/AdbWinUsbApi.dll
-!ATAKautoinstall/platform-tools/source.properties
+platform-tools/*
+!platform-tools/adb.exe
+!platform-tools/AdbWinApi.dll
+!platform-tools/AdbWinUsbApi.dll
+!platform-tools/source.properties
 
 # ---------------------------------------------------------------
 # För stort för git
@@ -52,7 +52,6 @@ _source/
 # Loggar och skräp
 # ---------------------------------------------------------------
 *.log
-ATAKautoinstall/logs/
 logs/
 
 # Python

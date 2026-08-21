@@ -1,11 +1,11 @@
 @echo off
-REM Launcher for atak_provision.py on Windows.
+REM Launcher for provision.py on Windows.
 REM Double-click to run an install, or call from cmd with arguments:
-REM     atak-provision.bat devices
-REM     atak-provision.bat restore --wipe-media
+REM     provision.bat devices
+REM     provision.bat restore --wipe-media
 
 setlocal
-set "SCRIPT=%~dp0atak_provision.py"
+set "SCRIPT=%~dp0provision.py"
 
 REM --- find a Python 3.11+ interpreter -------------------------------
 set "PY="

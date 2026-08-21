@@ -4,12 +4,12 @@
 Replaces the Windows-only .bat scripts. Runs on Windows, Linux and macOS,
 from any directory - nothing needs to live in C:\\.
 
-    atak_provision.py devices          list attached devices
-    atak_provision.py install          install apps and push configuration
-    atak_provision.py restore          uninstall apps, remove ATAK files
-    atak_provision.py restore --wipe-media   also clear Download/DCIM/Pictures/Documents
+    provision.py devices          list attached devices
+    provision.py install          install apps and push configuration
+    provision.py restore          uninstall apps, remove ATAK files
+    provision.py restore --wipe-media   also clear Download/DCIM/Pictures/Documents
 
-Configuration lives in atak-provision.toml next to this file.
+Configuration lives in provision.toml next to this file.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ if sys.version_info < (3, 11):
 import tomllib
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_CONFIG = HERE / "atak-provision.toml"
+DEFAULT_CONFIG = HERE / "provision.toml"
 
 
 # --------------------------------------------------------------------------
@@ -470,7 +470,7 @@ def confirm_word(prompt: str, word: str) -> bool:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        prog="atak_provision",
+        prog="provision",
         description="Provision ATAK devices over adb (Windows, Linux, macOS).",
     )
     ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG,

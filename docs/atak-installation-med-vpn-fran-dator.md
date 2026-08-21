@@ -1,3 +1,8 @@
+> [!NOTE]
+> Delarna om att kopiera `ATAKautoinstall` till `C:/` och dubbelklicka
+> `autoinstall.bat` är inaktuella. Datordelen görs numera med `provision.py`
+> — se [repots README](../README.md). Stegen på telefonen gäller fortfarande.
+
 ## (bild)
 
 ![bild](assets/atak-installation-med-vpn-fran-dator/sida01-01.png)
@@ -35,13 +40,15 @@ Nästa Sida
 - Backa 1 steg
 - Välj- Ljud och Vibration – Aktivera Vibration och/eller ljud vid behov
 
-- USB-Stickan: kopiera Mappen ATAKautoinstall till C:/
+- ~~USB-Stickan: kopiera Mappen ATAKautoinstall till C:/~~
+  (inaktuellt — paketet kan ligga var som helst)
 
 - Koppla in telefonen/telefonerna mot dator med USB,
 - Ska USB-felsökning godkännas – Godkänn - Om inte –
 aktivera filöverföring genom att dra nedåt i fönstret –
 välj USB…-Överför filer…
-- Öppna mappen ATAKautoinstall – dubbelklicka på autoinstall.bat – ett DOS fönster öppnar sig, Följ anvisnigarna i Fönstret
+- Kör `provision.bat install` (Windows) eller `./provision.sh install`
+  (Linux/macOS) och följ anvisningarna — se [README](../README.md)
 - Systemet känner av antalet anslutna enheter och avvaktar tills alla har godkänt USB-Felsökning
 - Det tar ca 1,5 min per telefon så 20 tel ~30 min
 - Starta Open-VPN: (Om ni använder VPN annars pkt 32)

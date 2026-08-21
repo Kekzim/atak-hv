@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Launcher for atak_provision.py on Linux and macOS.
-#   ./atak-provision.sh devices
-#   ./atak-provision.sh install
-#   ./atak-provision.sh restore --wipe-media
+# Launcher for provision.py on Linux and macOS.
+#   ./provision.sh devices
+#   ./provision.sh install
+#   ./provision.sh restore --wipe-media
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,6 +19,6 @@ else
 fi
 
 if [ "$#" -eq 0 ]; then
-    exec "$py" "$here/atak_provision.py" install
+    exec "$py" "$here/provision.py" install
 fi
-exec "$py" "$here/atak_provision.py" "$@"
+exec "$py" "$here/provision.py" "$@"

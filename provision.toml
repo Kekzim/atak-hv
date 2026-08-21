@@ -1,4 +1,4 @@
-# Configuration for atak_provision.py
+# Configuration for provision.py
 #
 # All relative paths are resolved from the directory holding this file,
 # so the kit can live anywhere - USB stick, home directory, C:\, /opt.
@@ -11,10 +11,10 @@
 # ---------------------------------------------------------------------
 [kit]
 apks = [
-    "Filer/Ramsor.apk",
-    "Filer/HVreports.apk",
-    "Filer/Icu.apk",
-    "Filer/ATAK-Sync.apk",
+    "payload/apks/Ramsor.apk",
+    "payload/apks/HVreports.apk",
+    "payload/apks/Icu.apk",
+    "payload/apks/ATAK-Sync.apk",
 ]
 
 # Removed after pushing: the folder push drags a stale copy along.
@@ -30,19 +30,19 @@ lookup = ["bundled", "path"]
 # `required = true` aborts the run if the source is missing.
 # ---------------------------------------------------------------------
 [[push]]
-source = "Filer/atak"
+source = "payload/atak"
 target = "/sdcard/"
 
 [[push]]
-source = "Filer/ATAK-installation"
+source = "payload/ATAK-installation"
 target = "/sdcard/"
 
 [[push]]
-source = "Filer/VPN-clients"
+source = "payload/VPN-clients"
 target = "/sdcard/"
 
 [[push]]
-source = "Filer/ATAK-installation/atak-box.zip"
+source = "payload/ATAK-installation/atak-box.zip"
 target = "/sdcard/Download/"
 required = true
 label = "atak-box.zip (TAK server config)"

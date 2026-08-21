@@ -32,4 +32,4 @@
 
 # GitHub language stats: docs and vendored config are not "source"
 docs/**             linguist-documentation
-ATAKautoinstall/Filer/atak/**  linguist-vendored
+payload/**  linguist-vendored

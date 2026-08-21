@@ -19,6 +19,8 @@ Genomförs efter övning eller på order.
 5. Välj **Intern lagring**, leta upp mappen `atak` och radera den.
 6. Öppna mappen `ATAK-installation` och kopiera mappen `atak` till internt
    minne (rotkatalogen). Tar cirka 10 sekunder.
+   Det är den rena reservkopian som lades ut vid installationen — därför
+   behövs ingen dator för att återställa ATAK.
 7. Backa tillbaka till telefonens hemskärm.
 8. Stäng av telefonen.
 

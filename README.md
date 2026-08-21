@@ -39,6 +39,7 @@ atak-hv/
 │   ├── apks/               appar som sidladdas
 │   ├── atak/               ATAK-konfiguration → /sdcard/atak
 │   ├── ATAK-installation/  → /sdcard/ATAK-installation
+│   │   └── atak/           ren reservkopia, se nedan
 │   └── VPN-clients/        era OpenVPN-klienter läggs här
 └── docs/                   handhavande och instruktioner
 ```
@@ -315,6 +316,21 @@ motorola = ["com.motorola.ccc.ota"]   # ny
 
 Ingen kodändring krävs — bidra gärna med fler tillverkare.
 
+## De två atak-mapparna
+
+`payload/atak/` och `payload/ATAK-installation/atak/` innehåller samma
+konfiguration, och båda läggs ut på telefonen. Det är avsiktligt:
+
+* `/sdcard/atak/` är den **arbetskopia** ATAK läser och skriver i.
+* `/sdcard/ATAK-installation/atak/` är en **ren reservkopia** som ligger
+  kvar på telefonen. Vid ”Återställ ATAK” raderar soldaten arbetskopian
+  och kopierar tillbaka reservkopian — utan dator, se
+  [Avrustning och uppstart](docs/avrustning.md#återställ-atak).
+
+Håll dem synkade. Läggs en ny kartdefinition till i `payload/atak/imagery/`
+måste den in i reservkopian också, annars försvinner den vid nästa
+återställning i fält.
+
 ## Avrustning och återlämning
 
 Vid avrustning, när systemet ska lämnas in eller lämnas över:
@@ -345,10 +361,6 @@ markörer, ritverktyg, rapportering, feeds och felsökning.
 
 ## Att verifiera
 
-* `payload/atak/` och `payload/ATAK-installation/atak/` är två nästan
-  identiska träd (~11 MB vardera) som båda läggs ut på enheten. ATAK läser
-  `/sdcard/atak`. Det nästlade trädet är sannolikt överflödigt, men
-  användningen är inte verifierad — behålls tills vidare.
 * Verktyget är utprovat mot en simulerad `adb`, inte mot riktiga telefoner.
   Kör `--dry-run` och en enskild enhet först.
 

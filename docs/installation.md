@@ -6,6 +6,17 @@ i stället.
 
 ![Översikt](assets/installation/sida01-01.png)
 
+## Appar som måste installeras från Google Play
+
+Verktyget sidladdar bara Ramsor, HVreports, TAK ICU och ATAK-Sync.
+Följande installeras av användaren på telefonen:
+
+| App | När |
+|---|---|
+| **ATAK** | **Alltid, och först av allt.** ATAK-Sync är ett plugin och konfigurationen förutsätter att ATAK finns på plats. |
+| **OpenVPN** | Om ni använder VPN — se [steg 3](#3-openvpn) |
+| **Reolink** | Om ni använder övervakningskameror — se [Video och kameror](video-och-kameror.md#reolink-kameror) |
+
 ## 1. Grundinställning av telefonen
 
 Vissa steg saknas på en del modeller.
@@ -58,6 +69,10 @@ Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 ## 3. OpenVPN
 
 Hoppa över om ni inte använder VPN.
+
+> [!NOTE]
+> **OpenVPN installeras från Google Play** — den sidladdas inte av
+> verktyget. Installera den på telefonen innan du fortsätter här.
 
 1. Starta **OpenVPN** → *Agree*.
 2. Välj **Upload File**.

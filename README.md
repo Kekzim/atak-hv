@@ -41,7 +41,7 @@ atak-hv/
 2. Läs [ATAK installation med VPN från dator](docs/presentations/atak-installation-med-vpn-fran-dator.md).
    För handhavande, se [ATAK-handbok](docs/presentations/atak-handbok.md).
 3. Följ [Före utskick](#före-utskick) nedan.
-4. Kör provisioneringen — se [docs/provisionering.md](docs/provisionering.md):
+4. Kör provisioneringen — se [Använda verktyget](#använda-verktyget):
 
    ```
    Windows:      atak-provision.bat install
@@ -90,14 +90,78 @@ installeras den med pakethanteraren — se [Före utskick](#före-utskick).
 | ATAK, OpenVPN, Geocam m.fl. `.apk` | Finns på Google Play | Google Play |
 | `_source/` | Original i `.pptx`/`.docx`/`.pdf`, ersatta av Markdown | Lokalt i arbetskopian |
 
-## Provisionering
+## Använda verktyget
 
-`atak_provision.py` sköter installation och avrustning via `adb` och fungerar
-på Windows, Linux och macOS. Se [docs/provisionering.md](docs/provisionering.md)
-för kommandon, flaggor, loggar och hur man lägger till en ny telefonmodell.
+`atak_provision.py` sköter installation och avrustning via `adb`, på Windows,
+Linux och macOS. Kör det via en av startfilerna i `ATAKautoinstall/`:
 
-De gamla `.bat`-skripten ligger kvar tills verktyget är utprovat på riktig
-hårdvara, och tas bort därefter.
+| System | Så här |
+|---|---|
+| Windows | Dubbelklicka `atak-provision.bat` för en installation, eller kör `atak-provision.bat <kommando>` från kommandotolken |
+| Linux / macOS | `./atak-provision.sh <kommando>` |
+
+Exemplen nedan visar Windows-varianten; på Linux byter du bara
+`atak-provision.bat` mot `./atak-provision.sh`.
+
+### Kommandon
+
+```
+atak-provision.bat devices                Visa anslutna enheter och avsluta
+atak-provision.bat install                Installera appar och pusha konfiguration
+atak-provision.bat restore                Avinstallera appar, ta bort ATAK-filer
+atak-provision.bat restore --wipe-media   Som restore, plus radera användarens filer
+```
+
+`install` stänger av system- och appuppdateringar, installerar apparna i
+`Filer/`, pushar `atak/`, `ATAK-installation/` och `VPN-clients/` till
+`/sdcard/`, och lägger `atak-box.zip` i `/sdcard/Download/`.
+
+`restore` gör tvärtom: avinstallerar ATAK-apparna, tar bort de utpushade
+mapparna och slår på uppdateringarna igen. `--wipe-media` rensar dessutom
+Download, DCIM, Pictures och Documents.
+
+### Vanliga flaggor
+
+| Flagga | Betydelse |
+|---|---|
+| `--dry-run` | Visar vad som skulle köras, ändrar ingenting |
+| `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
+| `-j N` | Provisionera N enheter parallellt (standard 1) |
+| `--adb SÖKVÄG` | Använd en specifik `adb` |
+| `-y` | Fråga inte om bekräftelse |
+
+**Prova alltid med `--dry-run` först**, och kör en enskild telefon med
+`--serial` innan du kör en hel omgång:
+
+```
+atak-provision.bat install --dry-run
+atak-provision.bat install --serial R58N1234ABC
+```
+
+### Bekräftelse
+
+Verktyget listar anslutna enheter och frågar innan det gör något.
+`restore --wipe-media` raderar användarens egna bilder och dokument och
+kräver därför att man skriver `WIPE` — `y` räcker inte. `-y` hoppar över
+alla frågor, även den.
+
+### Om något går fel
+
+Varje enhet får en logg i `ATAKautoinstall/logs/<serienummer>.log` med alla
+adb-anrop. Misslyckas något avslutar verktyget med felkod och
+sammanfattningen visar vilket steg det gällde:
+
+```
+SUMMARY
+  R58N1234ABC              FAILED: Install apps
+```
+
+Fullständig beskrivning — alla flaggor, felsökningstabell och hur man lägger
+till en ny telefonmodell — finns i
+[docs/provisionering.md](docs/provisionering.md).
+
+De gamla `.bat`-skripten (`ATAK autoinstall.bat` med flera) ligger kvar tills
+verktyget är utprovat på riktig hårdvara, och tas bort därefter.
 
 ## Instruktioner
 

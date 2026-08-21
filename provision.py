@@ -266,12 +266,48 @@ def _logged(log, proc: subprocess.CompletedProcess) -> None:
 
 # --- task builders --------------------------------------------------------
 
-def task_stay_awake() -> Task:
-    def run(adb, dev, log):
+STAY_AWAKE_KEY = "stay_on_while_plugged_in"
+
+
+def tasks_stay_awake() -> tuple[Task, Task]:
+    """Keep the screen awake for the run, then hand the setting back.
+
+    The device must not lock while it is being provisioned. But
+    `svc power stayon true` outlives the run, and a phone whose screen
+    never sleeps on a vehicle charger or a power bank costs both battery
+    and panel - a change the operator did not ask for.
+
+    The two tasks share `saved`, keyed by serial: the task list is built
+    once and reused across devices when -j is above 1.
+    """
+    saved: dict[str, str] = {}
+
+    def enable(adb, dev, log):
+        q = adb.shell(["settings", "get", "global", STAY_AWAKE_KEY],
+                      dev.serial, mutating=False)
+        saved[dev.serial] = (q.stdout or "").strip()
         p = adb.shell(["svc", "power", "stayon", "true"], dev.serial)
         _logged(log, p)
         return p.returncode == 0, "ok"
-    return Task("Keep screen awake", run)
+
+    def revert(adb, dev, log):
+        # Same reasoning as the package verifier: a key that was never
+        # set reads back as "null", and writing that string would leave
+        # the screen pinned on. Delete it instead.
+        value = saved.get(dev.serial, "")
+        if value and value != "null":
+            p = adb.shell(["settings", "put", "global", STAY_AWAKE_KEY, value],
+                          dev.serial)
+            note = f"restored to {value}"
+        else:
+            p = adb.shell(["settings", "delete", "global", STAY_AWAKE_KEY],
+                          dev.serial)
+            note = "cleared"
+        _logged(log, p)
+        return p.returncode == 0, note
+
+    return (Task("Keep screen awake", enable),
+            Task("Let the screen sleep again", revert))
 
 
 def task_settings(groups: dict) -> Task:
@@ -578,7 +614,8 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     tasks = []
     if req.get("required") or req.get("optional"):
         tasks.append(task_requirements(req.get("required", {}), req.get("optional", {})))
-    tasks.append(task_stay_awake())
+    stay_awake, let_screen_sleep = tasks_stay_awake()
+    tasks.append(stay_awake)
     if optimize:
         tasks += [
             task_settings(cfg["settings"]["install"]),
@@ -599,6 +636,8 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     doze = cfg.get("doze", {}).get("verify", [])
     if doze:
         tasks.append(task_doze_check(doze))
+    # Last, so the screen stays lit for everything above it.
+    tasks.append(let_screen_sleep)
     return tasks
 
 

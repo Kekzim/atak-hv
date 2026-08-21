@@ -93,6 +93,10 @@ global = [
     ["animator_duration_scale", "1"],
     ["adaptive_battery_management_enabled", "1"],
     ["ble_scan_always_enabled", "1"],
+    # install slar pa den har for att skarmen inte ska lasa sig mitt i
+    # koren, och stanger av den igen sjalv. Star den kvar har avbrots en
+    # korning innan sista steget - da stanger restore av den.
+    ["stay_on_while_plugged_in", "0"],
 ]
 secure = [
     ["auto_update_apps", "1"],

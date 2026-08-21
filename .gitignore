@@ -40,7 +40,6 @@ ATAKautoinstall/platform-tools/*
 !ATAKautoinstall/platform-tools/adb.exe
 !ATAKautoinstall/platform-tools/AdbWinApi.dll
 !ATAKautoinstall/platform-tools/AdbWinUsbApi.dll
-!ATAKautoinstall/platform-tools/NOTICE.txt
 !ATAKautoinstall/platform-tools/source.properties
 
 # ---------------------------------------------------------------

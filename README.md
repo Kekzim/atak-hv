@@ -122,3 +122,9 @@ originalen ligger kvar lokalt i `_source/`.
 Skripten och dokumentationen i det här repot saknar ännu licens. `.apk`-filer
 under `ATAKautoinstall/Filer/` tillhör respektive upphovsman och omfattas av
 sina egna villkor.
+
+`ATAKautoinstall/platform-tools/` innehåller `adb` ur Android SDK
+Platform-Tools (revision 36.0.0), © Google LLC, huvudsakligen under Apache
+License 2.0. Fullständiga licensvillkor och attributionsnoteringar
+(`NOTICE.txt`) följer med Googles egen distribution:
+<https://developer.android.com/tools/releases/platform-tools>

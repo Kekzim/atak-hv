@@ -42,6 +42,10 @@ the tool against a real phone over `adb`. Useful properties when doing that:
   `protected_prefixes` in a scratch script before trusting `restore`.
 - Package ids can be read straight out of an APK's binary `AndroidManifest.xml`
   string pool when `aapt` is unavailable.
+- **Device state settles asynchronously — poll, do not check once.** A
+  single check right after an adb command can read a stale value and turn
+  into a wrong conclusion in a commit message. The Doze allowlist, for one,
+  keeps an uninstalled app listed for under a second.
 
 ## Architecture
 
@@ -88,8 +92,7 @@ change. Prefer extending the config over adding code.
 - **Leave no trace.** `install` must hand the device back as it found it.
   Anything it changes for the duration of the run — the package verifier,
   the stay-awake setting — gets saved and restored, and `restore` must undo
-  what `install` did, including state Android does not clean up on its own
-  (uninstalling an app does *not* drop its Doze allowlist entry).
+  what `install` did.
 - **An unset Android setting reads back as the string `"null"`.** Restoring
   it means `settings delete global <key>`, never `settings put ... null`.
 - `restore` matches package ids by **substring**, so a broad term like

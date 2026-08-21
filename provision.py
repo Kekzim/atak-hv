@@ -599,9 +599,13 @@ def task_remove(paths: list[str], label: str) -> Task:
 def task_unexempt(match: list[str], protected: list[str]) -> Task:
     """Take the provisioned apps back out of the Doze allowlist.
 
-    Uninstalling does not clear the entry: Android keeps it, pointing at
-    a uid that no longer exists. Without this, an avrustad telefon is
-    handed on still carrying the exemptions install put there.
+    Belt and braces. Android does clear an app's entry when the app is
+    uninstalled, but asynchronously: measured on a Xiaomi 21051182G
+    (Android 13) it was still listed 0.5s after `adb uninstall` and gone
+    by 1s. A normal restore therefore reports nothing to clear here - the
+    uninstall step ran seconds earlier. The step stays because that delay
+    is not contractual, it costs one adb call, and it still removes an
+    entry whose app left the device some other way.
 
     Matched against uninstall_match rather than [battery] exempt, because
     that also catches an entry left behind by an older kit whose app is

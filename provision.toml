@@ -126,11 +126,13 @@ core = [
 # com.android.vending (Play Store) och com.android.location.fused - de
 # kravs for GPS, mobilnat, wifi och framtida appinstallationer.
 #
-# VARNING: dialer, contacts och apps.messaging langst ner ar telefoni,
-# kontakter och SMS. Pa enheter dar Googles appar ar standard (OnePlus,
-# Pixel) forsvinner mojligheten att ringa och skicka SMS. Pa Samsung
-# finns egna appar och da spelar det ingen roll. Ta bort de tre raderna
-# om era telefoner ocksa anvands for samtal.
+# Mobilnat, wifi och Bluetooth ska fortsatta fungera. Darfor ar foljande
+# INTE med i listan, aven om de ingick i testningen pa en dedikerad enhet:
+#     com.google.android.dialer          telefoni
+#     com.google.android.contacts        kontakter
+#     com.google.android.apps.messaging  SMS
+# Pa enheter dar Googles appar ar standard (OnePlus, Pixel) forsvinner
+# annars mojligheten att ringa och skicka SMS.
 debloat = [
     "com.google.android.apps.docs",
     "com.google.android.apps.googleassistant",
@@ -153,12 +155,9 @@ debloat = [
     "com.google.ar.core",
     "com.google.android.feedback",
     "com.google.android.gms.location.history",
-    # bakgrundssynk av kontakter - ATAK anvander inte ramverket
+    # bakgrundssynk av kontakter - ATAK anvander inte ramverket.
+    # Sjalva kontaktappen ar orörd, bara synkadaptern.
     "com.google.android.syncadapters.contacts",
-    # telefoni, kontakter och SMS - se varningen ovan
-    "com.google.android.dialer",
-    "com.google.android.contacts",
-    "com.google.android.apps.messaging",
 ]
 
 # Tillverkarspecifikt. Matchas mot ro.product.manufacturer, sa en okand

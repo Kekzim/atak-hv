@@ -360,12 +360,14 @@ def task_install(apks: list[Path]) -> Task:
         for apk in apks:
             p = adb.run(["install", "-r", "-g", str(apk)], serial=dev.serial, timeout=600)
             _logged(log, p)
+            if adb.dry_run:
+                continue          # nothing ran, so there is no result to judge
             combined = p.stdout + p.stderr
             if p.returncode != 0 or "Success" not in combined:
                 failed.append(apk.name)
         if failed:
             return False, "failed: " + ", ".join(failed)
-        return True, f"{len(apks)} apps"
+        return True, f"{len(apks)} apps" + (" (dry-run)" if adb.dry_run else "")
     return Task("Install apps", run)
 
 
@@ -417,8 +419,10 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
         for pkg in targets:
             p = adb.run(["uninstall", pkg], serial=dev.serial, timeout=180)
             _logged(log, p)
-            if p.returncode == 0 and "Success" in p.stdout:
+            if adb.dry_run or (p.returncode == 0 and "Success" in p.stdout):
                 removed.append(pkg)
+        if adb.dry_run:
+            return True, f"{len(removed)} would be removed (dry-run)"
         return True, f"{len(removed)} removed" if removed else "nothing to remove"
     return Task("Uninstall apps", run)
 
@@ -531,37 +535,55 @@ def confirm_word(prompt: str, word: str) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Common options are accepted both before and after the subcommand, so
+    # "provision install --dry-run" works as readily as
+    # "provision --dry-run install". argparse.SUPPRESS keeps the subparser
+    # from overwriting a value that was already given before the subcommand.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--config", type=Path, default=argparse.SUPPRESS,
+                        help=f"config file (default: {DEFAULT_CONFIG})")
+    common.add_argument("--adb", default=argparse.SUPPRESS,
+                        help="path to adb, overriding auto-detection")
+    common.add_argument("--serial", action="append", default=argparse.SUPPRESS,
+                        help="only this device; repeatable")
+    common.add_argument("-j", "--jobs", type=int, default=argparse.SUPPRESS,
+                        help="devices to provision in parallel (default: 1)")
+    common.add_argument("--log-dir", type=Path, default=argparse.SUPPRESS,
+                        help="default: logs/ next to the config")
+    common.add_argument("--wait", type=int, default=argparse.SUPPRESS,
+                        help="seconds to wait for devices (default: 300)")
+    common.add_argument("--dry-run", action="store_true", default=argparse.SUPPRESS,
+                        help="print adb commands, change nothing")
+    common.add_argument("-y", "--yes", action="store_true", default=argparse.SUPPRESS,
+                        help="do not ask for confirmation")
+    common.add_argument("-q", "--quiet", action="store_true", default=argparse.SUPPRESS)
+
     ap = argparse.ArgumentParser(
         prog="provision",
+        parents=[common],
         description="Provision ATAK devices over adb (Windows, Linux, macOS).",
     )
-    ap.add_argument("--config", type=Path, default=DEFAULT_CONFIG,
-                    help="config file (default: %(default)s)")
-    ap.add_argument("--adb", help="path to adb, overriding auto-detection")
-    ap.add_argument("--serial", action="append", default=[],
-                    help="only this device; repeatable")
-    ap.add_argument("-j", "--jobs", type=int, default=1,
-                    help="devices to provision in parallel (default: 1)")
-    ap.add_argument("--log-dir", type=Path, help="default: logs/ next to the config")
-    ap.add_argument("--wait", type=int, default=300,
-                    help="seconds to wait for devices (default: %(default)s)")
-    ap.add_argument("--dry-run", action="store_true", help="print adb commands, change nothing")
-    ap.add_argument("-y", "--yes", action="store_true", help="do not ask for confirmation")
-    ap.add_argument("-q", "--quiet", action="store_true")
 
     sub = ap.add_subparsers(dest="command", required=True)
-    sub.add_parser("devices", help="list attached devices and exit")
-    p_install = sub.add_parser("install", help="install apps and push configuration")
+    sub.add_parser("devices", parents=[common], help="list attached devices and exit")
+    p_install = sub.add_parser("install", parents=[common],
+                               help="install apps and push configuration")
     p_install.add_argument(
         "--no-optimize", action="store_true",
         help="skip the lockdown steps: leave system and app updates, the "
              "package verifier and the manufacturer's update services alone. "
              "Use this on a personal phone.")
-    p_restore = sub.add_parser("restore", help="uninstall apps and remove ATAK files")
+    p_restore = sub.add_parser("restore", parents=[common],
+                               help="uninstall apps and remove ATAK files")
     p_restore.add_argument("--wipe-media", action="store_true",
                            help="also delete Download, DCIM, Pictures and Documents")
 
     args = ap.parse_args(argv)
+    for name, value in (("config", DEFAULT_CONFIG), ("adb", None), ("serial", []),
+                        ("jobs", 1), ("log_dir", None), ("wait", 300),
+                        ("dry_run", False), ("yes", False), ("quiet", False)):
+        if not hasattr(args, name):
+            setattr(args, name, value)
     out = Out(args.quiet)
 
     if not args.config.exists():

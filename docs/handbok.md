@@ -478,6 +478,13 @@ Gruppfeed
 ---
 
 ## OM TELEFONEN TAPPAR KONTAKTEN MED SERVERN (serverconnect.pdf)
+
+> [!NOTE]
+> Händer det efter en omstart räcker det inte alltid att ta bort
+> anslutningen i ATAK med soptunneikonen. Ett gammalt `atak-box.zip` kan
+> ligga kvar under `atak/tools/datapackage/` på telefonen och blockera
+> registreringen. Radera då den filen från telefonens lagring också, innan
+> du importerar `atak-box.zip` från Download igen.
 - Denna information finns även på Telefonen under Download eller ATAK-Installation mappen
 - Klicka på den röda pricken nere i högra hörnet av bilden på TAK skölden
 - Klicka på Soptunnan

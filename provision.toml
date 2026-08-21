@@ -53,11 +53,23 @@ label = "atak-box.zip (TAK server config)"
 # ---------------------------------------------------------------------
 [settings.install]
 global = [
+    # uppdateringar
     ["auto_update_apps", "0"],
     ["auto_update_system", "0"],
     ["ota_disable_automatic_update", "1"],
     ["package_verifier_enable", "0"],
     ["verifier_verify_adb_installs", "0"],
+    # bakgrundssynk - ATAK anvander inte Androids synkramverk
+    ["master_sync", "0"],
+    # animationer, rent kosmetiska pa en enfunktionsenhet
+    ["window_animation_scale", "0"],
+    ["transition_animation_scale", "0"],
+    ["animator_duration_scale", "0"],
+    # adaptiv batterihantering larlar sig vilka appar som ska strypas;
+    # overhead utan nytta nar enheten kor en app
+    ["adaptive_battery_management_enabled", "0"],
+    # Android BLE-skannar for positionering aven med Bluetooth av
+    ["ble_scan_always_enabled", "0"],
 ]
 secure = [
     ["auto_update_apps", "0"],
@@ -71,6 +83,12 @@ global = [
     ["ota_disable_automatic_update", "0"],
     ["package_verifier_enable", "1"],
     ["verifier_verify_adb_installs", "1"],
+    ["master_sync", "1"],
+    ["window_animation_scale", "1"],
+    ["transition_animation_scale", "1"],
+    ["animator_duration_scale", "1"],
+    ["adaptive_battery_management_enabled", "1"],
+    ["ble_scan_always_enabled", "1"],
 ]
 secure = [
     ["auto_update_apps", "1"],
@@ -93,14 +111,119 @@ secure = [
 #     adb shell pm list packages | grep -i -E 'update|ota|fota'
 # ---------------------------------------------------------------------
 [packages]
+# Uppdateringstjanster. Att stanga av enskilda GMS-*komponenter* (till
+# skillnad fran hela paket) kan tyst misslyckas pa nyare Android/GMS -
+# installningarna ovan ar den primara kontrollen.
 core = [
     "com.google.android.gms/.update.SystemUpdateActivity",
     "com.google.android.gms/.update.SystemUpdateService",
 ]
 
+# Google-appar utan roll pa en ATAK-enhet. De kor annars
+# bakgrundstjanster, synk och uppdateringskontroller.
+#
+# ORORDA med avsikt: com.google.android.gms, com.google.android.gsf,
+# com.android.vending (Play Store) och com.android.location.fused - de
+# kravs for GPS, mobilnat, wifi och framtida appinstallationer.
+#
+# VARNING: dialer, contacts och apps.messaging langst ner ar telefoni,
+# kontakter och SMS. Pa enheter dar Googles appar ar standard (OnePlus,
+# Pixel) forsvinner mojligheten att ringa och skicka SMS. Pa Samsung
+# finns egna appar och da spelar det ingen roll. Ta bort de tre raderna
+# om era telefoner ocksa anvands for samtal.
+debloat = [
+    "com.google.android.apps.docs",
+    "com.google.android.apps.googleassistant",
+    "com.google.android.apps.magazines",
+    "com.google.android.apps.photos",
+    "com.google.android.apps.podcasts",
+    "com.google.android.apps.subscriptions.red",
+    "com.google.android.apps.tachyon",
+    "com.google.android.apps.walletnfcrel",
+    "com.google.android.apps.wellbeing",
+    "com.google.android.apps.youtube.music",
+    "com.google.android.calendar",
+    "com.google.android.gm",
+    "com.google.android.googlequicksearchbox",
+    "com.google.android.marvin.talkback",
+    "com.google.android.printservice.recommendation",
+    "com.google.android.projection.gearhead",
+    "com.google.android.videos",
+    "com.google.android.youtube",
+    "com.google.ar.core",
+    "com.google.android.feedback",
+    "com.google.android.gms.location.history",
+    # bakgrundssynk av kontakter - ATAK anvander inte ramverket
+    "com.google.android.syncadapters.contacts",
+    # telefoni, kontakter och SMS - se varningen ovan
+    "com.google.android.dialer",
+    "com.google.android.contacts",
+    "com.google.android.apps.messaging",
+]
+
+# Tillverkarspecifikt. Matchas mot ro.product.manufacturer, sa en okand
+# telefon far bara core och debloat och fungerar anda.
 [packages.vendor]
 samsung = ["com.wssyncmldm", "com.sec.android.soagent"]
 xiaomi = ["com.miui.updater"]
+
+# OxygenOS-appar och telemetri. Utprovat pa OnePlus Nord N100 (BE2013).
+#
+# ORORDA med avsikt: com.oneplus.coreservice, com.oneplus.security,
+# com.oneplus.config, com.oneplus.*overlay.*, com.oneplus.sdcardservice,
+# com.oneplus.providers.media, com.oneplus.dataoptimization - OS-niva for
+# tema, lagring och natverk. Att stanga av dem riskerar Installningar,
+# lagringsatkomst och wifi.
+oneplus = [
+    "cn.oneplus.photos",
+    "com.oneplus.calculator",
+    "com.oneplus.gallery",
+    "com.oneplus.note",
+    "com.oneplus.soundrecorder",
+    "com.oneplus.deskclock",
+    "com.oneplus.gamespace",
+    "com.oneplus.store",
+    "com.oneplus.applocker",
+    "com.oneplus.twspods",
+    "net.oneplus.forums",
+    "net.oneplus.weather",
+    "net.oneplus.widget",
+    "com.oneplus.screenrecord",
+    # telemetri, backup och diagnostikloggning
+    "com.oneplus.ses",
+    "com.oneplus.opbackup",
+    "com.oem.logkitsdservice",
+    "com.oem.oemlogkit",
+    "com.oneplus.diagnosemanager",
+]
+
+# ---------------------------------------------------------------------
+# Extra adb shell-kommandon, korda som en del av nedlasningen.
+#
+# Bluetooth ar AVSIKTLIGT inte avstangt har. Pa en enskild enhet utan
+# tillbehor ar "svc bluetooth disable" en rimlig besparing, men
+# payload/atak/tools/bluetooth/bluetooth_devices.xml konfigurerar
+# laseravstandsmatare (PLRF, MOSKITO, Vector21, TruePulse) och externa
+# GNSS-mottagare (Bad Elf, Trimble R8/R10/R12). Stanger ni av Bluetooth
+# slutar de fungera.
+#
+# Anvander ni inga Bluetooth-tillbehor, lagg till:
+#     install = [["svc", "bluetooth", "disable"]]
+#     restore = [["svc", "bluetooth", "enable"]]
+# ---------------------------------------------------------------------
+[commands]
+install = []
+restore = []
+
+# ---------------------------------------------------------------------
+# Doze-undantag som kontrolleras (aldrig andras).
+#
+# Blue Force Tracking kraver bakgrunds-GPS och natverk. Ar ATAK inte
+# undantagen fran Doze stryps positionsrapporteringen. Verktyget varnar
+# om undantaget saknas.
+# ---------------------------------------------------------------------
+[doze]
+verify = ["com.atakmap.app.civ", "com.atakmap.takcam"]
 
 # ---------------------------------------------------------------------
 # Restore behaviour

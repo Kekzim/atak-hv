@@ -118,13 +118,16 @@ under `/sdcard/`, och placerar `atak-box.zip` i `/sdcard/Download/`.
 
 ### Testa på en egen telefon
 
-Standardläget låser ner enheten. På ett utlämnat system är det meningen,
-men på någons privata telefon är det inte det:
+Standardläget låser ner och rensar enheten. På ett utlämnat system är det
+meningen, men på någons privata telefon är det inte det:
 
 * system- och appuppdateringar stängs av — telefonen slutar få
   säkerhetsuppdateringar
 * paketverifieraren stängs av
 * tillverkarens uppdateringstjänster inaktiveras
+* ett trettiotal Google-appar och tillverkarappar inaktiveras — inklusive
+  telefoni, kontakter och SMS på enheter där Googles appar är standard
+* bakgrundssynk, animationer och adaptiv batterihantering stängs av
 
 Kör därför `install --no-optimize` när du provar verktyget på en telefon
 som används privat. Appar och konfiguration installeras precis som vanligt,
@@ -303,6 +306,44 @@ Beror på modell:
 * Av-knapp + volym ner
 * På en del modeller kan knappen programmeras — sök på *sidoknapp* i
   telefonens inställningar.
+
+## Optimering
+
+`install` låser ner enheten och tar bort det som inte hör hemma på ett
+system vars enda uppgift är ATAK. Allt styrs från `provision.toml` och
+allt återställs av `restore`.
+
+| Vad | Varför |
+|---|---|
+| Uppdateringar av system och appar, paketverifierare | En oplanerad uppdatering får inte ändra beteende eller kräva omstart mitt i ett uppdrag |
+| Cirka 25 Google-appar (mejl, video, assistent, plånbok, kalender …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
+| Tillverkarens appar och telemetri | Samma sak — `[packages.vendor]`, matchas mot telefonens tillverkare |
+| Bakgrundssynk (`master_sync`) | ATAK använder inte Androids synkramverk |
+| Animationer | Kostar GPU och batteri för rent kosmetiska övergångar |
+| Adaptiv batterihantering | Lägger CPU på att lära sig vilka appar som ska strypas — meningslöst när enheten kör en app |
+| BLE-skanning för positionering | Android skannar efter beacons även med Bluetooth av |
+
+Orörda med avsikt: `com.google.android.gms`, `com.google.android.gsf`,
+Play Store och `com.android.location.fused` — de krävs för GPS, mobilnät,
+wifi och framtida appinstallationer. Detsamma gäller tillverkarnas
+OS-överlägg för tema, lagring och nätverk.
+
+> [!WARNING]
+> Listan inaktiverar även `com.google.android.dialer`,
+> `com.google.android.contacts` och `com.google.android.apps.messaging`.
+> På telefoner där Googles appar är standard — OnePlus, Pixel — försvinner
+> då möjligheten att ringa och skicka SMS. På Samsung finns egna appar och
+> då spelar det ingen roll. Används era telefoner även för samtal: ta bort
+> de tre raderna ur `debloat` i `provision.toml`.
+
+**Bluetooth stängs inte av.** Det vore en rimlig besparing på en enhet utan
+tillbehör, men `payload/atak/tools/bluetooth/bluetooth_devices.xml`
+konfigurerar laseravståndsmätare och externa GNSS-mottagare. Använder ni
+inga sådana kan `[commands]` i `provision.toml` slå av radion.
+
+Efter installationen kontrollerar verktyget att ATAK är undantagen från
+**Doze**. Är den inte det stryps positionsrapporteringen i bakgrunden, och
+verktyget varnar i sammanfattningen. Inget ändras automatiskt.
 
 ## Konfiguration
 

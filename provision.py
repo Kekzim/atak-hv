@@ -210,6 +210,7 @@ class Task:
 class Result:
     device: Device
     failures: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     log_path: Path | None = None
 
     @property
@@ -240,6 +241,8 @@ class Runner:
                     log.write(f"exception: {exc}\n")
                 if ok:
                     self.out.ok(note or "ok")
+                    if note and note.startswith("WARNING"):
+                        result.warnings.append(note)
                 else:
                     self.out.fail(note or "see log")
                     result.failures.append(task.label)
@@ -282,31 +285,73 @@ def task_settings(groups: dict) -> Task:
     return Task("Apply system settings", run)
 
 
-def task_packages(core: list[str], vendor: dict, enable: bool) -> Task:
+def task_packages(packages: dict, enable: bool) -> Task:
+    """Disable (or re-enable) update services, unused apps and vendor bloat.
+
+    `core` and `debloat` apply everywhere. `vendor` is keyed by
+    ro.product.manufacturer, so an unknown handset simply gets the common
+    lists and still works.
+    """
     verb = "enable" if enable else "disable-user"
+    vendor = packages.get("vendor", {})
 
     def run(adb, dev, log):
-        targets = list(core)
+        targets = list(packages.get("core", [])) + list(packages.get("debloat", []))
         key = dev.manufacturer.lower()
         matched = next((v for k, v in vendor.items() if k.lower() == key), None)
         if matched:
             targets += matched
-            log.write(f"vendor match: {key} -> {matched}\n")
+            log.write(f"vendor match: {key} -> {len(matched)} packages\n")
         else:
-            log.write(f"no vendor entry for '{key}' - core packages only\n")
+            log.write(f"no vendor entry for '{key}' - common lists only\n")
 
-        touched = 0
+        touched = failed = 0
         for pkg in targets:
             args = ["pm", verb] + ([] if enable else ["--user", "0"]) + [pkg]
             p = adb.shell(args, dev.serial)
             _logged(log, p)
-            if p.returncode == 0 and "Exception" not in (p.stdout + p.stderr):
+            combined = p.stdout + p.stderr
+            if p.returncode == 0 and "Exception" not in combined:
                 touched += 1
+            else:
+                # A package not present on this ROM, or a GMS component the
+                # shell may not touch, is expected - not an error.
+                failed += 1
         note = f"{touched}/{len(targets)}"
+        if failed:
+            note += f" ({failed} n/a)"
         if matched:
             note += f", vendor: {key}"
         return True, note
-    return Task("Enable update services" if enable else "Disable update services", run)
+    return Task("Re-enable disabled packages" if enable else "Disable unused packages", run)
+
+
+def task_shell(commands: list[list[str]], label: str) -> Task:
+    """Run extra adb shell commands from the config."""
+    def run(adb, dev, log):
+        for cmd in commands:
+            p = adb.shell([str(a) for a in cmd], dev.serial)
+            _logged(log, p)
+        return True, f"{len(commands)} commands"
+    return Task(label, run)
+
+
+def task_doze_check(packages: list[str]) -> Task:
+    """Verify ATAK is exempt from Doze - checked, never changed.
+
+    Blue-force tracking needs background GPS and network. If a future
+    reset drops the exemption, this is where it becomes visible.
+    """
+    def run(adb, dev, log):
+        p = adb.shell(["dumpsys", "deviceidle", "whitelist"], dev.serial, mutating=False)
+        _logged(log, p)
+        listed = p.stdout
+        missing = [pkg for pkg in packages if pkg not in listed]
+        if missing:
+            log.write(f"NOT allowlisted: {missing}\n")
+            return True, f"WARNING: {', '.join(missing)} not exempt from Doze"
+        return True, f"{len(packages)} exempt"
+    return Task("Check Doze allowlist", run)
 
 
 def task_install(apks: list[Path]) -> Task:
@@ -395,14 +440,19 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     if optimize:
         tasks += [
             task_settings(cfg["settings"]["install"]),
-            task_packages(cfg["packages"]["core"], cfg["packages"].get("vendor", {}),
-                          enable=False),
+            task_packages(cfg["packages"], enable=False),
         ]
+        extra = cfg.get("commands", {}).get("install", [])
+        if extra:
+            tasks.append(task_shell(extra, "Apply extra settings"))
     tasks += [task_install(apks)]
     tasks += [task_push(e, base) for e in cfg["push"]]
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean stale atak-box.zip"))
+    doze = cfg.get("doze", {}).get("verify", [])
+    if doze:
+        tasks.append(task_doze_check(doze))
     return tasks
 
 
@@ -416,8 +466,11 @@ def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
         tasks.append(task_remove(r["wipe_paths"], "Wipe user media"))
     tasks += [
         task_settings(cfg["settings"]["restore"]),
-        task_packages(cfg["packages"]["core"], cfg["packages"].get("vendor", {}), enable=True),
+        task_packages(cfg["packages"], enable=True),
     ]
+    extra = cfg.get("commands", {}).get("restore", [])
+    if extra:
+        tasks.append(task_shell(extra, "Revert extra settings"))
     return tasks
 
 
@@ -604,6 +657,8 @@ def main(argv: list[str] | None = None) -> int:
         for res in results:
             status = "OK" if res.ok else "FAILED: " + ", ".join(res.failures)
             out.info(f"  {res.device.serial:<24} {status}")
+            for w in res.warnings:
+                out.info(f"  {'':<24} {w}")
         failed = [r for r in results if not r.ok]
         if failed:
             out.info(f"\n{len(failed)} of {len(results)} device(s) failed. Logs: {log_dir}")

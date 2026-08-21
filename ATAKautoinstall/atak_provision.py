@@ -460,6 +460,14 @@ def confirm(prompt: str) -> bool:
         return False
 
 
+def confirm_word(prompt: str, word: str) -> bool:
+    """Require the exact word. Used where a wrong keystroke destroys data."""
+    try:
+        return input(f"{prompt} (type {word} to confirm): ").strip() == word
+    except EOFError:
+        return False
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
         prog="atak_provision",
@@ -523,9 +531,17 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         if args.command == "restore" and args.wipe_media and not args.yes:
-            out.warn("--wipe-media deletes Download, DCIM, Pictures and Documents "
-                     "on every device listed above. This cannot be undone.")
-            if not confirm("Continue?"):
+            # Listed from the config, not hardcoded, so the warning cannot
+            # drift away from what is actually deleted.
+            print()
+            print("!" * 60)
+            print("  --wipe-media DELETES USER DATA on all "
+                  f"{len(devices)} device(s) above:")
+            for path in cfg["restore"]["wipe_paths"]:
+                print(f"    {path}")
+            print("  Photos, downloads and documents included. Not reversible.")
+            print("!" * 60)
+            if not confirm_word("Proceed?", "WIPE"):
                 out.info("Aborted.")
                 return 1
         elif not args.yes and not confirm(f"Run '{args.command}' on {len(devices)} device(s)?"):

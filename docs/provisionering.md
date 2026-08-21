@@ -81,6 +81,32 @@ Linux och macOS:
 
 Kör alltid `--dry-run` först om du är osäker.
 
+### Bekräftelse innan körning
+
+Verktyget frågar alltid innan det gör något, och visar först vilka enheter
+som är anslutna:
+
+* `install` och `restore` frågar `Run 'restore' on 2 device(s)? [y/N]`.
+  Enter eller vad som helst utom `y`/`ja` avbryter.
+* `restore --wipe-media` raderar användarens egna filer och kräver därför
+  att man skriver **`WIPE`** — `y` räcker inte. Innan frågan listas de
+  exakta sökvägar som kommer att raderas, hämtade ur konfigurationen:
+
+  ```
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    --wipe-media DELETES USER DATA on all 2 device(s) above:
+      /sdcard/Download/*
+      /sdcard/DCIM/*
+      /sdcard/Pictures/*
+      /sdcard/Documents/*
+    Photos, downloads and documents included. Not reversible.
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Proceed? (type WIPE to confirm):
+  ```
+
+* `-y` hoppar över **alla** frågor, även `WIPE`. Använd den bara i skript
+  där du redan vet vad som kommer att hända.
+
 ## Innan du kör `install`
 
 1. **ATAK måste vara installerat från Google Play på alla enheter.**

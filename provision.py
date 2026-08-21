@@ -124,9 +124,6 @@ class Adb:
     def start_server(self) -> None:
         self.run(["start-server"], timeout=60, mutating=False)
 
-    def kill_server(self) -> None:
-        self.run(["kill-server"], timeout=30, mutating=False)
-
     def list_devices(self) -> tuple[list[str], list[tuple[str, str]]]:
         """Return (ready serials, [(serial, state)] for anything not ready)."""
         proc = self.run(["devices"], timeout=30, mutating=False)
@@ -237,6 +234,7 @@ class Runner:
             for i, task in enumerate(tasks, 1):
                 self.out.step(i, len(tasks), task.label)
                 log.write(f"\n--- {task.label} ---\n")
+                log.flush()   # so an interrupted run still leaves a record
                 try:
                     ok, note = task.action(self.adb, device, log)
                 except Exception as exc:                      # noqa: BLE001
@@ -251,7 +249,9 @@ class Runner:
                     result.failures.append(task.label)
                     if task.fatal:
                         log.write("fatal - aborting this device\n")
+                        log.flush()
                         break
+                log.flush()
         return result
 
 
@@ -339,6 +339,27 @@ def task_shell(commands: list[list[str]], label: str) -> Task:
     return Task(label, run)
 
 
+def task_requirements(required: dict, optional: dict) -> Task:
+    """Check that the Play Store apps are on the device before doing anything.
+
+    Pushing configuration to a phone without ATAK accomplishes nothing,
+    and the failure only becomes visible much later, in the field.
+    """
+    def run(adb, dev, log):
+        installed = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False).stdout
+        miss_req = [n for p, n in required.items() if f"package:{p}" not in installed]
+        miss_opt = [n for p, n in optional.items() if f"package:{p}" not in installed]
+        log.write(f"missing required: {miss_req}\nmissing optional: {miss_opt}\n")
+
+        if miss_req:
+            return False, ("not installed: " + ", ".join(miss_req)
+                           + " - install from Google Play first")
+        if miss_opt:
+            return True, f"WARNING: not installed: {', '.join(miss_opt)}"
+        return True, f"{len(required) + len(optional)} present"
+    return Task("Check required apps", run, fatal=True)
+
+
 def task_permissions(perms: dict, appops: dict, exempt: list[str]) -> Task:
     """Grant runtime permissions to apps installed from the Play Store.
 
@@ -417,19 +438,56 @@ def task_doze_check(packages: list[str]) -> Task:
     return Task("Check Doze allowlist", run)
 
 
-def task_install(apks: list[Path]) -> Task:
+VERIFIER_KEYS = ("package_verifier_enable", "verifier_verify_adb_installs")
+
+
+def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
+    """Sideload the APKs.
+
+    Android's package verifier blocks adb installs with
+    INSTALL_FAILED_VERIFICATION_FAILURE, so it is turned off for the
+    duration regardless of --no-optimize - otherwise nothing installs at
+    all. With --no-optimize the previous values are put back afterwards,
+    since leaving the verifier off is a lockdown change the operator did
+    not ask for.
+    """
     def run(adb, dev, log):
-        failed = []
-        for apk in apks:
-            p = adb.run(["install", "-r", "-g", str(apk)], serial=dev.serial, timeout=600)
-            _logged(log, p)
-            if adb.dry_run:
-                continue          # nothing ran, so there is no result to judge
-            combined = p.stdout + p.stderr
-            if p.returncode != 0 or "Success" not in combined:
-                failed.append(apk.name)
-        if failed:
-            return False, "failed: " + ", ".join(failed)
+        previous = {}
+        for key in VERIFIER_KEYS:
+            q = adb.shell(["settings", "get", "global", key], dev.serial, mutating=False)
+            previous[key] = (q.stdout or "").strip()
+            adb.shell(["settings", "put", "global", key, "0"], dev.serial)
+        log.write(f"verifier was {previous}, disabled for install\n")
+
+        failed, conflicts = [], []
+        try:
+            for apk in apks:
+                p = adb.run(["install", "-r", "-g", str(apk)], serial=dev.serial, timeout=600)
+                _logged(log, p)
+                if adb.dry_run:
+                    continue
+                combined = p.stdout + p.stderr
+                if p.returncode == 0 and "Success" in combined:
+                    continue
+                if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in combined:
+                    conflicts.append(apk.name)
+                else:
+                    failed.append(apk.name)
+        finally:
+            if restore_verifier:
+                for key, value in previous.items():
+                    if value and value != "null":
+                        adb.shell(["settings", "put", "global", key, value], dev.serial)
+                log.write("verifier restored to previous values\n")
+
+        if failed or conflicts:
+            parts = []
+            if failed:
+                parts.append("failed: " + ", ".join(failed))
+            if conflicts:
+                parts.append("already installed with a different signature, "
+                             "uninstall first: " + ", ".join(conflicts))
+            return False, "; ".join(parts)
         return True, f"{len(apks)} apps" + (" (dry-run)" if adb.dry_run else "")
     return Task("Install apps", run)
 
@@ -503,7 +561,11 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     skipped with --no-optimize.
     """
     apks = [(base / a).resolve() for a in cfg["kit"]["apks"]]
-    tasks = [task_stay_awake()]
+    req = cfg.get("requirements", {})
+    tasks = []
+    if req.get("required") or req.get("optional"):
+        tasks.append(task_requirements(req.get("required", {}), req.get("optional", {})))
+    tasks.append(task_stay_awake())
     if optimize:
         tasks += [
             task_settings(cfg["settings"]["install"]),
@@ -512,7 +574,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
         extra = cfg.get("commands", {}).get("install", [])
         if extra:
             tasks.append(task_shell(extra, "Apply extra settings"))
-    tasks += [task_install(apks)]
+    tasks += [task_install(apks, restore_verifier=not optimize)]
     if cfg.get("permissions") or cfg.get("appops") or cfg.get("battery", {}).get("exempt"):
         tasks.append(task_permissions(cfg.get("permissions", {}),
                                       cfg.get("appops", {}),
@@ -755,7 +817,10 @@ def main(argv: list[str] | None = None) -> int:
         out.info(f"\nAll {len(results)} device(s) completed. Logs: {log_dir}")
         return 0
     finally:
-        adb.kill_server()
+        # Deliberately not killing the adb server: it is shared, and tearing
+        # it down would disrupt any other adb user - including a second copy
+        # of this tool provisioning other devices at the same time.
+        pass
 
 
 if __name__ == "__main__":

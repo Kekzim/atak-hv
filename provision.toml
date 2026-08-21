@@ -5,16 +5,20 @@
 
 # ---------------------------------------------------------------------
 # Apps sideloaded onto every device.
-# Paths are relative to this file. ATAK, OpenVPN and Geocam are NOT here
-# on purpose - they are installed from Google Play by the operator, and
-# ATAK must be present before this tool runs (ATAK-Sync is a plugin).
+# Paths are relative to this file. ATAK, ATAK-Sync, OpenVPN and Geocam are
+# NOT here on purpose - they are installed from Google Play by the
+# operator, and ATAK must be present before this tool runs.
+#
+# ATAK-Sync sidladdades tidigare, men Play Store-versionen ar signerad med
+# en annan nyckel: en telefon som redan har den fran Play kan inte
+# uppdateras med vart paket (INSTALL_FAILED_UPDATE_INCOMPATIBLE). Play
+# Store ar dessutom nyare - 3.7.4 mot 3.7.0 i paketet.
 # ---------------------------------------------------------------------
 [kit]
 apks = [
     "payload/apks/Ramsor.apk",
     "payload/apks/HVreports.apk",
     "payload/apks/Icu.apk",
-    "payload/apks/ATAK-Sync.apk",
 ]
 
 # Removed after pushing: the folder push drags a stale copy along.
@@ -216,6 +220,28 @@ oneplus = [
 [commands]
 install = []
 restore = []
+
+# ---------------------------------------------------------------------
+# Appar som ska finnas fore korning, installerade fran Google Play.
+#
+# Verktyget kontrollerar dem forst av allt och avbryter om nagot under
+# [requirements.required] saknas - det ar ingen ide att pusha
+# konfiguration till en telefon som inte har ATAK.
+#
+# Saknas nagot under [requirements.optional] blir det en varning, ingen
+# avbrytning. Ta bort rader ni inte anvander.
+#
+# Paketnamnen ar verifierade mot en testenhet dar det gick; ovriga ar
+# leverantorernas standardnamn. Kontrollera med:
+#     adb shell pm list packages | grep -i <namn>
+# ---------------------------------------------------------------------
+[requirements.required]
+"com.atakmap.app.civ" = "ATAK"
+
+[requirements.optional]
+"com.atakmap.android.datasync.plugin" = "ATAK-Sync"
+"com.atakmap.android.geocam.plugin" = "Geocam"
+"net.openvpn.openvpn" = "OpenVPN Connect"
 
 # ---------------------------------------------------------------------
 # Rattigheter for appar som installeras fran Google Play.

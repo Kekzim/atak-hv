@@ -78,13 +78,19 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 | App | Anmärkning |
 |---|---|
 | **ATAK** | **Måste installeras först.** ATAK-Sync är ett plugin, och konfigurationen som läggs ut kräver att ATAK redan finns på enheten. Verktyget installerar inte ATAK. |
+| **ATAK-Sync** | Datasync-plugin. Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
 | OpenVPN | Om ni använder OpenVPN |
 | Geocam | |
 | Reolink | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
 
 **Sidladdas av verktyget** från `payload/apks/`:
 
-`Ramsor.apk` · `HVreports.apk` · `Icu.apk` (TAK ICU) · `ATAK-Sync.apk`
+`Ramsor.apk` · `HVreports.apk` · `Icu.apk` (TAK ICU)
+
+Verktyget **kontrollerar först att Play Store-apparna finns** och avbryter
+om ATAK saknas — det är ingen idé att lägga ut konfiguration på en telefon
+utan ATAK. Saknas någon av de övriga blir det en varning. Listan ligger
+under `[requirements]` i `provision.toml`.
 
 ## Före utskick
 

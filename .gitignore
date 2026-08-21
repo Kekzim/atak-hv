@@ -46,6 +46,11 @@ _source/
 # ---------------------------------------------------------------
 *.log
 ATAKautoinstall/logs/
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
 Thumbs.db
 desktop.ini
 .DS_Store

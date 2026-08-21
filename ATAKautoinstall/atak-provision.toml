@@ -1,0 +1,140 @@
+# Configuration for atak_provision.py
+#
+# All relative paths are resolved from the directory holding this file,
+# so the kit can live anywhere - USB stick, home directory, C:\, /opt.
+
+# ---------------------------------------------------------------------
+# Apps sideloaded onto every device.
+# Paths are relative to this file. ATAK, OpenVPN and Geocam are NOT here
+# on purpose - they are installed from Google Play by the operator, and
+# ATAK must be present before this tool runs (ATAK-Sync is a plugin).
+# ---------------------------------------------------------------------
+[kit]
+apks = [
+    "Filer/Ramsor.apk",
+    "Filer/HVreports.apk",
+    "Filer/Icu.apk",
+    "Filer/ATAK-Sync.apk",
+]
+
+# Removed after pushing: the folder push drags a stale copy along.
+cleanup_after_push = ["/sdcard/ATAK-installation/atak-box.zip"]
+
+[adb]
+# Where to look for adb, in order. "bundled" = platform-tools/ next to
+# this file, "path" = whatever is on PATH. Override with --adb.
+lookup = ["bundled", "path"]
+
+# ---------------------------------------------------------------------
+# Files and folders copied to the device.
+# `required = true` aborts the run if the source is missing.
+# ---------------------------------------------------------------------
+[[push]]
+source = "Filer/atak"
+target = "/sdcard/"
+
+[[push]]
+source = "Filer/ATAK-installation"
+target = "/sdcard/"
+
+[[push]]
+source = "Filer/VPN-clients"
+target = "/sdcard/"
+
+[[push]]
+source = "Filer/ATAK-installation/atak-box.zip"
+target = "/sdcard/Download/"
+required = true
+label = "atak-box.zip (TAK server config)"
+
+# ---------------------------------------------------------------------
+# Core Android settings. These are AOSP/Google keys and apply to every
+# device regardless of manufacturer.
+# ---------------------------------------------------------------------
+[settings.install]
+global = [
+    ["auto_update_apps", "0"],
+    ["auto_update_system", "0"],
+    ["ota_disable_automatic_update", "1"],
+    ["package_verifier_enable", "0"],
+    ["verifier_verify_adb_installs", "0"],
+]
+secure = [
+    ["auto_update_apps", "0"],
+    ["ota_disable_automatic_update", "1"],
+]
+
+[settings.restore]
+global = [
+    ["auto_update_apps", "1"],
+    ["auto_update_system", "1"],
+    ["ota_disable_automatic_update", "0"],
+    ["package_verifier_enable", "1"],
+    ["verifier_verify_adb_installs", "1"],
+]
+secure = [
+    ["auto_update_apps", "1"],
+    ["ota_disable_automatic_update", "0"],
+]
+
+# ---------------------------------------------------------------------
+# Update components disabled during install and re-enabled on restore.
+#
+# `core` is Google/AOSP and applies everywhere.
+#
+# `vendor` is per-manufacturer and matched against the device's
+# ro.product.manufacturer. Only the matching entry is applied, so an
+# unknown handset simply gets the core set.
+#
+# CONTRIBUTORS: adding a manufacturer is a config change, not a code
+# change. Add a table below, keyed by the lowercased manufacturer
+# string. Find yours with:
+#     adb shell getprop ro.product.manufacturer
+#     adb shell pm list packages | grep -i -E 'update|ota|fota'
+# ---------------------------------------------------------------------
+[packages]
+core = [
+    "com.google.android.gms/.update.SystemUpdateActivity",
+    "com.google.android.gms/.update.SystemUpdateService",
+]
+
+[packages.vendor]
+samsung = ["com.wssyncmldm", "com.sec.android.soagent"]
+xiaomi = ["com.miui.updater"]
+
+# ---------------------------------------------------------------------
+# Restore behaviour
+# ---------------------------------------------------------------------
+[restore]
+# Packages whose name contains any of these are uninstalled.
+# Match against the package id, not the app's display name - Signal
+# ships as org.thoughtcrime.securesms, so "signal" alone never matched
+# it (a long-standing bug in the old .bat scripts).
+uninstall_match = [
+    "atak",
+    "icu",
+    "geocam",
+    "reolink",
+    "securesms",   # Signal
+    "openvpn",
+]
+
+# Never uninstalled, even on a match - stops a substring like "icu"
+# from taking out a system component.
+protected_prefixes = ["android", "com.android.", "com.google.android."]
+
+# Removed by `restore`.
+remove_paths = [
+    "/sdcard/atak",
+    "/sdcard/ATAK-installation",
+    "/sdcard/VPN-clients",
+    "/sdcard/Download/atak-box.zip",
+]
+
+# Removed only by `restore --wipe-media`. User data - not reversible.
+wipe_paths = [
+    "/sdcard/Download/*",
+    "/sdcard/DCIM/*",
+    "/sdcard/Pictures/*",
+    "/sdcard/Documents/*",
+]

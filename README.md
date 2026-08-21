@@ -14,11 +14,15 @@ utbildningsmaterialet i Markdown-form.
 
 ```
 atak-hv/
-├── ATAKautoinstall/              provisioneringspaket, kopieras till C:\
-│   ├── ATAK autoinstall.bat      installerar appar + pushar konfiguration
-│   ├── ATAK-Restore.bat          avinstallerar appar
-│   ├── Restore + delete files.bat  avinstallerar appar och rensar filer
-│   ├── platform-tools/           adb.exe m.m. — hämtas separat, se nedan
+├── ATAKautoinstall/              provisioneringspaket, kan ligga var som helst
+│   ├── atak_provision.py         verktyget (Windows, Linux, macOS)
+│   ├── atak-provision.toml       konfiguration — appar, pushar, paket
+│   ├── atak-provision.bat        startar verktyget på Windows
+│   ├── atak-provision.sh         startar verktyget på Linux/macOS
+│   ├── ATAK autoinstall.bat      GAMMAL, ersätts av verktyget ovan
+│   ├── ATAK-Restore.bat          GAMMAL
+│   ├── Restore + delete files.bat  GAMMAL
+│   ├── platform-tools/           adb m.m. — hämtas separat, se nedan
 │   └── Filer/
 │       ├── *.apk                 apparna som sidladdas
 │       ├── atak/                 ATAK-konfiguration → /sdcard/atak
@@ -37,11 +41,15 @@ atak-hv/
 2. Läs [ATAK installation med VPN från dator](docs/presentations/atak-installation-med-vpn-fran-dator.md).
    För handhavande, se [ATAK-handbok](docs/presentations/atak-handbok.md).
 3. Följ [Före utskick](#före-utskick) nedan.
-4. Kopiera mappen `ATAKautoinstall` till `C:\` och kör
-   `C:\ATAKautoinstall\ATAK autoinstall.bat`.
+4. Kör provisioneringen — se [docs/provisionering.md](docs/provisionering.md):
 
-Skripten använder absoluta sökvägar under `C:\ATAKautoinstall\` och fungerar
-bara om mappen ligger där.
+   ```
+   Windows:      atak-provision.bat install
+   Linux/macOS:  ./atak-provision.sh install
+   ```
+
+Paketet kan ligga var som helst; sökvägarna löses relativt konfigurationen.
+Kräver Python 3.11+ och `adb`.
 
 ## Appar
 
@@ -79,6 +87,15 @@ bara om mappen ligger där.
 | `platform-tools/` | ~15 MB tredjepartsbinärer med egen licens | [developer.android.com](https://developer.android.com/tools/releases/platform-tools) |
 | ATAK, OpenVPN, Geocam m.fl. `.apk` | Finns på Google Play | Google Play |
 | `_source/` | Original i `.pptx`/`.docx`/`.pdf`, ersatta av Markdown | Lokalt i arbetskopian |
+
+## Provisionering
+
+`atak_provision.py` sköter installation och avrustning via `adb` och fungerar
+på Windows, Linux och macOS. Se [docs/provisionering.md](docs/provisionering.md)
+för kommandon, flaggor, loggar och hur man lägger till en ny telefonmodell.
+
+De gamla `.bat`-skripten ligger kvar tills verktyget är utprovat på riktig
+hårdvara, och tas bort därefter.
 
 ## Instruktioner
 

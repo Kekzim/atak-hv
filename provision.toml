@@ -126,13 +126,13 @@ core = [
 # com.android.vending (Play Store) och com.android.location.fused - de
 # kravs for GPS, mobilnat, wifi och framtida appinstallationer.
 #
-# Mobilnat, wifi och Bluetooth ska fortsatta fungera. Darfor ar foljande
-# INTE med i listan, aven om de ingick i testningen pa en dedikerad enhet:
-#     com.google.android.dialer          telefoni
-#     com.google.android.contacts        kontakter
-#     com.google.android.apps.messaging  SMS
-# Pa enheter dar Googles appar ar standard (OnePlus, Pixel) forsvinner
-# annars mojligheten att ringa och skicka SMS.
+# Enheten ar en dataenhet - inga rostsamtal gar till den. Darfor
+# inaktiveras aven telefoni, kontakter och SMS langst ner i listan.
+# Mobildata paverkas inte: data bars av telefoniramverket i systemet,
+# inte av uppringningsappen. Wifi och Bluetooth ar likasa ororda.
+#
+# Ska era telefoner aven anvandas for samtal: ta bort de tre sista
+# raderna ur listan.
 debloat = [
     "com.google.android.apps.docs",
     "com.google.android.apps.googleassistant",
@@ -155,9 +155,12 @@ debloat = [
     "com.google.ar.core",
     "com.google.android.feedback",
     "com.google.android.gms.location.history",
-    # bakgrundssynk av kontakter - ATAK anvander inte ramverket.
-    # Sjalva kontaktappen ar orörd, bara synkadaptern.
+    # bakgrundssynk av kontakter - ATAK anvander inte ramverket
     "com.google.android.syncadapters.contacts",
+    # telefoni, kontakter och SMS - enheten tar inte emot samtal
+    "com.google.android.dialer",
+    "com.google.android.contacts",
+    "com.google.android.apps.messaging",
 ]
 
 # Tillverkarspecifikt. Matchas mot ro.product.manufacturer, sa en okand

@@ -125,7 +125,8 @@ meningen, men på någons privata telefon är det inte det:
   säkerhetsuppdateringar
 * paketverifieraren stängs av
 * tillverkarens uppdateringstjänster inaktiveras
-* ett tjugotal Google-appar och tillverkarens appar inaktiveras
+* ett tjugotal Google-appar och tillverkarens appar inaktiveras, inklusive
+  telefoni, kontakter och SMS
 * bakgrundssynk, animationer och adaptiv batterihantering stängs av
 
 Kör därför `install --no-optimize` när du provar verktyget på en telefon
@@ -315,7 +316,7 @@ allt återställs av `restore`.
 | Vad | Varför |
 |---|---|
 | Uppdateringar av system och appar, paketverifierare | En oplanerad uppdatering får inte ändra beteende eller kräva omstart mitt i ett uppdrag |
-| 22 Google-appar (mejl, video, assistent, plånbok, kalender …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
+| 25 Google-appar (mejl, video, assistent, plånbok, kalender, telefoni …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
 | Tillverkarens appar och telemetri | Samma sak — `[packages.vendor]`, matchas mot telefonens tillverkare |
 | Bakgrundssynk (`master_sync`) | ATAK använder inte Androids synkramverk |
 | Animationer | Kostar GPU och batteri för rent kosmetiska övergångar |
@@ -329,15 +330,14 @@ OS-överlägg för tema, lagring och nätverk.
 
 ### Vad optimeringen inte rör
 
-**Mobilnät, wifi och Bluetooth fortsätter fungera.** Det är ett medvetet
-krav, och tre saker följer av det:
+**Mobildata, wifi och Bluetooth fortsätter fungera.** Det är ett medvetet
+krav:
 
-* **Telefoni, kontakter och SMS** är kvar. `com.google.android.dialer`,
-  `com.google.android.contacts` och `com.google.android.apps.messaging`
-  ingick i testningen på en dedikerad enhet, men är inte med i listan —
-  på telefoner där Googles appar är standard (OnePlus, Pixel) skulle det
-  ta bort möjligheten att ringa och skicka SMS. Bara *synkadaptern* för
-  kontakter stängs av, inte kontaktappen.
+* **Mobildata påverkas inte** av att telefoni-, kontakt- och SMS-apparna
+  inaktiveras. Data bärs av telefoniramverket i systemet, inte av
+  uppringningsappen. Enheten är en dataenhet — inga röstsamtal går till
+  den — så de tre apparna stängs av. Ska era telefoner även användas för
+  samtal, ta bort dem ur `debloat` i `provision.toml`.
 * **Bluetooth-radion stängs inte av.**
   `payload/atak/tools/bluetooth/bluetooth_devices.xml` konfigurerar
   laseravståndsmätare (PLRF, MOSKITO, Vector21, TruePulse) och externa

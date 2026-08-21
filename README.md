@@ -79,7 +79,7 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 | **ATAK** | **Måste installeras först.** ATAK-Sync är ett plugin, och konfigurationen som läggs ut kräver att ATAK redan finns på enheten. Verktyget installerar inte ATAK. |
 | OpenVPN | Om ni använder OpenVPN |
 | Geocam | |
-| Reolink | Vid behov — om ni använder övervakningskameror, se [kamerainstruktionen](docs/atak-kamera-reolink-setup.md) |
+| Reolink | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
 
 **Sidladdas av verktyget** från `payload/apks/`:
 
@@ -209,16 +209,16 @@ Vid avrustning, när systemet ska lämnas in eller lämnas över:
 1. Ladda telefonen.
 2. Kör `provision.bat restore` (eller `--wipe-media` om användarens egna
    filer också ska bort).
-3. Se [avrustning och grundinställning](docs/atak-avrustning-grundinstallning.md)
-   för fabriksåterställning och packlista för TAK-väskan.
+3. Se [Avrustning och uppstart](docs/avrustning.md) för återställning av
+   ATAK, fabriksåterställning och packlista för TAK-väskan.
 
 När du får en avrustad telefon, se
-[uppstart efter återställd ATAK](docs/atak-uppstart-efter-aterstalld.md).
+[uppstart efter återställd ATAK](docs/avrustning.md#uppstart-efter-återställd-atak).
 
 ## Dokumentation
 
 Handhavande och instruktioner finns i [docs/](docs/README.md) — bland annat
-[ATAK-handboken](docs/atak-handbok.md) med menyer, kartor, navigation,
+[ATAK-handboken](docs/handbok.md) med menyer, kartor, navigation,
 markörer, ritverktyg, rapportering, feeds och felsökning.
 
 ## Vad som inte ligger i git

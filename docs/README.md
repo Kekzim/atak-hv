@@ -1,27 +1,24 @@
 # Handhavande och instruktioner
 
-Instruktionsmaterial för ATAK i Markdown, i
-[reveal.js](https://revealjs.com)-format. Varje fil går att läsa direkt på
+Instruktionsmaterial för ATAK. Varje dokument går att läsa direkt på
 GitHub, eller visas som bildspel via `viewer.html`.
 
-För installation och avrustning av enheter, se [repots README](../README.md).
+För att installera och avrusta enheter från datorn, se
+[repots README](../README.md).
 
-| Dokument | Avsnitt | Innehåll |
-|---|---:|---|
-| [ATAK-handbok](atak-handbok.md) | 31 | Handhavande: layout, menyer, kartor, navigation, point dropper, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, tips och felsökning |
-| [Installation med VPN från dator](atak-installation-med-vpn-fran-dator.md) | 5 | Installation av enhet från dator |
-| [Uppstart efter återställd ATAK](atak-uppstart-efter-aterstalld.md) | 1 | Konfiguration av en avrustad telefon, inkl. färgsättning |
-| [Avrustning och grundinställning](atak-avrustning-grundinstallning.md) | 1 | Fabriksåterställning och packning av TAK-väska |
-| [Streaming setup](atak-streaming-setup.md) | 5 | RTSP-streaming från TAK ICU, ATAK och UAS |
-| [Kamera – Reolink setup](atak-kamera-reolink-setup.md) | 2 | Uppsättning av Reolink-kameror |
-| [Ställa om uppdateringsintervallen](stall-om-uppdateringsintervallen.md) | 1 | Rapporteringsintervall |
+| Dokument | Innehåll |
+|---|---|
+| [ATAK-handbok](handbok.md) | Handhavande: styrningar och färgsättning, layout, menyer, kartor, navigation, markörer, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, uppdateringsintervall, tips och felsökning |
+| [Installation av enhet från dator](installation.md) | Nyinstallation av telefon, provisionering, OpenVPN, första start av ATAK |
+| [Avrustning och uppstart](avrustning.md) | Återställ ATAK, fabriksåterställning, packlista för TAK-väskan, uppstart av en avrustad telefon |
+| [Video och kameror](video-och-kameror.md) | RTSP-streaming från TAK ICU, ATAK och UAS, samt Reolink-övervakningskameror |
 
 Dessutom:
 
 * [instruktion-atak-hemvarn-0.9.pdf](instruktion-atak-hemvarn-0.9.pdf) — Instruktion ATAK Hemvärn, 22 sidor
 * [mall-vaska-a6.pdf](mall-vaska-a6.pdf) — mall för väskmärkning A6, 12 sidor
 
-De två PDF-filerna är kvar som PDF eftersom de saknar PowerPoint-källa och
+De två PDF-filerna är kvar som PDF eftersom de saknar redigerbar källa och
 är layoutberoende.
 
 ## Visa som bildspel
@@ -37,9 +34,11 @@ python3 -m http.server -d docs 8000
 
 ## Om innehållet
 
-Materialet är konverterat automatiskt från PowerPoint och PDF och är därför
-inte pixelperfekt. Text, punktlistor och bilder följer med; exakt layout och
-animationer gör det inte.
+Materialet är konverterat från PowerPoint och PDF och därefter
+omstrukturerat. Kursmaterial — agenda, mål, metodikavsnitt och
+övningsuppgifter — ingår inte; kvar är handhavande och instruktioner.
 
-Rent kursmaterial — agenda, mål, kursupplägg, metodikavsnitt och
-övningsuppgifter — är bortplockat. Kvar är handhavande och instruktioner.
+Uppgifter som annars skulle upprepas står på ett ställe och länkas till:
+färgsättningen finns i [handboken](handbok.md#färgsättning), och
+callsign-inställningen i
+[Avrustning och uppstart](avrustning.md#callsign-och-teamfärg).

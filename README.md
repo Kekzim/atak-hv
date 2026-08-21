@@ -22,7 +22,7 @@ atak-hv/
 │   ├── ATAK autoinstall.bat      GAMMAL, ersätts av verktyget ovan
 │   ├── ATAK-Restore.bat          GAMMAL
 │   ├── Restore + delete files.bat  GAMMAL
-│   ├── platform-tools/           adb m.m. — hämtas separat, se nedan
+│   ├── platform-tools/           adb.exe för Windows (följer med)
 │   └── Filer/
 │       ├── *.apk                 apparna som sidladdas
 │       ├── atak/                 ATAK-konfiguration → /sdcard/atak
@@ -49,7 +49,8 @@ atak-hv/
    ```
 
 Paketet kan ligga var som helst; sökvägarna löses relativt konfigurationen.
-Kräver Python 3.11+ och `adb` — se [Före utskick](#före-utskick).
+Kräver Python 3.11+. `adb` följer med för Windows; på Linux/macOS
+installeras den med pakethanteraren — se [Före utskick](#före-utskick).
 
 ## Appar
 
@@ -74,12 +75,11 @@ Kräver Python 3.11+ och `adb` — se [Före utskick](#före-utskick).
    TAK-server och distribueras utanför repot.
 2. **Lägg era OpenVPN-klienter** i `ATAKautoinstall/Filer/VPN-clients/`.
    Använder ni inte OpenVPN kan mappen lämnas tom.
-3. **Se till att `adb` finns.** Windows: packa upp
-   [Android SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools)
-   till `ATAKautoinstall/platform-tools/` så att `adb.exe` hamnar direkt i
-   mappen. Linux: `sudo apt install adb android-sdk-platform-tools-common`.
-   macOS: `brew install android-platform-tools`.
-   Mappen `platform-tools/` i paketet innehåller bara Windows-binärer.
+3. **Se till att `adb` finns.** På Windows följer den med i repot
+   (`ATAKautoinstall/platform-tools/adb.exe`) — inget att göra. På Linux:
+   `sudo apt install adb android-sdk-platform-tools-common`. macOS:
+   `brew install android-platform-tools`. Verktyget skriver ut rätt
+   kommando för ditt system om `adb` saknas.
 
 ## Vad som inte ligger i git
 
@@ -87,7 +87,6 @@ Kräver Python 3.11+ och `adb` — se [Före utskick](#före-utskick).
 |---|---|---|
 | `atak-box.zip` | Serveradress + certifikat, förbandsspecifikt | Från er TAK-serveransvarige |
 | `VPN-clients/*.ovpn` | Enhetsspecifika hemligheter | Från er VPN-ansvarige |
-| `platform-tools/` | ~15 MB tredjepartsbinärer med egen licens | [developer.android.com](https://developer.android.com/tools/releases/platform-tools) |
 | ATAK, OpenVPN, Geocam m.fl. `.apk` | Finns på Google Play | Google Play |
 | `_source/` | Original i `.pptx`/`.docx`/`.pdf`, ersatta av Markdown | Lokalt i arbetskopian |
 

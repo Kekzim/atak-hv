@@ -165,13 +165,33 @@ def find_adb(config: dict, override: str | None, out: Out) -> Path:
             if found:
                 return Path(found).resolve()
 
+    if sys.platform == "win32":
+        howto = (
+            "  Install Android SDK Platform-Tools:\n"
+            "    1. Download https://developer.android.com/tools/releases/platform-tools\n"
+            f"    2. Unzip it so that adb.exe sits directly in\n"
+            f"       {HERE / 'platform-tools'}"
+        )
+    elif sys.platform == "darwin":
+        howto = ("  Install it with Homebrew:\n"
+                 "    brew install android-platform-tools")
+    else:
+        howto = (
+            "  Install it with your package manager:\n"
+            "    Debian/Ubuntu: sudo apt install adb android-sdk-platform-tools-common\n"
+            "    Fedora:        sudo dnf install android-tools\n"
+            "    Arch:          sudo pacman -S android-tools\n"
+            "  (android-sdk-platform-tools-common adds the udev rules that\n"
+            "   otherwise cause 'no permissions' errors.)\n"
+            "  Note: the bundled platform-tools/ folder holds Windows binaries only."
+        )
+
     raise SystemExit(
-        "ERROR: adb not found.\n"
+        "ERROR: adb not found - it is required, this tool only drives it.\n"
         f"  Looked in: {HERE / 'platform-tools' / exe}\n"
         "             and on PATH\n"
-        "  Install Android SDK Platform-Tools:\n"
-        "    https://developer.android.com/tools/releases/platform-tools\n"
-        "  Or point at it directly with --adb /path/to/adb"
+        f"{howto}\n"
+        "  Or point at an existing adb with --adb /path/to/adb"
     )
 
 

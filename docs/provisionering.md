@@ -10,19 +10,27 @@ Linux och macOS.
   Linux: `sudo apt install python3` (finns oftast redan).
   Windows: <https://www.python.org/downloads/> — kryssa i
   *"Add python.exe to PATH"* i installationsprogrammet.
+  Saknas Python skriver `atak-provision.bat` ut var den hämtas och
+  avslutar; den kontrollerar även att versionen är tillräckligt ny.
 * **`adb`** (Android Debug Bridge, ur Android SDK Platform-Tools). Det är
   `adb` som gör själva jobbet — installerar appar, kopierar filer och sätter
   inställningar. Verktyget styr bara `adb`, så utan den händer ingenting.
 
   | System | Hämtas så här |
   |---|---|
-  | Windows | Ligger i `ATAKautoinstall/platform-tools/`. Saknas den: [ladda ner från Google](https://developer.android.com/tools/releases/platform-tools) och packa upp så att `adb.exe` hamnar direkt i mappen. |
-  | Linux | `sudo apt install adb android-sdk-platform-tools-common` — det andra paketet lägger in udev-reglerna som annars ger `no permissions`. |
+  | **Windows** | **Följer med i repot** — `ATAKautoinstall/platform-tools/adb.exe`. Inget att installera. |
+  | Linux | `sudo apt install adb android-sdk-platform-tools-common` — det andra paketet lägger in udev-reglerna som annars ger `no permissions`. Fedora: `sudo dnf install android-tools`. |
   | macOS | `brew install android-platform-tools` |
 
-  **Obs:** `platform-tools/` i paketet innehåller bara Windows-binärer
-  (`adb.exe`). På Linux och macOS måste `adb` installeras med
-  paket&shy;hanteraren enligt tabellen ovan.
+  **Obs:** `platform-tools/` i repot innehåller bara Windows-binärer. På
+  Linux och macOS måste `adb` installeras med paket&shy;hanteraren enligt
+  tabellen ovan. Kör verktyget utan `adb` och det skriver ut exakt vilket
+  kommando som gäller för ditt system.
+
+  Endast det `adb` behöver följer med (`adb.exe` och två DLL:er, revision
+  36.0.0). `fastboot`, `sqlite3` med flera används inte av paketet och
+  ingår inte — `fastboot` kan dessutom radera en telefon om fel verktyg
+  körs av misstag.
 
   Verktyget letar i tur och ordning i `ATAKautoinstall/platform-tools/`,
   sedan i `PATH`. Peka annars ut den med `--adb`.

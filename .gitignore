@@ -32,8 +32,16 @@ ATAKautoinstall/Filer/FileManager.apk
 # ---------------------------------------------------------------
 # Tredjepartsbinärer — hämtas från leverantören, se README
 # ---------------------------------------------------------------
-# Android SDK Platform-Tools (adb.exe m.m.), ~15 MB, egen licens
-ATAKautoinstall/platform-tools/
+# Android SDK Platform-Tools. Bara det adb behover foljer med (Windows):
+# adb.exe + DLL:er, licens och versionsinfo. fastboot, sqlite3, mke2fs
+# m.fl. anvands inte av paketet och halls utanfor - fastboot kan dessutom
+# radera en telefon om nagon kor fel verktyg.
+ATAKautoinstall/platform-tools/*
+!ATAKautoinstall/platform-tools/adb.exe
+!ATAKautoinstall/platform-tools/AdbWinApi.dll
+!ATAKautoinstall/platform-tools/AdbWinUsbApi.dll
+!ATAKautoinstall/platform-tools/NOTICE.txt
+!ATAKautoinstall/platform-tools/source.properties
 
 # ---------------------------------------------------------------
 # För stort för git

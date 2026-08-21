@@ -7,24 +7,34 @@ REM     atak-provision.bat restore --wipe-media
 setlocal
 set "SCRIPT=%~dp0atak_provision.py"
 
+REM --- find a Python 3.11+ interpreter -------------------------------
 set "PY="
-where py >nul 2>&1 && set "PY=py -3"
-if not defined PY (
-    where python >nul 2>&1 && set "PY=python"
+for %%C in ("py -3" "python" "python3") do (
+    if not defined PY (
+        %%~C -c "import sys; sys.exit(0 if sys.version_info>=(3,11) else 1)" >nul 2>&1
+        if not errorlevel 1 set "PY=%%~C"
+    )
 )
 
 if not defined PY (
     echo =====================================================
-    echo  Python 3.11 or newer is required but was not found.
+    echo   Python 3.11 or newer is required, and was not found.
     echo =====================================================
     echo.
-    echo  Install it from https://www.python.org/downloads/
-    echo  Tick "Add python.exe to PATH" in the installer.
+    echo   This tool needs Python to run. Install it from:
+    echo     https://www.python.org/downloads/
+    echo.
+    echo   IMPORTANT: tick "Add python.exe to PATH" in the
+    echo   installer, then open a new window and try again.
+    echo.
+    echo   (If Python is already installed it may be an older
+    echo    version - this tool needs 3.11 or newer.)
     echo.
     pause
     exit /b 1
 )
 
+REM --- run -----------------------------------------------------------
 if "%~1"=="" (
     %PY% "%SCRIPT%" install
 ) else (

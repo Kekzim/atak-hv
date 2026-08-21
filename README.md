@@ -113,8 +113,9 @@ provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 ```
 
 **`install`** stänger av system- och appuppdateringar, installerar apparna i
-`payload/apks/`, lägger ut `atak/`, `ATAK-installation/` och `VPN-clients/`
-under `/sdcard/`, och placerar `atak-box.zip` i `/sdcard/Download/`.
+`payload/apks/`, beviljar ATAK:s rättigheter, lägger ut `atak/`,
+`ATAK-installation/` och `VPN-clients/` under `/sdcard/`, och placerar
+`atak-box.zip` i `/sdcard/Download/`.
 
 ### Testa på en egen telefon
 
@@ -280,7 +281,8 @@ Hoppa över om ni inte använder VPN.
 
 ### 5. Starta ATAK första gången
 
-1. Starta ATAK och tillåt alla frågor som kommer upp.
+1. Starta ATAK och tillåt alla frågor som kommer upp. Rättigheterna är
+   redan beviljade av verktyget, så det bör bli få eller inga frågor.
 2. **TAK Device Setup** — *Done*.
 3. *Disable battery…* — *OK*.
 4. Tillåt appen att köras i bakgrunden — *Tillåt*.
@@ -313,6 +315,32 @@ Beror på modell:
 * Av-knapp + volym ner
 * På en del modeller kan knappen programmeras — sök på *sidoknapp* i
   telefonens inställningar.
+
+## Rättigheter
+
+De sidladdade apparna får alla rättigheter direkt vid installationen
+(`adb install -g`). **ATAK kommer från Google Play och får ingenting** —
+därför beviljar verktyget ATAK:s rättigheter separat, i stället för att
+lita på att operatören trycker rätt i varje dialogruta.
+
+Det gäller plats, kamera, mikrofon, media, Bluetooth, wifi-upptäckt och
+aviseringar, samt *All files access* (`MANAGE_EXTERNAL_STORAGE`) som krävs
+för att komma åt `/sdcard/atak`. ATAK läggs också till i undantagslistan
+för batterioptimering.
+
+> [!IMPORTANT]
+> Viktigast är **`ACCESS_BACKGROUND_LOCATION`**. Utan den rapporterar ATAK
+> position bara när appen ligger i förgrunden — Blue Force Tracking slutar
+> alltså fungera så fort skärmen släcks eller soldaten byter app. Den går
+> **inte** att bevilja via de vanliga dialogrutorna; Android kräver ett
+> separat besök i Inställningar. Det är precis vad verktyget gör åt dig.
+
+Rättigheter som appen inte deklarerar, eller som inte finns i den
+Android-versionen, hoppas över utan att räknas som fel. Listan ligger under
+`[permissions]` i `provision.toml`.
+
+Detta steg körs **även med `--no-optimize`** — det handlar om att ATAK ska
+fungera, inte om att låsa ner telefonen.
 
 ## Optimering
 

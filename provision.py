@@ -339,6 +339,55 @@ def task_shell(commands: list[list[str]], label: str) -> Task:
     return Task(label, run)
 
 
+def task_permissions(perms: dict, appops: dict, exempt: list[str]) -> Task:
+    """Grant runtime permissions to apps installed from the Play Store.
+
+    Sideloaded APKs get everything from `adb install -g`. ATAK does not,
+    so it is granted here rather than relying on the operator tapping
+    through every dialog - and ACCESS_BACKGROUND_LOCATION cannot be
+    granted from those dialogs at all.
+    """
+    def run(adb, dev, log):
+        installed = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False).stdout
+        granted = skipped = missing = 0
+
+        for pkg, permissions in perms.items():
+            if f"package:{pkg}" not in installed:
+                log.write(f"{pkg} not installed - skipping permissions\n")
+                missing += 1
+                continue
+            for perm in permissions:
+                p = adb.shell(["pm", "grant", pkg, perm], dev.serial)
+                _logged(log, p)
+                # pm grant is silent on success. Output means the app does
+                # not declare it, or this Android version lacks it.
+                if adb.dry_run or (p.returncode == 0 and not (p.stdout + p.stderr).strip()):
+                    granted += 1
+                else:
+                    skipped += 1
+
+        for pkg, ops in appops.items():
+            if f"package:{pkg}" not in installed:
+                continue
+            for op, mode in ops:
+                p = adb.shell(["appops", "set", pkg, op, mode], dev.serial)
+                _logged(log, p)
+
+        for pkg in exempt:
+            if f"package:{pkg}" not in installed:
+                continue
+            p = adb.shell(["dumpsys", "deviceidle", "whitelist", f"+{pkg}"], dev.serial)
+            _logged(log, p)
+
+        note = f"{granted} granted" + (" (dry-run)" if adb.dry_run else "")
+        if skipped:
+            note += f", {skipped} n/a"
+        if missing:
+            note += f", {missing} app(s) not installed"
+        return True, note
+    return Task("Grant ATAK permissions", run)
+
+
 def task_doze_check(packages: list[str]) -> Task:
     """Verify ATAK is exempt from Doze - checked, never changed.
 
@@ -349,11 +398,22 @@ def task_doze_check(packages: list[str]) -> Task:
         p = adb.shell(["dumpsys", "deviceidle", "whitelist"], dev.serial, mutating=False)
         _logged(log, p)
         listed = p.stdout
-        missing = [pkg for pkg in packages if pkg not in listed]
+        installed = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False).stdout
+
+        # A package that is not installed is not a problem; one that is
+        # installed but not exempt is.
+        present = [pkg for pkg in packages if f"package:{pkg}" in installed]
+        absent = [pkg for pkg in packages if f"package:{pkg}" not in installed]
+        missing = [pkg for pkg in present if pkg not in listed]
+        if absent:
+            log.write(f"not installed, not checked: {absent}\n")
         if missing:
             log.write(f"NOT allowlisted: {missing}\n")
             return True, f"WARNING: {', '.join(missing)} not exempt from Doze"
-        return True, f"{len(packages)} exempt"
+        note = f"{len(present)} exempt"
+        if absent:
+            note += f", {len(absent)} not installed"
+        return True, note
     return Task("Check Doze allowlist", run)
 
 
@@ -453,6 +513,10 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
         if extra:
             tasks.append(task_shell(extra, "Apply extra settings"))
     tasks += [task_install(apks)]
+    if cfg.get("permissions") or cfg.get("appops") or cfg.get("battery", {}).get("exempt"):
+        tasks.append(task_permissions(cfg.get("permissions", {}),
+                                      cfg.get("appops", {}),
+                                      cfg.get("battery", {}).get("exempt", [])))
     tasks += [task_push(e, base) for e in cfg["push"]]
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:

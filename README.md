@@ -116,6 +116,11 @@ atak-provision.bat restore --wipe-media   Som restore, plus radera användarens 
 `Filer/`, pushar `atak/`, `ATAK-installation/` och `VPN-clients/` till
 `/sdcard/`, och lägger `atak-box.zip` i `/sdcard/Download/`.
 
+> [!NOTE]
+> `atak-box.zip` ingår inte i repot — se [Före utskick](#före-utskick). Utan
+> den avbryter `install` direkt med ett felmeddelande; enheterna får annars
+> ingen kontakt med TAK-servern.
+
 `restore` gör tvärtom: avinstallerar ATAK-apparna, tar bort de utpushade
 mapparna och slår på uppdateringarna igen. `--wipe-media` rensar dessutom
 Download, DCIM, Pictures och Documents.

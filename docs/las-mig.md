@@ -44,16 +44,18 @@ ATAKautoinstall/
     ├── *.apk                   apparna i listan ovan
     ├── atak/                   ATAK-konfiguration, pushas till /sdcard/atak
     ├── ATAK-installation/
-    │   └── atak-box.zip        serverpaket — BYTS UT, se nedan
+    │   └── atak-box.zip        serverpaket — LÄGGS IN, se nedan
     └── VPN-clients/            era OpenVPN-klienter läggs här
 ```
 
 ## Före utskick
 
-1. **Byt ut `Filer/ATAK-installation/atak-box.zip`** mot det paket som gäller för
-   *er* server. Filen måste heta exakt `atak-box.zip`.
-   Paketet innehåller serveradress och certifikat och distribueras separat —
-   det ligger medvetet inte i det här repot.
+1. **Lägg in `atak-box.zip` för er TAK-server** i
+   `Filer/ATAK-installation/`. Filen måste heta exakt `atak-box.zip`.
+   Paketet innehåller serveradress och certifikat, distribueras separat och
+   ingår medvetet inte i repot — du får hämta det från er
+   TAK-serveransvarige. Saknas det avbryts installationen med ett
+   felmeddelande.
 2. **Lägg era OpenVPN-klienter i `Filer/VPN-clients/`.** Använder ni inte
    OpenVPN kan mappen lämnas tom — skriptet pushar den ändå.
 3. Kopiera hela mappen `ATAKautoinstall` till `C:\` — skripten använder

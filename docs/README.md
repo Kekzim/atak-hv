@@ -3,13 +3,13 @@
 Instruktionsmaterial för ATAK. Varje dokument går att läsa direkt på
 GitHub, eller visas som bildspel via `viewer.html`.
 
-För att installera och avrusta enheter från datorn, se
-[repots README](../README.md).
+Installation av en enhet — från grundinställning av telefonen till första
+start av ATAK — står i [repots README](../README.md#installera-en-enhet),
+tillsammans med provisioneringsverktyget.
 
 | Dokument | Innehåll |
 |---|---|
 | [ATAK-handbok](handbok.md) | Handhavande: styrningar och färgsättning, layout, menyer, kartor, navigation, markörer, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, uppdateringsintervall, tips och felsökning |
-| [Installation av enhet från dator](installation.md) | Nyinstallation av telefon, provisionering, OpenVPN, första start av ATAK |
 | [Avrustning och uppstart](avrustning.md) | Återställ ATAK, fabriksåterställning, packlista för TAK-väskan, uppstart av en avrustad telefon |
 | [Video och kameror](video-och-kameror.md) | RTSP-streaming från TAK ICU, ATAK och UAS, samt Reolink-övervakningskameror |
 

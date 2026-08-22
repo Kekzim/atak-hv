@@ -143,6 +143,32 @@ Ett undantag: paketverifieraren stängs av även då, eftersom Android annars
 vägrar sidladdningen. Den sätts tillbaka som den var direkt efteråt — var
 den aldrig satt från början tas nyckeln bort igen.
 
+**Slå på utvecklarläge och USB-felsökning först.** Utan det syns telefonen
+inte för `adb` över huvud taget, och verktyget står bara och väntar på en
+enhet som aldrig dyker upp. Det är samma steg som för en utlämnad telefon,
+och det måste göras på varje telefon en gång:
+
+1. **Inställningar → Om telefonen**, leta upp **Version** och tryck på den
+   sju gånger. På en del modeller heter den **Kompileringsnummer** och
+   ligger under *Om telefonen → Programvaruinformation*. Telefonen räknar
+   ner och svarar att du nu är utvecklare.
+2. Backa ett steg, sök på *USB-fel* i inställningarna och slå på
+   **USB-felsökning**.
+3. Anslut kabeln. Välj **Filöverföring (MTP)** om telefonen frågar, och
+   godkänn rutan *Tillåt USB-felsökning*. Bocka i *Tillåt alltid från den
+   här datorn* så slipper du rutan nästa gång.
+
+Kontrollera med `provision.bat devices` (`./provision.sh devices`) innan du
+kör något annat. Står telefonen inte i listan är något av stegen ovan inte
+gjort — se även [Loggar och felsökning](#loggar-och-felsökning).
+
+> [!NOTE]
+> Vissa tillverkare, bland andra Xiaomi, kräver dessutom att du godkänner
+> en ruta **på telefonens skärm för varje app som sidladdas**. Missar du
+> den avbryts steget med `INSTALL_FAILED_USER_RESTRICTED: Install canceled
+> by user` — det är rutan som inte hann godkännas, inte ett fel i
+> verktyget. Ha telefonen framför dig under körningen.
+
 Verktyget skriver ut vilket läge det kör i och väntar på bekräftelse innan
 det börjar, så du hinner avbryta om du valt fel.
 
@@ -207,8 +233,10 @@ SUMMARY
 
 | Symptom | Orsak |
 |---|---|
+| `no authorized devices within ...` | Telefonen syns inte alls. Utvecklarläge och USB-felsökning påslagna? Se [Testa på en egen telefon](#testa-på-en-egen-telefon) |
 | `unauthorized` | Godkänn USB-felsökning på telefonen |
 | `offline` | Koppla ur och i kabeln |
+| `INSTALL_FAILED_USER_RESTRICTED` | Rutan på telefonens skärm hann inte godkännas. Vanligt på Xiaomi — kör om med telefonen framför dig |
 | `no permissions` (Linux) | `sudo apt install android-sdk-platform-tools-common`, koppla sedan ur och i telefonen |
 | `adb not found` | Se [Krav](#krav), eller använd `--adb` |
 | `install` avbryts direkt | `atak-box.zip` eller en `.apk` saknas — se [Före utskick](#före-utskick) |

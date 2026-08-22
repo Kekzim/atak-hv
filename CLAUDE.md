@@ -101,15 +101,17 @@ change. Prefer extending the config over adding code.
 
 ## Payload and secrets
 
-`payload/apks/` holds only sideloaded apps. ATAK itself, ATAK-Sync, OpenVPN
-and Geocam come from Google Play and are *checked for*, not installed — see
-`[requirements]`. ATAK must already be present or `install` aborts.
+`payload/apks/` holds only sideloaded apps. **ATAK-CIV (Civil Use)** and its
+two plugins — **ATAK Plugin: Data Sync** and **ATAK Plugin: GeoCam** — come
+from Google Play and are *checked for*, not installed; see `[requirements]`,
+where the labels are the Play Store names so the tool's warning is the string
+an operator can search for. ATAK-CIV must already be present or `install`
+aborts.
 
 `payload/ATAK-installation/atak-box.zip` carries the TAK server address and
 certificates. It is förbandsspecifik, gitignored, and required: preflight
-aborts `install` without it. `.gitignore` also blocks certificates, `.ovpn`
-files and the Play Store APK filenames — check before adding anything under
-`payload/`.
+aborts `install` without it. `.gitignore` also blocks certificates and the
+Play Store APK filenames — check before adding anything under `payload/`.
 
 ## Conventions
 

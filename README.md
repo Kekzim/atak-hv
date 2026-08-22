@@ -38,9 +38,8 @@ atak-hv/
 ├── payload/                det som hamnar på telefonen
 │   ├── apks/               appar som sidladdas
 │   ├── atak/               ATAK-konfiguration → /sdcard/atak
-│   ├── ATAK-installation/  → /sdcard/ATAK-installation
-│   │   └── atak/           ren reservkopia, se nedan
-│   └── VPN-clients/        era OpenVPN-klienter läggs här
+│   └── ATAK-installation/  → /sdcard/ATAK-installation
+│       └── atak/           ren reservkopia, se nedan
 └── docs/                   handhavande och instruktioner
 ```
 
@@ -84,8 +83,6 @@ paketnamnet eller följ länken — *ATAK* ensamt ger många träffar, och det
 | **[ATAK-CIV (Civil Use)](https://play.google.com/store/apps/details?id=com.atakmap.app.civ)** | `com.atakmap.app.civ` | **Måste installeras först.** De andra två är plugin till den, och konfigurationen som läggs ut kräver att den redan finns på enheten. Verktyget installerar den inte. |
 | **[ATAK Plugin: Data Sync](https://play.google.com/store/apps/details?id=com.atakmap.android.datasync.plugin)** | `com.atakmap.android.datasync.plugin` | Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
 | [ATAK Plugin: GeoCam](https://play.google.com/store/apps/details?id=com.atakmap.android.geocam.plugin) | `com.atakmap.android.geocam.plugin` | |
-| [OpenVPN Connect](https://play.google.com/store/apps/details?id=net.openvpn.openvpn) | `net.openvpn.openvpn` | Om ni använder OpenVPN |
-| [Reolink](https://play.google.com/store/apps/details?id=com.mcu.reolink) | `com.mcu.reolink` | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
 
 **Sidladdas av verktyget** från `payload/apks/`:
 
@@ -103,9 +100,7 @@ under `[requirements]` i `provision.toml`.
    hämtas från er TAK-serveransvarige. Den innehåller serveradress och
    certifikat, distribueras separat och ingår inte i repot. Saknas den
    avbryts `install` direkt.
-2. **Lägg era OpenVPN-klienter** i `payload/VPN-clients/`. Använder ni inte
-   OpenVPN kan mappen lämnas tom — den läggs ut ändå.
-3. **Kontrollera att `adb` finns** enligt [Krav](#krav).
+2. **Kontrollera att `adb` finns** enligt [Krav](#krav).
 
 ## Använda verktyget
 
@@ -123,9 +118,9 @@ provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 ```
 
 **`install`** stänger av system- och appuppdateringar, installerar apparna i
-`payload/apks/`, beviljar ATAK:s rättigheter, lägger ut `atak/`,
-`ATAK-installation/` och `VPN-clients/` under `/sdcard/`, och placerar
-`atak-box.zip` i `/sdcard/Download/`.
+`payload/apks/`, beviljar ATAK:s rättigheter, lägger ut `atak/` och
+`ATAK-installation/` under `/sdcard/`, och placerar `atak-box.zip` i
+`/sdcard/Download/`.
 
 ### Testa på en egen telefon
 
@@ -274,28 +269,12 @@ Vissa steg saknas på en del modeller.
 Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 30 minuter.
 
-### 3. OpenVPN
-
-Hoppa över om ni inte använder VPN.
-
-> [!NOTE]
-> **OpenVPN installeras från Google Play** — den sidladdas inte av
-> verktyget. Installera den på telefonen innan du fortsätter här.
-
-1. Starta **OpenVPN** → *Agree*.
-2. Välj **Upload File**.
-3. *Browse* → filhanteraren → **Main Storage** → `VPN-clients`.
-4. Välj rätt `.ovpn`-fil. Administratören har den i
-   `OpenVPN-server-Readme.txt`.
-5. **Import** → *OK*.
-6. Lösenord enligt lista från administratören.
-
-### 4. Avsluta på telefonen
+### 3. Avsluta på telefonen
 
 1. Flytta ut ATAK-ikonen till första sidan på telefonen.
 2. Backa till första sidan.
 
-### 5. Starta ATAK första gången
+### 4. Starta ATAK första gången
 
 1. Starta ATAK och tillåt alla frågor som kommer upp. Rättigheterna är
    redan beviljade av verktyget, så det bör bli få eller inga frågor.
@@ -314,7 +293,7 @@ Hoppa över om ni inte använder VPN.
 13. Logga in — användarnamn och lösenord enligt lista.
 14. *OK* — ”Tak server registration completed” — *OK*.
 
-### 6. Callsign och teamfärg
+### 5. Callsign och teamfärg
 
 Görs vid nästa uppstart. Proceduren är densamma som efter en avrustning —
 se [Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg), och
@@ -485,8 +464,7 @@ markörer, ritverktyg, rapportering, feeds och felsökning.
 | Vad | Varför | Var man får tag på det |
 |---|---|---|
 | `atak-box.zip` | Serveradress + certifikat, förbandsspecifikt | Från er TAK-serveransvarige |
-| `VPN-clients/*.ovpn` | Enhetsspecifika hemligheter | Från er VPN-ansvarige |
-| ATAK-CIV, plugin-apparna, OpenVPN Connect m.fl. | Finns på Google Play | Google Play |
+| ATAK-CIV och de två plugin-apparna | Finns på Google Play | Google Play |
 | `logs/` | Körloggar | Skapas vid körning |
 
 ## Att verifiera

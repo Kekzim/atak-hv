@@ -1,3 +1,0 @@
-Lägg era egna OpenVPN-klientfiler (.ovpn) i den här mappen före utskick.
-Mappen pushas till /sdcard/VPN-clients av "ATAK autoinstall.bat".
-Klientfilerna är enhetsspecifika och ska inte checkas in i git.

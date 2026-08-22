@@ -5,10 +5,6 @@
 # lägger in sin egen fil med exakt namnet atak-box.zip.
 atak-box.zip
 
-# OpenVPN-klienter
-payload/VPN-clients/*
-!payload/VPN-clients/.gitkeep
-
 # Certifikat och nycklar
 *.p12
 *.pfx
@@ -17,16 +13,13 @@ payload/VPN-clients/*
 *.pem
 *.crt
 *.cer
-*.ovpn
 
 # ---------------------------------------------------------------
 # Appar som installeras från Google Play (sidladdas inte längre)
 # ---------------------------------------------------------------
 payload/apks/ATAK.apk
-payload/apks/OpenVPN.apk
 payload/apks/Geocam.apk
 payload/apks/Signal.apk
-payload/apks/Reolink.apk
 payload/apks/FileManager.apk
 
 # ---------------------------------------------------------------

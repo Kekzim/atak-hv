@@ -253,14 +253,20 @@ i stället.
 Vissa steg saknas på en del modeller.
 
 1. Starta telefonen. Sitter simkort i måste du ange PIN. Välj språk.
-2. Wifi — hoppa över, fortsätt utan nätverk.
+2. Anslut till wifi. Nätverk krävs för Google-inloggningen i nästa steg
+   och för att hämta apparna ur Play Store.
 3. Kopiera appar och data — **kopiera inte**.
-4. Hoppa över Google-inloggning.
+4. Logga in med förbandets Google-konto. Kontot behövs för att hämta
+   ATAK-CIV och plugin-apparna ur Play Store, och **ska stanna kvar på
+   enheten** — det är därigenom apparna kan uppdateras längre fram.
+   `install` stänger ändå av de automatiska uppdateringarna, så en
+   uppdatering blir ett medvetet beslut och sker när ni väljer det.
 5. Google-tjänster — bocka ur ”skicka diagnostik och användardata”,
    godkänn.
 6. Välj webbläsare och sökmotor — Google.
-7. Samsung-tjänster: glömt lösen → ange → *Nästa* → *Hoppa över* → bocka
-   ur tre rutor → *Acceptera* → *Nästa* → bocka ur Telia → *Nästa*.
+7. Tillverkarens egna konton och tjänster — hoppa över. Bocka ur
+   telemetri och diagnostik, och tacka nej till operatörens erbjudanden.
+   Skärmarna ser olika ut för Samsung, Xiaomi, OnePlus och andra.
 8. Skapa PIN: fyra siffror, framtagen av chef.
 9. Granska fler appar — bocka ur om du tillfrågas.
 10. Fingeravtryck — **nej tack**.
@@ -272,9 +278,14 @@ Vissa steg saknas på en del modeller.
     Kompileringsnummer*.
 14. Backa ett steg, sök *USB-fel* och aktivera **USB-felsökning**.
 15. Backa ett steg.
-16. **Aviseringar** → **App-aviseringar** → tillåt ATAK.
-17. Backa ett steg → **Ljud och vibration** → aktivera vibration
-    och/eller ljud vid behov.
+16. Öppna **Play Store** och installera **ATAK-CIV (Civil Use)** samt
+    plugin-apparna **ATAK Plugin: Data Sync** och **ATAK Plugin: GeoCam**.
+    Se [Appar](#appar) för länkar och paketnamn. ATAK-CIV **måste** finnas
+    på plats innan nästa steg — utan den avbryts `install` direkt.
+17. **Ljud och vibration** → aktivera vibration och/eller ljud vid behov.
+
+Aviseringar behöver inte röras. Verktyget beviljar `POST_NOTIFICATIONS`
+åt ATAK i nästa steg.
 
 ### 2. Provisionering från datorn
 
@@ -291,8 +302,18 @@ Vissa steg saknas på en del modeller.
 
    Se [Använda verktyget](#använda-verktyget) för kommandon och
    flaggor.
-4. Verktyget känner av antalet anslutna enheter och avvaktar tills alla
-   godkänt USB-felsökning.
+4. Verktyget listar de enheter det hittar och frågar innan det gör något.
+
+> [!IMPORTANT]
+> Verktyget startar så snart **minst en** telefon är godkänd — det väntar
+> inte in de övriga. Godkänn *Tillåt USB-felsökning* på **alla** telefoner
+> innan du svarar på frågan, och kontrollera att antalet i listan stämmer.
+> En telefon som inte hunnit godkännas varnas det för en gång, och blir
+> sedan stående oprovisionerad.
+
+Kör flera telefoner parallellt med `-j`, till exempel
+`provision.bat install -j 4`. Loggen skrivs per serienummer, så
+sammanfattningen visar ändå vilken telefon som gjorde vad.
 
 Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 30 minuter.
@@ -304,22 +325,22 @@ Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 
 ### 4. Starta ATAK första gången
 
-1. Starta ATAK och tillåt alla frågor som kommer upp. Rättigheterna är
-   redan beviljade av verktyget, så det bör bli få eller inga frågor.
+1. Starta ATAK och tillåt de frågor som kommer upp. Rättigheterna och
+   undantaget från batterioptimering är redan satta av verktyget, så det
+   bör bli få eller inga frågor. Kommer ändå en ruta om batteri eller
+   bakgrundskörning — godkänn den.
 2. **TAK Device Setup** — *Done*.
-3. *Disable battery…* — *OK*.
-4. Tillåt appen att köras i bakgrunden — *Tillåt*.
-5. Avvakta 5–7 sekunder. *Load Iconset* blinkar förbi på displayen.
-6. Menyn i överkant fylls på med tre ikoner.
-7. Stäng ner ATAK — ”Hamburgaren” → **Quit** → *Yes*.
-8. Starta ATAK igen.
-9. ”Hamburgaren” → **Import**.
-10. **Local SD** — klicka ikonen till vänster under *S* i *Select Files to
-    Import* — skrolla till **Download**.
-11. Välj `xxxxxx.zip` (bocka i rutan till höger) — *OK*.
-12. **Copy**.
-13. Logga in — användarnamn och lösenord enligt lista.
-14. *OK* — ”Tak server registration completed” — *OK*.
+3. Avvakta 5–7 sekunder. *Load Iconset* blinkar förbi på displayen.
+4. Menyn i överkant fylls på med tre ikoner.
+5. Stäng ner ATAK — ”Hamburgaren” → **Quit** → *Yes*.
+6. Starta ATAK igen.
+7. ”Hamburgaren” → **Import**.
+8. **Local SD** — klicka ikonen till vänster under *S* i *Select Files to
+   Import* — skrolla till **Download**.
+9. Välj `atak-box.zip` (bocka i rutan till höger) — *OK*.
+10. **Copy**.
+11. Logga in — användarnamn och lösenord enligt lista.
+12. *OK* — ”Tak server registration completed” — *OK*.
 
 ### 5. Callsign och teamfärg
 

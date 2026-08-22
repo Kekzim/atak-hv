@@ -58,7 +58,7 @@ När du fått en avrustad telefon.
 7. Klicka ”Hamburgaren”, välj **Import**.
 8. **Local SD** — klicka ikonen till vänster under *S* i *Select Files to
    Import* — skrolla till **Download**.
-9. Välj `xxxxxxx.zip` (bocka i rutan till höger) — *OK*.
+9. Välj `atak-box.zip` (bocka i rutan till höger) — *OK*.
 10. **Copy**.
 11. Logga in — användarnamn och lösenord enligt lista.
 12. *OK* — ”Tak server registration completed” — *OK*.

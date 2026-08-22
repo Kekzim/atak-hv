@@ -75,13 +75,17 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 
 **Installeras av användaren från Google Play, före körning:**
 
-| App | Anmärkning |
-|---|---|
-| **ATAK** | **Måste installeras först.** ATAK-Sync är ett plugin, och konfigurationen som läggs ut kräver att ATAK redan finns på enheten. Verktyget installerar inte ATAK. |
-| **ATAK-Sync** | Datasync-plugin. Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
-| **OpenVPN Connect** | Om ni använder OpenVPN. Verktyget söker efter `net.openvpn.openvpn` och varnar under det namnet om den saknas |
-| Geocam | |
-| Reolink | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
+Namnen nedan är precis som de står i Play Store. Sök hellre på
+paketnamnet eller följ länken — *ATAK* ensamt ger många träffar, och det
+är bara `com.atakmap.app.civ` som avses.
+
+| App i Play Store | Paketnamn | Anmärkning |
+|---|---|---|
+| **[ATAK-CIV (Civil Use)](https://play.google.com/store/apps/details?id=com.atakmap.app.civ)** | `com.atakmap.app.civ` | **Måste installeras först.** De andra två är plugin till den, och konfigurationen som läggs ut kräver att den redan finns på enheten. Verktyget installerar den inte. |
+| **[ATAK Plugin: Data Sync](https://play.google.com/store/apps/details?id=com.atakmap.android.datasync.plugin)** | `com.atakmap.android.datasync.plugin` | Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
+| [ATAK Plugin: GeoCam](https://play.google.com/store/apps/details?id=com.atakmap.android.geocam.plugin) | `com.atakmap.android.geocam.plugin` | |
+| [OpenVPN Connect](https://play.google.com/store/apps/details?id=net.openvpn.openvpn) | `net.openvpn.openvpn` | Om ni använder OpenVPN |
+| [Reolink](https://play.google.com/store/apps/details?id=com.mcu.reolink) | `com.mcu.reolink` | Vid behov — om ni använder övervakningskameror, se [Video och kameror](docs/video-och-kameror.md) |
 
 **Sidladdas av verktyget** från `payload/apks/`:
 
@@ -482,13 +486,21 @@ markörer, ritverktyg, rapportering, feeds och felsökning.
 |---|---|---|
 | `atak-box.zip` | Serveradress + certifikat, förbandsspecifikt | Från er TAK-serveransvarige |
 | `VPN-clients/*.ovpn` | Enhetsspecifika hemligheter | Från er VPN-ansvarige |
-| ATAK, OpenVPN, Geocam m.fl. `.apk` | Finns på Google Play | Google Play |
+| ATAK-CIV, plugin-apparna, OpenVPN Connect m.fl. | Finns på Google Play | Google Play |
 | `logs/` | Körloggar | Skapas vid körning |
 
 ## Att verifiera
 
-* Verktyget är utprovat mot en simulerad `adb`, inte mot riktiga telefoner.
-  Kör `--dry-run` och en enskild enhet först.
+Verktyget är utprovat mot riktiga telefoner: en Xiaomi 21051182G
+(Android 13) och en OnePlus Nord N100 (Android 11) — med och utan
+`--no-optimize`, samt en full `restore` med kontroll av att inställningar
+och avstängda paket kommer tillbaka.
+
+`restore --wipe-media` är **inte** utprovat. Det är också det enda
+kommandot som raderar användarens egna filer.
+
+Kör ändå `--dry-run` och en enskild enhet först på en modell ni inte
+provisionerat förut — tillverkarnas paketlistor skiljer sig åt.
 
 ## Licens
 

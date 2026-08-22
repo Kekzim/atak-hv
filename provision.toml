@@ -5,11 +5,13 @@
 
 # ---------------------------------------------------------------------
 # Apps sideloaded onto every device.
-# Paths are relative to this file. ATAK, ATAK-Sync, OpenVPN and Geocam are
-# NOT here on purpose - they are installed from Google Play by the
-# operator, and ATAK must be present before this tool runs.
+# Paths are relative to this file. ATAK-CIV (Civil Use), ATAK Plugin:
+# Data Sync, ATAK Plugin: GeoCam and OpenVPN Connect are NOT here on
+# purpose - they are installed from Google Play by the operator, and
+# ATAK-CIV must be present before this tool runs. The names are exactly
+# as they read in the Play Store; see [requirements] below.
 #
-# ATAK-Sync sidladdades tidigare, men Play Store-versionen ar signerad med
+# Data Sync sidladdades tidigare, men Play Store-versionen ar signerad med
 # en annan nyckel: en telefon som redan har den fran Play kan inte
 # uppdateras med vart paket (INSTALL_FAILED_UPDATE_INCOMPATIBLE). Play
 # Store ar dessutom nyare - 3.7.4 mot 3.7.0 i paketet.
@@ -244,11 +246,11 @@ restore = []
 #     adb shell pm list packages | grep -i <namn>
 # ---------------------------------------------------------------------
 [requirements.required]
-"com.atakmap.app.civ" = "ATAK"
+"com.atakmap.app.civ" = "ATAK-CIV (Civil Use)"
 
 [requirements.optional]
-"com.atakmap.android.datasync.plugin" = "ATAK-Sync"
-"com.atakmap.android.geocam.plugin" = "Geocam"
+"com.atakmap.android.datasync.plugin" = "ATAK Plugin: Data Sync"
+"com.atakmap.android.geocam.plugin" = "ATAK Plugin: GeoCam"
 "net.openvpn.openvpn" = "OpenVPN Connect"
 
 # ---------------------------------------------------------------------

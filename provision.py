@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -563,6 +564,58 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
     return Task("Install apps", run)
 
 
+def task_callsign(callsigns: dict, cfg: dict) -> Task:
+    """Stage ATAK's own defaults file so the callsign is set on next start.
+
+    ATAK reads <mount>/atak/config/prefs/defaults when it starts, applies
+    every entry and deletes the file. Upstream documents this as the way
+    to mass-configure devices, and it runs early enough in ATAKActivity
+    that the value is in place before ATAK would invent a callsign of its
+    own - it only does that when locationCallsign is empty.
+
+    Written per device rather than shipped in payload/atak, because the
+    callsign is the one setting that differs between phones. `callsigns`
+    is keyed by serial: the task list is built once and reused across
+    devices when -j is above 1.
+    """
+    target = cfg["target"]
+    group, key = cfg["group"], cfg["key"]
+
+    def run(adb, dev, log):
+        callsign = callsigns.get(dev.serial, "")
+        if not callsign:
+            return True, "skipped (none given)"
+
+        # ATAK's own escaping for the five characters that would otherwise
+        # break the XML - see encode()/decode() in PreferenceControl.
+        text = callsign
+        for ch, esc in (("&", "\\u0026"), ('"', "\\u0022"), ("'", "\\u0027"),
+                        ("<", "\\u003c"), (">", "\\u003e")):
+            text = text.replace(ch, esc)
+        doc = ("<?xml version='1.0' standalone='yes'?>\n"
+               "<preferences>\n"
+               f'<preference version="1" name="{group}">\n'
+               f'<entry key="{key}" class="class java.lang.String">{text}</entry>\n'
+               "</preference>\n</preferences>\n")
+        log.write(f"{key}={callsign}\n{doc}")
+
+        tmp = Path(tempfile.mkdtemp(prefix="atak-hv-")) / "defaults"
+        tmp.write_text(doc, encoding="utf-8")
+        try:
+            parent = target.rsplit("/", 1)[0]
+            p = adb.shell(["mkdir", "-p", parent], dev.serial)
+            _logged(log, p)
+            p = adb.run(["push", str(tmp), target], serial=dev.serial, timeout=120)
+            _logged(log, p)
+            if p.returncode != 0:
+                detail = [l.strip() for l in p.stderr.splitlines() if l.strip()]
+                return False, detail[0] if detail else "see log"
+        finally:
+            shutil.rmtree(tmp.parent, ignore_errors=True)
+        return True, f"{callsign} - applies when ATAK next starts"
+    return Task("Stage callsign", run)
+
+
 def task_push(entry: dict, base: Path) -> Task:
     source = (base / entry["source"]).resolve()
     target = entry["target"]
@@ -675,7 +728,8 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 # commands
 # --------------------------------------------------------------------------
 
-def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Task]:
+def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
+                        callsigns: dict | None = None) -> list[Task]:
     """Build the install sequence.
 
     `optimize` covers the lockdown steps - turning off system and app
@@ -684,6 +738,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
     skipped with --no-optimize.
     """
     apks = [(base / a).resolve() for a in cfg["kit"]["apks"]]
+    callsigns = callsigns or {}
     req = cfg.get("requirements", {})
     tasks = []
     if req.get("required") or req.get("optional"):
@@ -704,6 +759,8 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True) -> list[Ta
                                       cfg.get("appops", {}),
                                       cfg.get("battery", {}).get("exempt", [])))
     tasks += [task_push(e, base) for e in cfg["push"]]
+    if callsigns and cfg.get("callsign"):
+        tasks.append(task_callsign(callsigns, cfg["callsign"]))
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean up after push"))
@@ -828,6 +885,10 @@ def main(argv: list[str] | None = None) -> int:
     p_install = sub.add_parser("install", parents=[common],
                                help="install apps and push configuration")
     p_install.add_argument(
+        "--callsign",
+        help="ATAK callsign for the device. Asked for if not given; pass an "
+             "empty string, or -y without this flag, to leave it unset.")
+    p_install.add_argument(
         "--no-optimize", action="store_true",
         help="skip the lockdown steps: leave system and app updates, the "
              "package verifier and the manufacturer's update services alone. "
@@ -878,6 +939,28 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "devices":
             return 0
 
+        # Asked before the confirmation, so the callsign is on screen as
+        # part of what is being agreed to.
+        callsigns: dict[str, str] = {}
+        if args.command == "install":
+            given = getattr(args, "callsign", None)
+            if given is not None:
+                if len(devices) > 1:
+                    out.error("--callsign takes one device; narrow with --serial")
+                    return 2
+                callsigns[devices[0].serial] = given.strip()
+            elif not args.yes:
+                print()
+                for d in devices:
+                    try:
+                        answer = input(f"  Callsign for {d} (Enter to skip): ")
+                    except EOFError:
+                        answer = ""
+                    if answer.strip():
+                        callsigns[d.serial] = answer.strip()
+                    else:
+                        out.warn(f"{d.serial}: no callsign - left as it is")
+
         if args.command == "restore" and args.wipe_media and not args.yes:
             # Listed from the config, not hardcoded, so the warning cannot
             # drift away from what is actually deleted.
@@ -911,7 +994,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
         if args.command == "install":
-            tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize)
+            tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,
+                                        callsigns=callsigns)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

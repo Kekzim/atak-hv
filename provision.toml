@@ -295,6 +295,29 @@ restore = []
 exempt = ["com.atakmap.app.civ"]
 
 # ---------------------------------------------------------------------
+# Anropssignal (callsign).
+#
+# ATAK laser in en preferensfil fran <mount>/atak/config/prefs/defaults
+# nar appen startar, tillampar varje post och raderar sedan filen. Det ar
+# ATAK:s egen vag att masskonfigurera enheter - se ATAKActivity, som
+# anropar PreferenceControl.ingestDefaults() tidigt i uppstarten.
+#
+# Filen skrivs per enhet av verktyget, eftersom anropssignalen ar unik
+# for varje telefon. Den kan inte ligga i payload/atak, som ar samma for
+# alla.
+#
+# Steget kors fore ATAK har startats forsta gangen: ATAK hittar pa en
+# egen anropssignal bara om locationCallsign ar tomt, och defaults-filen
+# lases in innan dess.
+# ---------------------------------------------------------------------
+[callsign]
+target = "/sdcard/atak/config/prefs/defaults"
+# Preferensgruppen som posterna skrivs i. ATAK mappar om det har namnet
+# till appens egna preferenser vid inlasning.
+group = "com.atakmap.app_preferences"
+key = "locationCallsign"
+
+# ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).
 #
 # Blue Force Tracking kraver bakgrunds-GPS och natverk. Ar ATAK inte

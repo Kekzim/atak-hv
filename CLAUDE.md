@@ -95,6 +95,14 @@ change. Prefer extending the config over adding code.
   what `install` did.
 - **An unset Android setting reads back as the string `"null"`.** Restoring
   it means `settings delete global <key>`, never `settings put ... null`.
+- **ATAK preferences can be staged, not just typed in.** ATAK reads
+  `/sdcard/atak/config/prefs/defaults` at startup (`ingestDefaults()` in
+  `PreferenceControl`, called early from `ATAKActivity`), applies every
+  entry and deletes the file. `task_callsign` uses it for `locationCallsign`.
+  Same XML shape as the `config.pref` inside `atak-box.zip`. The importer
+  applies any key — the blacklist naming `locationCallsign` is on the JSON
+  path, not this one — and ATAK only invents a callsign when the pref is
+  empty, so a staged value wins.
 - `restore` matches package ids by **substring**, so a broad term like
   `"atak"` is deliberate and `protected_prefixes` is the guard that keeps it
   from taking out system components.

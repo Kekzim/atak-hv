@@ -184,6 +184,7 @@ Download, DCIM, Pictures och Documents.
 
 | Flagga | Betydelse |
 |---|---|
+| `--callsign SIGNAL` | Endast `install`: anropssignal för enheten. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
@@ -302,7 +303,10 @@ Aviseringar behöver inte röras. Verktyget beviljar `POST_NOTIFICATIONS`
 
    Se [Använda verktyget](#använda-verktyget) för kommandon och
    flaggor.
-4. Verktyget listar de enheter det hittar och frågar innan det gör något.
+4. Verktyget listar de enheter det hittar, **frågar efter anropssignal**
+   och ber om bekräftelse innan det gör något. Svara enligt FAL-A. Tryck
+   Enter för att lämna signalen orörd, eller ange den i förväg med
+   `--callsign`.
 
 > [!IMPORTANT]
 > Verktyget startar så snart **minst en** telefon är godkänd — det väntar
@@ -342,13 +346,22 @@ Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 11. Logga in — användarnamn och lösenord enligt lista.
 12. *OK* — ”Tak server registration completed” — *OK*.
 
-### 5. Callsign och teamfärg
+### 5. Callsign, teamfärg och Remarks
 
-Görs vid nästa uppstart. Proceduren är densamma som efter en avrustning —
-se [Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg), och
+**Anropssignalen är redan satt** om du angav en i steg 2. Verktyget lägger
+den i den preferensfil ATAK själv läser vid start
+(`/sdcard/atak/config/prefs/defaults`), så den sitter första gången ATAK
+startas — ingen handpåläggning. Kontrollera i självmarkörens ruta att det
+står rätt signal.
+
+Blev det fel, eller hoppade du över frågan, sätts den för hand enligt
+[Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg).
+
+**Teamfärgen** kommer ur er `atak-box.zip`, som sätter `locationTeam`.
+Ska en enhet ha en annan färg än paketets, ändra den för hand — se
 [Färgsättning](docs/handbok.md#färgsättning) för färgschemat.
 
-Sätt även **Remarks** till rätt hashtag, se
+**Remarks** sätts fortfarande för hand. Se
 [Uppstart och systemkonfiguration](docs/handbok.md#uppstart-och-systemkonfiguration).
 
 ### Stänga av telefonen

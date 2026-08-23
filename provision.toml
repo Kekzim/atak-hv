@@ -314,9 +314,24 @@ target = "/sdcard/atak/config/prefs/defaults"
 # Preferensgruppen posterna skrivs i. ATAK mappar om det har namnet till
 # appens egna preferenser vid inlasning.
 group = "com.atakmap.app_preferences"
-# Nyckeln anropssignalen hamnar under. Varde per enhet, fran --callsign
-# eller fragan vid korning.
-callsign_key = "locationCallsign"
+# Poster som fragas efter vid korningen. De ar unika per telefon och kan
+# darfor inte ligga under [prefs.entries], som ar samma pa alla enheter.
+# `flag` ar flaggan som anger vardet i forvag; utan flagga fragas det
+# bara efter interaktivt. Tomt svar hoppar over posten.
+#
+# Teamfarg och roll fragas det med avsikt inte efter. De har manga
+# alternativ och satts av anvandaren i ATAK efter forsta uppstarten.
+[[prefs.ask]]
+key = "locationCallsign"
+flag = "callsign"
+prompt = "Anropssignal (enligt FAL-A)"
+
+# Nivataggen som hogre staber filtrerar pa, t.ex. #Bat, #Komp, #Plut,
+# #Grp. Hamnar i CoT-meddelandets remarks-falt.
+[[prefs.ask]]
+key = "userRemarks"
+flag = "remarks"
+prompt = "Remarks (nivatagg)"
 
 # Kritiska enhetsinstallningar ur handboken: MGRS, MSL, meter, km/h,
 # numerisk kurs, streck och gitternord. "Avvikelser skapar kritiska fel

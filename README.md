@@ -185,6 +185,7 @@ Download, DCIM, Pictures och Documents.
 | Flagga | Betydelse |
 |---|---|
 | `--callsign SIGNAL` | Endast `install`: anropssignal för enheten. Frågas efter om den utelämnas |
+| `--remarks TAGG` | Endast `install`: nivåtaggen i *Remarks*. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
@@ -303,10 +304,10 @@ Aviseringar behöver inte röras. Verktyget beviljar `POST_NOTIFICATIONS`
 
    Se [Använda verktyget](#använda-verktyget) för kommandon och
    flaggor.
-4. Verktyget listar de enheter det hittar, **frågar efter anropssignal**
-   och ber om bekräftelse innan det gör något. Svara enligt FAL-A. Tryck
-   Enter för att lämna signalen orörd, eller ange den i förväg med
-   `--callsign`.
+4. Verktyget listar de enheter det hittar, **frågar efter anropssignal
+   och Remarks**, och ber om bekräftelse innan det gör något. Svara enligt
+   FAL-A respektive nivåtagg. Tryck Enter för att lämna en post orörd,
+   eller ange den i förväg med `--callsign` och `--remarks`.
 
 > [!IMPORTANT]
 > Verktyget startar så snart **minst en** telefon är godkänd — det väntar
@@ -348,7 +349,8 @@ Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 
 ### 5. Callsign, teamfärg och Remarks
 
-**Anropssignalen och de kritiska enhetsinställningarna är redan satta.**
+**Anropssignalen, Remarks och de kritiska enhetsinställningarna är redan
+satta.**
 Verktyget lägger dem i den preferensfil ATAK själv läser vid start
 (`/sdcard/atak/config/prefs/defaults`), så de sitter första gången ATAK
 startas — ingen handpåläggning. Det gäller MGRS, MSL, meter, km/h,
@@ -367,15 +369,18 @@ höjden i `m MSL`.
 > och slår igenom i avstånd- och bäringsverktyget. Använd inte den rutan
 > för att kontrollera just de två.
 
-Blev det fel, eller hoppade du över frågan, sätts den för hand enligt
+Blev något fel, eller hoppade du över en fråga, sätts den för hand enligt
 [Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg).
+Kontrollera **Remarks** i självmarkörens detaljvy — klicka på din egen
+markör och välj detaljer.
 
-**Teamfärgen** kommer ur er `atak-box.zip`, som sätter `locationTeam`.
-Ska en enhet ha en annan färg än paketets, ändra den för hand — se
-[Färgsättning](docs/handbok.md#färgsättning) för färgschemat.
-
-**Remarks** sätts fortfarande för hand. Se
-[Uppstart och systemkonfiguration](docs/handbok.md#uppstart-och-systemkonfiguration).
+**Teamfärg och roll sätts av användaren i ATAK**, efter första uppstarten.
+Alternativen är många och valet hänger på förband och befattning, så
+verktyget rör dem inte. Er `atak-box.zip` sätter ett utgångsvärde
+(`locationTeam`, `atakRoleType`) som sedan ändras på enheten. Se
+[Färgsättning](docs/handbok.md#färgsättning) för färgschemat och
+[Uppstart och systemkonfiguration](docs/handbok.md#uppstart-och-systemkonfiguration)
+för vilken tagg som gäller.
 
 ### Stänga av telefonen
 

@@ -522,7 +522,9 @@ ställs in internt. Grupp och soldat följer plutonens färgkodning. Se
 
 **Nivåmarkering (filtreringstagg).** Använd `#Bat`, `#Komp`, `#Plut`,
 `#Grp` i fältet *Remarks*, så att högre staber snabbt kan filtrera fram
-rätt beslutsnivå.
+rätt beslutsnivå. Provisioneringsverktyget frågar efter taggen och lägger
+in den, så på en nyinstallerad telefon är den redan satt — kontrollera i
+självmarkörens detaljvy.
 
 **Kritiska enhetsinställningar.** MGRS, MSL (meters), km/h, Numeric
 Heading, Mils, Grid North.

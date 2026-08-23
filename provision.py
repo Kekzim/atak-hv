@@ -587,7 +587,7 @@ def _pref_entry(key: str, value) -> str:
     return f'<entry key="{key}" class="{class_name}">{text}</entry>'
 
 
-def task_prefs(callsigns: dict, cfg: dict) -> Task:
+def task_prefs(answers: dict, cfg: dict) -> Task:
     """Stage the preference file ATAK reads for itself at startup.
 
     ATAK reads <mount>/atak/config/prefs/defaults when it starts, applies
@@ -599,22 +599,21 @@ def task_prefs(callsigns: dict, cfg: dict) -> Task:
 
     Carries two kinds of setting. The entries from [prefs.entries] are
     the same on every device: coordinate format, altitude reference,
-    units, north reference. The callsign is per device, which is why the
-    file is written here rather than shipped in payload/atak.
+    units, north reference. What [prefs.ask] collects - callsign, remarks
+    - differs per device, which is why the file is written here rather
+    than shipped in payload/atak.
 
-    `callsigns` is keyed by serial: the task list is built once and
-    reused across devices when -j is above 1.
+    `answers` is keyed by serial: the task list is built once and reused
+    across devices when -j is above 1.
     """
     target = cfg["target"]
     group = cfg["group"]
     entries = dict(cfg.get("entries", {}))
-    callsign_key = cfg.get("callsign_key", "locationCallsign")
+    labels = {a["key"]: a.get("flag") or a["key"] for a in cfg.get("ask", [])}
 
     def run(adb, dev, log):
-        staged = dict(entries)
-        callsign = callsigns.get(dev.serial, "")
-        if callsign:
-            staged[callsign_key] = callsign
+        asked = answers.get(dev.serial, {})
+        staged = {**entries, **asked}
         if not staged:
             return True, "nothing to stage"
 
@@ -638,7 +637,9 @@ def task_prefs(callsigns: dict, cfg: dict) -> Task:
             shutil.rmtree(tmp.parent, ignore_errors=True)
 
         note = f"{len(staged)} settings"
-        note += f", callsign {callsign}" if callsign else ", no callsign"
+        if asked:
+            note += " (" + ", ".join(
+                f"{labels.get(k, k)} {v}" for k, v in asked.items()) + ")"
         return True, note + " - applied when ATAK next starts"
     return Task("Stage ATAK preferences", run)
 
@@ -756,7 +757,7 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 # --------------------------------------------------------------------------
 
 def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
-                        callsigns: dict | None = None) -> list[Task]:
+                        answers: dict | None = None) -> list[Task]:
     """Build the install sequence.
 
     `optimize` covers the lockdown steps - turning off system and app
@@ -765,7 +766,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
     skipped with --no-optimize.
     """
     apks = [(base / a).resolve() for a in cfg["kit"]["apks"]]
-    callsigns = callsigns or {}
+    answers = answers or {}
     req = cfg.get("requirements", {})
     tasks = []
     if req.get("required") or req.get("optional"):
@@ -787,9 +788,9 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
                                       cfg.get("battery", {}).get("exempt", [])))
     tasks += [task_push(e, base) for e in cfg["push"]]
     prefs = cfg.get("prefs")
-    # Runs for the shared settings even when no callsign was given.
-    if prefs and (prefs.get("entries") or callsigns):
-        tasks.append(task_prefs(callsigns, prefs))
+    # Runs for the shared settings even when nothing was asked for.
+    if prefs and (prefs.get("entries") or answers):
+        tasks.append(task_prefs(answers, prefs))
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean up after push"))
@@ -913,10 +914,15 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("devices", parents=[common], help="list attached devices and exit")
     p_install = sub.add_parser("install", parents=[common],
                                help="install apps and push configuration")
+    # These pair with [prefs.ask] in the config, by its `flag` field.
     p_install.add_argument(
         "--callsign",
         help="ATAK callsign for the device. Asked for if not given; pass an "
-             "empty string, or -y without this flag, to leave it unset.")
+             "empty string, or -y without the flag, to leave it unset.")
+    p_install.add_argument(
+        "--remarks",
+        help="ATAK remarks field - the level tag higher staff filter on, "
+             "such as #Plut. Same rules as --callsign.")
     p_install.add_argument(
         "--no-optimize", action="store_true",
         help="skip the lockdown steps: leave system and app updates, the "
@@ -968,27 +974,40 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "devices":
             return 0
 
-        # Asked before the confirmation, so the callsign is on screen as
+        # Asked before the confirmation, so the answers are on screen as
         # part of what is being agreed to.
-        callsigns: dict[str, str] = {}
-        if args.command == "install":
-            given = getattr(args, "callsign", None)
-            if given is not None:
-                if len(devices) > 1:
-                    out.error("--callsign takes one device; narrow with --serial")
-                    return 2
-                callsigns[devices[0].serial] = given.strip()
-            elif not args.yes:
+        answers: dict[str, dict[str, str]] = {}
+        ask = cfg.get("prefs", {}).get("ask", []) if args.command == "install" else []
+        if ask:
+            on_cli = {}
+            for entry in ask:
+                flag = entry.get("flag")
+                value = getattr(args, flag.replace("-", "_"), None) if flag else None
+                if value is not None:
+                    on_cli[entry["key"]] = value.strip()
+            if on_cli and len(devices) > 1:
+                out.error("a value given on the command line applies to one "
+                          "device; narrow with --serial")
+                return 2
+            if not on_cli and not args.yes:
                 print()
-                for d in devices:
-                    try:
-                        answer = input(f"  Callsign for {d} (Enter to skip): ")
-                    except EOFError:
-                        answer = ""
-                    if answer.strip():
-                        callsigns[d.serial] = answer.strip()
+            for d in devices:
+                for entry in ask:
+                    key, prompt = entry["key"], entry["prompt"]
+                    if key in on_cli:
+                        value = on_cli[key]
+                    elif args.yes:
+                        value = ""
                     else:
-                        out.warn(f"{d.serial}: no callsign - left as it is")
+                        try:
+                            value = input(f"  {prompt} for {d} "
+                                          "(Enter to skip): ").strip()
+                        except EOFError:
+                            value = ""
+                    if value:
+                        answers.setdefault(d.serial, {})[key] = value
+                    else:
+                        out.warn(f"{d.serial}: {prompt} not set - left as it is")
 
         if args.command == "restore" and args.wipe_media and not args.yes:
             # Listed from the config, not hardcoded, so the warning cannot
@@ -1024,7 +1043,7 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.command == "install":
             tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,
-                                        callsigns=callsigns)
+                                        answers=answers)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

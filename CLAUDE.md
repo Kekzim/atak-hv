@@ -99,8 +99,9 @@ change. Prefer extending the config over adding code.
   `/sdcard/atak/config/prefs/defaults` at startup (`ingestDefaults()` in
   `PreferenceControl`, called early from `ATAKActivity`), applies every
   entry and deletes the file. `task_prefs` writes it.
-  `[prefs.entries]` carries the settings that are identical on every device
-  (MGRS, MSL, mils, grid north). Same XML shape as the `config.pref` inside
+  `[prefs.entries]` carries the settings identical on every device (MGRS,
+  MSL, mils, grid north); `[prefs.ask]` declares what is prompted for per
+  device (callsign, remarks), each optionally bound to a CLI flag. Same XML shape as the `config.pref` inside
   `atak-box.zip`. Values that look numeric are **strings** — ATAK reads them
   with `getString()` then `Integer.parseInt()`, so an Integer entry throws
   `ClassCastException` inside the app. The importer

@@ -5,7 +5,7 @@ emot en som någon annan lämnat tillbaka.
 
 Datordelen — att avinstallera appar och rensa filer via `adb` — görs med
 `provision.bat restore` respektive `./provision.sh restore`, se
-[repots README](../README.md#avrustning-och-återlämning).
+[repots README](../README.md#kommandon).
 
 ## Återställ ATAK
 
@@ -65,13 +65,19 @@ När du fått en avrustad telefon.
 
 ### Callsign och teamfärg
 
+> [!NOTE]
+> Har telefonen provisionerats om med verktyget är **anropssignal och
+> Remarks redan satta** — verktyget frågar efter dem vid installationen.
+> Då återstår bara teamfärgen, steg 4. Se
+> [Enhetsinställningar som verktyget sätter](../README.md#enhetsinställningar-som-verktyget-sätter).
+
 1. ”Hamburgaren” → **Settings**.
 2. **Callsign and Device Preferences**.
 3. **Callsign Preferences** → **My Callsign** → ange ditt callsign enligt
    FAL-A → *OK*.
 4. **My Team** → välj färg enligt
    [färgsättningen i handboken](handbok.md#färgsättning).
-5. Ange **Remarks**: `#xxxxxxx` vid behov.
+5. Ange **Remarks**: nivåtaggen — `#Bat`, `#Komp`, `#Plut` eller `#Grp`.
 6. Backa med pil bakåt tills du har ren kartbild.
 7. Klicka på kartikonen i överkant och välj din karta.
 8. Backa tillbaka till ren kartbild.

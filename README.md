@@ -7,7 +7,7 @@ konfigurationen som läggs ut på enheterna, och instruktionsmaterialet.
 > [!IMPORTANT]
 > **Serverpaketet `atak-box.zip` ingår inte i repot.** Det innehåller
 > TAK-serverns adress och certifikat och är förbandsspecifikt. Utan det
-> avbryts installationen. Se [Före utskick](#före-utskick).
+> avbryts installationen. Se [Före utskick](#före-installation-på-enhet).
 
 ## Snabbstart
 
@@ -93,7 +93,72 @@ om ATAK saknas — det är ingen idé att lägga ut konfiguration på en telefon
 utan ATAK. Saknas någon av de övriga blir det en varning. Listan ligger
 under `[requirements]` i `provision.toml`.
 
-## Före utskick
+## Enhetsinställningar som verktyget sätter
+
+ATAK har tre inställningar som måste stämma per telefon, och sju som måste
+vara lika på alla. Verktyget lägger ut samtliga, så ingenting av det här
+behöver knappas in på enheten.
+
+Allt hamnar i den preferensfil ATAK själv läser vid start,
+`/sdcard/atak/config/prefs/defaults`. ATAK tillämpar posterna och raderar
+sedan filen. Listan ligger under `[prefs]` i `provision.toml`.
+
+### Frågas efter vid installationen
+
+Unika per telefon, så verktyget frågar efter dem när enheten listats —
+före bekräftelsen, så att svaren står på skärmen som en del av det du
+godkänner.
+
+| Vad | Flagga | Innebörd |
+|---|---|---|
+| **Anropssignal** | `--callsign` | Enligt FAL-A. Skilj på personliga enheter (t.ex. `QS1`) och funktionsenheter (t.ex. `QS`) |
+| **Remarks** | `--remarks` | Nivåtaggen högre staber filtrerar på: `#Bat`, `#Komp`, `#Plut`, `#Grp` |
+
+Tryck Enter för att hoppa över en fråga — då lämnas telefonens nuvarande
+värde orört. Med `-y` ställs inga frågor alls, och båda lämnas orörda om
+du inte angett flaggorna.
+
+**Teamfärg och roll sätts inte av verktyget.** Alternativen är många och
+valet hänger på förband och befattning, så de väljs i ATAK efter första
+uppstarten. Er `atak-box.zip` sätter ett utgångsvärde som sedan ändras på
+enheten.
+
+### Sätts alltid, lika på alla enheter
+
+Handboken kallar dem *kritiska enhetsinställningar* — ”avvikelser skapar
+kritiska fel vid eldledning”. De sätts vid varje `install`, även med `-y`
+och även med `--no-optimize`.
+
+| Inställning | Värde | Nyckel i `provision.toml` |
+|---|---|---|
+| Koordinatformat | MGRS | `coord_display_pref` |
+| Höjdreferens | MSL (över havet) | `alt_display_pref` |
+| Höjdenhet | meter | `alt_unit_pref` |
+| Hastighet | km/h | `speed_unit_pref` |
+| Kurs | numerisk | `compass_heading_display` |
+| Bäring | streck (mils) | `rab_brg_units_pref` |
+| Nordreferens | gitternord | `rab_north_ref_pref` |
+
+Behöver ni andra värden ändrar ni dem under `[prefs.entries]`. Värdena
+skrivs som strängar även när de ser ut som siffror — ATAK läser dem så,
+och ett heltal får appen att kasta undantag.
+
+### Kontrollera på enheten
+
+Klicka på din egen markör och välj detaljer. Där står anropssignal,
+**Remarks** och **Role**.
+
+Koordinatrutan uppe till höger visar bäring och nordreferens, t.ex.
+`551 milsG` — streck och gitternord.
+
+> [!NOTE]
+> **Självmarkörens ruta nere till höger visar alltid grader och `M`**,
+> även när streck och gitternord är satta. Den widgeten skiljer bara på
+> rättvisande nord och ”övrigt” och formaterar alltid i grader.
+> Inställningarna är satta ändå. Använd rutan uppe till höger för att
+> kontrollera just de två.
+
+## Före installation på enhet
 
 1. **Lägg in `atak-box.zip` för er TAK-server** i
    `payload/ATAK-installation/`. Filen måste heta exakt `atak-box.zip` och
@@ -117,15 +182,16 @@ provision.bat restore                Avinstallera appar, ta bort ATAK-filer
 provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 ```
 
-**`install`** stänger av system- och appuppdateringar, installerar apparna i
+**`install`** stänger av system-, appuppdateringar och bloatware, installerar apparna i
 `payload/apks/`, beviljar ATAK:s rättigheter, lägger ut `atak/` och
 `ATAK-installation/` under `/sdcard/`, och placerar `atak-box.zip` i
 `/sdcard/Download/`.
 
 ### Testa på en egen telefon
 
-Standardläget låser ner och rensar enheten. På ett utlämnat system är det
-meningen, men på någons privata telefon är det inte det:
+Standardläget optimerar enheten för att vara dedikerad ATAK enhet.
+På ett utlämnad enhet/privat dedikerad ATAK enhet är det meningen, 
+men på någons privata primära telefon är det inte det:
 
 * system- och appuppdateringar stängs av — telefonen slutar få
   säkerhetsuppdateringar
@@ -136,8 +202,8 @@ meningen, men på någons privata telefon är det inte det:
 * bakgrundssynk, animationer och adaptiv batterihantering stängs av
 
 Kör därför `install --no-optimize` när du provar verktyget på en telefon
-som används privat. Appar och konfiguration installeras precis som vanligt,
-men telefonens uppdateringsinställningar lämnas orörda.
+som används privat som primär telefon. Appar och konfiguration installeras
+precis som vanligt, men telefonens uppdateringsinställningar lämnas orörda.
 
 Ett undantag: paketverifieraren stängs av även då, eftersom Android annars
 vägrar sidladdningen. Den sätts tillbaka som den var direkt efteråt — var
@@ -177,8 +243,7 @@ uppdateringarna igen och avinstallerar ATAK-apparna.
 
 **`restore`** gör tvärtom: avinstallerar ATAK-apparna, tar bort deras
 undantag ur Doze, tar bort de utlagda mapparna och slår på uppdateringarna
-igen. `--wipe-media` rensar dessutom
-Download, DCIM, Pictures och Documents.
+igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 
 ### Flaggor
 
@@ -241,155 +306,7 @@ SUMMARY
 | `INSTALL_FAILED_USER_RESTRICTED` | Rutan på telefonens skärm hann inte godkännas. Vanligt på Xiaomi — kör om med telefonen framför dig |
 | `no permissions` (Linux) | `sudo apt install android-sdk-platform-tools-common`, koppla sedan ur och i telefonen |
 | `adb not found` | Se [Krav](#krav), eller använd `--adb` |
-| `install` avbryts direkt | `atak-box.zip` eller en `.apk` saknas — se [Före utskick](#före-utskick) |
-
-## Installera en enhet
-
-Hela kedjan från kartong till färdig ATAK-telefon. Ska en avrustad telefon
-startas igen, se
-[Uppstart efter återställd ATAK](docs/avrustning.md#uppstart-efter-återställd-atak)
-i stället.
-
-### 1. Grundinställning av telefonen
-
-Vissa steg saknas på en del modeller.
-
-1. Starta telefonen. Sitter simkort i måste du ange PIN. Välj språk.
-2. Anslut till wifi. Nätverk krävs för Google-inloggningen i nästa steg
-   och för att hämta apparna ur Play Store.
-3. Kopiera appar och data — **kopiera inte**.
-4. Logga in med förbandets Google-konto. Kontot behövs för att hämta
-   ATAK-CIV och plugin-apparna ur Play Store, och **ska stanna kvar på
-   enheten** — det är därigenom apparna kan uppdateras längre fram.
-   `install` stänger ändå av de automatiska uppdateringarna, så en
-   uppdatering blir ett medvetet beslut och sker när ni väljer det.
-5. Google-tjänster — bocka ur ”skicka diagnostik och användardata”,
-   godkänn.
-6. Välj webbläsare och sökmotor — Google.
-7. Tillverkarens egna konton och tjänster — hoppa över. Bocka ur
-   telemetri och diagnostik, och tacka nej till operatörens erbjudanden.
-   Skärmarna ser olika ut för Samsung, Xiaomi, OnePlus och andra.
-8. Skapa PIN: fyra siffror, framtagen av chef.
-9. Granska fler appar — bocka ur om du tillfrågas.
-10. Fingeravtryck — **nej tack**.
-11. Ansiktsregistrering — **nej tack**.
-12. Inställningar → sök *SIM* → ta bort simkortslås.
-13. Inställningar → **Om telefonen** → hitta **Version** och tryck sju
-    gånger för att aktivera utvecklaralternativ. På vissa modeller ligger
-    det under *Om telefonen → Programvaruinformation →
-    Kompileringsnummer*.
-14. Backa ett steg, sök *USB-fel* och aktivera **USB-felsökning**.
-15. Backa ett steg.
-16. Öppna **Play Store** och installera **ATAK-CIV (Civil Use)** samt
-    plugin-apparna **ATAK Plugin: Data Sync** och **ATAK Plugin: GeoCam**.
-    Se [Appar](#appar) för länkar och paketnamn. ATAK-CIV **måste** finnas
-    på plats innan nästa steg — utan den avbryts `install` direkt.
-17. **Ljud och vibration** → aktivera vibration och/eller ljud vid behov.
-
-Aviseringar behöver inte röras. Verktyget beviljar `POST_NOTIFICATIONS`
-åt ATAK i nästa steg.
-
-### 2. Provisionering från datorn
-
-1. Koppla in telefonen eller telefonerna mot datorn med USB.
-2. Ska USB-felsökning godkännas — godkänn. Om rutan inte kommer, aktivera
-   filöverföring genom att dra nedåt i fönstret och välja
-   *USB… → Överför filer*.
-3. Kör provisioneringen från datorn:
-
-   ```
-   Windows:      provision.bat install
-   Linux/macOS:  ./provision.sh install
-   ```
-
-   Se [Använda verktyget](#använda-verktyget) för kommandon och
-   flaggor.
-4. Verktyget listar de enheter det hittar, **frågar efter anropssignal
-   och Remarks**, och ber om bekräftelse innan det gör något. Svara enligt
-   FAL-A respektive nivåtagg. Tryck Enter för att lämna en post orörd,
-   eller ange den i förväg med `--callsign` och `--remarks`.
-
-> [!IMPORTANT]
-> Verktyget startar så snart **minst en** telefon är godkänd — det väntar
-> inte in de övriga. Godkänn *Tillåt USB-felsökning* på **alla** telefoner
-> innan du svarar på frågan, och kontrollera att antalet i listan stämmer.
-> En telefon som inte hunnit godkännas varnas det för en gång, och blir
-> sedan stående oprovisionerad.
-
-Kör flera telefoner parallellt med `-j`, till exempel
-`provision.bat install -j 4`. Loggen skrivs per serienummer, så
-sammanfattningen visar ändå vilken telefon som gjorde vad.
-
-Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
-30 minuter.
-
-### 3. Avsluta på telefonen
-
-1. Flytta ut ATAK-ikonen till första sidan på telefonen.
-2. Backa till första sidan.
-
-### 4. Starta ATAK första gången
-
-1. Starta ATAK och tillåt de frågor som kommer upp. Rättigheterna och
-   undantaget från batterioptimering är redan satta av verktyget, så det
-   bör bli få eller inga frågor. Kommer ändå en ruta om batteri eller
-   bakgrundskörning — godkänn den.
-2. **TAK Device Setup** — *Done*.
-3. Avvakta 5–7 sekunder. *Load Iconset* blinkar förbi på displayen.
-4. Menyn i överkant fylls på med tre ikoner.
-5. Stäng ner ATAK — ”Hamburgaren” → **Quit** → *Yes*.
-6. Starta ATAK igen.
-7. ”Hamburgaren” → **Import**.
-8. **Local SD** — klicka ikonen till vänster under *S* i *Select Files to
-   Import* — skrolla till **Download**.
-9. Välj `atak-box.zip` (bocka i rutan till höger) — *OK*.
-10. **Copy**.
-11. Logga in — användarnamn och lösenord enligt lista.
-12. *OK* — ”Tak server registration completed” — *OK*.
-
-### 5. Callsign, teamfärg och Remarks
-
-**Anropssignalen, Remarks och de kritiska enhetsinställningarna är redan
-satta.**
-Verktyget lägger dem i den preferensfil ATAK själv läser vid start
-(`/sdcard/atak/config/prefs/defaults`), så de sitter första gången ATAK
-startas — ingen handpåläggning. Det gäller MGRS, MSL, meter, km/h,
-numerisk kurs, streck och gitternord, som annars måste knappas in på varje
-telefon och där avvikelser ger kritiska fel vid eldledning. Listan ligger
-under `[prefs.entries]` i `provision.toml`.
-
-Kontrollera i självmarkörens ruta att rätt anropssignal står där, och att
-koordinaten visas som MGRS (`33V WC 38271 29248`, med rutbokstäverna) och
-höjden i `m MSL`.
-
-> [!NOTE]
-> Självmarkörens ruta visar **alltid grader och `M`**, även när gitternord
-> och streck är satta. Widgeten skiljer bara på rättvisande nord och
-> "övrigt" och formaterar alltid i grader — inställningarna är satta ändå
-> och slår igenom i avstånd- och bäringsverktyget. Använd inte den rutan
-> för att kontrollera just de två.
-
-Blev något fel, eller hoppade du över en fråga, sätts den för hand enligt
-[Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg).
-Kontrollera **Remarks** i självmarkörens detaljvy — klicka på din egen
-markör och välj detaljer.
-
-**Teamfärg och roll sätts av användaren i ATAK**, efter första uppstarten.
-Alternativen är många och valet hänger på förband och befattning, så
-verktyget rör dem inte. Er `atak-box.zip` sätter ett utgångsvärde
-(`locationTeam`, `atakRoleType`) som sedan ändras på enheten. Se
-[Färgsättning](docs/handbok.md#färgsättning) för färgschemat och
-[Uppstart och systemkonfiguration](docs/handbok.md#uppstart-och-systemkonfiguration)
-för vilken tagg som gäller.
-
-### Stänga av telefonen
-
-Beror på modell:
-
-* Av-knapp + volym upp
-* Av-knapp + volym ner
-* På en del modeller kan knappen programmeras — sök på *sidoknapp* i
-  telefonens inställningar.
+| `install` avbryts direkt | `atak-box.zip` eller en `.apk` saknas — se [Före utskick](#före-installation-på-enhet) |
 
 ## Rättigheter
 
@@ -519,19 +436,6 @@ konfiguration, och båda läggs ut på telefonen. Det är avsiktligt:
 Håll dem synkade. Läggs en ny kartdefinition till i `payload/atak/imagery/`
 måste den in i reservkopian också, annars försvinner den vid nästa
 återställning i fält.
-
-## Avrustning och återlämning
-
-Vid avrustning, när systemet ska lämnas in eller lämnas över:
-
-1. Ladda telefonen.
-2. Kör `provision.bat restore` (eller `--wipe-media` om användarens egna
-   filer också ska bort).
-3. Se [Avrustning och uppstart](docs/avrustning.md) för återställning av
-   ATAK, fabriksåterställning och packlista för TAK-väskan.
-
-När du får en avrustad telefon, se
-[uppstart efter återställd ATAK](docs/avrustning.md#uppstart-efter-återställd-atak).
 
 ## Dokumentation
 

@@ -3,9 +3,8 @@
 Instruktionsmaterial för ATAK. Varje dokument går att läsa direkt på
 GitHub, eller visas som bildspel via `viewer.html`.
 
-Installation av en enhet — från grundinställning av telefonen till första
-start av ATAK — står i [repots README](../README.md#installera-en-enhet),
-tillsammans med provisioneringsverktyget.
+Provisioneringsverktyget, och de enhetsinställningar det sätter åt dig,
+står i [repots README](../README.md#enhetsinställningar-som-verktyget-sätter).
 
 | Dokument | Innehåll |
 |---|---|

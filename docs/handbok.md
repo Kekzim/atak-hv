@@ -522,19 +522,35 @@ ställs in internt. Grupp och soldat följer plutonens färgkodning. Se
 
 **Nivåmarkering (filtreringstagg).** Använd `#Bat`, `#Komp`, `#Plut`,
 `#Grp` i fältet *Remarks*, så att högre staber snabbt kan filtrera fram
-rätt beslutsnivå. Provisioneringsverktyget frågar efter taggen och lägger
-in den, så på en nyinstallerad telefon är den redan satt — kontrollera i
-självmarkörens detaljvy.
+rätt beslutsnivå.
 
 **Kritiska enhetsinställningar.** MGRS, MSL (meters), km/h, Numeric
 Heading, Mils, Grid North.
 Avvikelser skapar kritiska fel vid eldledning.
 
-På en telefon som provisionerats med verktyget är de här redan satta —
-se `[prefs.entries]` i `provision.toml`. Kontrollera ändå, och rätta för
-hand om något avviker. Observera att självmarkörens ruta alltid visar
-grader och `M` även när streck och gitternord är satta; den visningen
-säger ingenting om de två inställningarna.
+### Vad som redan är satt på en provisionerad telefon
+
+Kommer telefonen från provisioneringsverktyget är det mesta av ovanstående
+redan gjort. Se
+[Enhetsinställningar som verktyget sätter](../README.md#enhetsinställningar-som-verktyget-sätter).
+
+| Inställning | Status på en provisionerad telefon |
+|---|---|
+| Anropssignal | **Satt.** Verktyget frågar efter den vid installationen |
+| Remarks (nivåtagg) | **Satt.** Frågas efter vid installationen |
+| De sju kritiska enhetsinställningarna | **Satta.** Alltid, lika på alla enheter |
+| Teamfärg och roll | **Sätts för hand.** Alternativen är många och valet hänger på förband och befattning |
+
+Kontrollera ändå, och rätta för hand om något avviker: klicka på din egen
+markör och välj detaljer, så står anropssignal, *Remarks* och *Role* där.
+
+> [!NOTE]
+> Bäring och nordreferens kontrolleras i **koordinatrutan uppe till
+> höger**, som visar t.ex. `551 milsG` — streck och gitternord.
+> Självmarkörens ruta nere till höger visar **alltid** grader och `M`,
+> även när streck och gitternord är satta, eftersom den widgeten bara
+> skiljer på rättvisande nord och ”övrigt”. Den rutan säger alltså
+> ingenting om de två inställningarna.
 
 ![Anropssignaler](assets/handbok/hv-slide06-13.png)
 ![Teamfärger](assets/handbok/hv-slide06-14.png)

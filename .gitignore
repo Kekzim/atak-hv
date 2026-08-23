@@ -5,7 +5,9 @@
 # lägger in sin egen fil med exakt namnet atak-box.zip.
 atak-box.zip
 
-# Certifikat och nycklar
+# Certifikat, nycklar och VPN-profiler. OpenVPN ingar inte langre i
+# paketet, men regeln star kvar som skyddsnat: en .ovpn-fil ar en
+# hemlighet oavsett vilken klient den hor till.
 *.p12
 *.pfx
 *.jks
@@ -13,6 +15,7 @@ atak-box.zip
 *.pem
 *.crt
 *.cer
+*.ovpn
 
 # ---------------------------------------------------------------
 # Appar som installeras från Google Play (sidladdas inte längre)

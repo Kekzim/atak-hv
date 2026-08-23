@@ -466,9 +466,22 @@ provisionerat förut — tillverkarnas paketlistor skiljer sig åt.
 
 ## Licens
 
-Skripten och dokumentationen saknar ännu licens. `.apk`-filer under
-`payload/apks/` tillhör respektive upphovsman och omfattas av sina egna
-villkor.
+Skripten och dokumentationen i det här repot står under **Apache License
+2.0** — se [LICENSE](LICENSE). Det gäller `provision.py`, `provision.toml`,
+launcherna, README och materialet under `docs/`.
+
+Undantag, som har sina egna villkor och inte omfattas av licensen ovan:
+
+* `.apk`-filerna under `payload/apks/` tillhör respektive upphovsman.
+* ATAK-konfigurationen under `payload/atak/` och
+  `payload/ATAK-installation/` innehåller kartkällor, KML-lager och
+  datapaket från tredje part.
+* `docs/instruktion-atak-hemvarn-0.9.pdf` är Hemvärnets eget
+  instruktionsmaterial.
+
+ATAK:s egen dokumentation (`ATAK_User_Guide.pdf`, `ATAK_Icon_Glossary.pdf`)
+ingår **inte** i repot. ATAK lägger själv ut den under
+`/sdcard/atak/support/docs/` när appen installeras eller uppdateras.
 
 `platform-tools/` innehåller `adb` ur Android SDK Platform-Tools (revision
 36.0.0), © Google LLC, huvudsakligen under Apache License 2.0. Fullständiga

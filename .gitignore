@@ -18,6 +18,18 @@ atak-box.zip
 *.ovpn
 
 # ---------------------------------------------------------------
+# Foljer med nar atak/-mappen kopieras fran en konfigurerad telefon,
+# men hor inte hemma i repot.
+# ---------------------------------------------------------------
+# ATAK lagger sjalv ut sin dokumentation ur appens assets vid varje
+# uppgradering (AppVersionUpgrade), sa kopior i payload skrivs anda over.
+**/atak/support/docs/*.pdf
+
+# Plugin-apk ur ett redan importerat datapaket. Plugin-apparna hamtas ur
+# Play Store; ingenting i paketet installerar dem harifran.
+**/atak/tools/datapackage/files/**/*.apk
+
+# ---------------------------------------------------------------
 # Appar som installeras från Google Play (sidladdas inte längre)
 # ---------------------------------------------------------------
 payload/apks/ATAK.apk

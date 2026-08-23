@@ -295,27 +295,46 @@ restore = []
 exempt = ["com.atakmap.app.civ"]
 
 # ---------------------------------------------------------------------
-# Anropssignal (callsign).
+# ATAK-preferenser som laggs ut vid installationen.
 #
-# ATAK laser in en preferensfil fran <mount>/atak/config/prefs/defaults
-# nar appen startar, tillampar varje post och raderar sedan filen. Det ar
-# ATAK:s egen vag att masskonfigurera enheter - se ATAKActivity, som
-# anropar PreferenceControl.ingestDefaults() tidigt i uppstarten.
+# ATAK laser <mount>/atak/config/prefs/defaults nar appen startar,
+# tillampar varje post och raderar sedan filen. Det ar ATAK:s egen vag
+# att masskonfigurera enheter - ATAKActivity anropar
+# PreferenceControl.ingestDefaults() tidigt i uppstarten.
 #
-# Filen skrivs per enhet av verktyget, eftersom anropssignalen ar unik
-# for varje telefon. Den kan inte ligga i payload/atak, som ar samma for
-# alla.
+# Filen skrivs av verktyget, eftersom anropssignalen ar unik per telefon
+# och darfor inte kan ligga i payload/atak, som ar samma for alla.
 #
-# Steget kors fore ATAK har startats forsta gangen: ATAK hittar pa en
-# egen anropssignal bara om locationCallsign ar tomt, och defaults-filen
-# lases in innan dess.
+# Steget hinner fore ATAK:s egen ifyllning: ATAK hittar bara pa en
+# anropssignal nar locationCallsign ar tomt, och defaults lases in innan
+# dess.
 # ---------------------------------------------------------------------
-[callsign]
+[prefs]
 target = "/sdcard/atak/config/prefs/defaults"
-# Preferensgruppen som posterna skrivs i. ATAK mappar om det har namnet
-# till appens egna preferenser vid inlasning.
+# Preferensgruppen posterna skrivs i. ATAK mappar om det har namnet till
+# appens egna preferenser vid inlasning.
 group = "com.atakmap.app_preferences"
-key = "locationCallsign"
+# Nyckeln anropssignalen hamnar under. Varde per enhet, fran --callsign
+# eller fragan vid korning.
+callsign_key = "locationCallsign"
+
+# Kritiska enhetsinstallningar ur handboken: MGRS, MSL, meter, km/h,
+# numerisk kurs, streck och gitternord. "Avvikelser skapar kritiska fel
+# vid eldledning", sa de ska vara lika pa alla enheter och sattas har i
+# stallet for att knappas in per telefon.
+#
+# VARDENA AR STRANGAR aven nar de ser ut som siffror. ATAK:s
+# ListPreference lagrar dem som String och gor Integer.parseInt() vid
+# lasning - skrivs de som heltal kastar appen ClassCastException.
+# Typen foljer TOML: "1" ger String, 1 ger Integer, true ger Boolean.
+[prefs.entries]
+coord_display_pref = "MGRS"        # koordinatformat
+alt_display_pref = "MSL"           # hojd over havet, inte ellipsoid
+alt_unit_pref = "1"                # 0 = fot, 1 = meter
+speed_unit_pref = "1"              # 0 = mph, 1 = km/h, 2 = knop, 3 = m/s
+compass_heading_display = "Numeric"  # numerisk kurs, inte vaderstreck
+rab_brg_units_pref = "1"           # 0 = grader, 1 = streck (mils)
+rab_north_ref_pref = "2"           # 0 = rattvisande, 1 = magnetisk, 2 = gitternord
 
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).

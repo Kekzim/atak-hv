@@ -348,11 +348,24 @@ Räkna med cirka 1,5 minut per telefon — 20 telefoner tar ungefär
 
 ### 5. Callsign, teamfärg och Remarks
 
-**Anropssignalen är redan satt** om du angav en i steg 2. Verktyget lägger
-den i den preferensfil ATAK själv läser vid start
-(`/sdcard/atak/config/prefs/defaults`), så den sitter första gången ATAK
-startas — ingen handpåläggning. Kontrollera i självmarkörens ruta att det
-står rätt signal.
+**Anropssignalen och de kritiska enhetsinställningarna är redan satta.**
+Verktyget lägger dem i den preferensfil ATAK själv läser vid start
+(`/sdcard/atak/config/prefs/defaults`), så de sitter första gången ATAK
+startas — ingen handpåläggning. Det gäller MGRS, MSL, meter, km/h,
+numerisk kurs, streck och gitternord, som annars måste knappas in på varje
+telefon och där avvikelser ger kritiska fel vid eldledning. Listan ligger
+under `[prefs.entries]` i `provision.toml`.
+
+Kontrollera i självmarkörens ruta att rätt anropssignal står där, och att
+koordinaten visas som MGRS (`33V WC 38271 29248`, med rutbokstäverna) och
+höjden i `m MSL`.
+
+> [!NOTE]
+> Självmarkörens ruta visar **alltid grader och `M`**, även när gitternord
+> och streck är satta. Widgeten skiljer bara på rättvisande nord och
+> "övrigt" och formaterar alltid i grader — inställningarna är satta ändå
+> och slår igenom i avstånd- och bäringsverktyget. Använd inte den rutan
+> för att kontrollera just de två.
 
 Blev det fel, eller hoppade du över frågan, sätts den för hand enligt
 [Callsign och teamfärg](docs/avrustning.md#callsign-och-teamfärg).

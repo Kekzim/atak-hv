@@ -564,46 +564,70 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
     return Task("Install apps", run)
 
 
-def task_callsign(callsigns: dict, cfg: dict) -> Task:
-    """Stage ATAK's own defaults file so the callsign is set on next start.
+PREF_CLASSES = {
+    bool: "class java.lang.Boolean",     # before int - bool is a subclass
+    str: "class java.lang.String",
+    int: "class java.lang.Integer",
+    float: "class java.lang.Float",
+}
+
+
+def _pref_entry(key: str, value) -> str:
+    """One <entry> line, escaped the way ATAK's decode() expects."""
+    for cls, name in PREF_CLASSES.items():
+        if isinstance(value, cls):
+            class_name = name
+            break
+    else:
+        raise TypeError(f"{key}: cannot express {type(value).__name__} in a .pref")
+    text = "true" if value is True else "false" if value is False else str(value)
+    for ch, esc in (("&", "\\u0026"), ('"', "\\u0022"), ("'", "\\u0027"),
+                    ("<", "\\u003c"), (">", "\\u003e")):
+        text = text.replace(ch, esc)
+    return f'<entry key="{key}" class="{class_name}">{text}</entry>'
+
+
+def task_prefs(callsigns: dict, cfg: dict) -> Task:
+    """Stage the preference file ATAK reads for itself at startup.
 
     ATAK reads <mount>/atak/config/prefs/defaults when it starts, applies
     every entry and deletes the file. Upstream documents this as the way
     to mass-configure devices, and it runs early enough in ATAKActivity
-    that the value is in place before ATAK would invent a callsign of its
-    own - it only does that when locationCallsign is empty.
+    that the values are in place before ATAK would fill anything in of
+    its own accord - it only invents a callsign when locationCallsign is
+    empty.
 
-    Written per device rather than shipped in payload/atak, because the
-    callsign is the one setting that differs between phones. `callsigns`
-    is keyed by serial: the task list is built once and reused across
-    devices when -j is above 1.
+    Carries two kinds of setting. The entries from [prefs.entries] are
+    the same on every device: coordinate format, altitude reference,
+    units, north reference. The callsign is per device, which is why the
+    file is written here rather than shipped in payload/atak.
+
+    `callsigns` is keyed by serial: the task list is built once and
+    reused across devices when -j is above 1.
     """
     target = cfg["target"]
-    group, key = cfg["group"], cfg["key"]
+    group = cfg["group"]
+    entries = dict(cfg.get("entries", {}))
+    callsign_key = cfg.get("callsign_key", "locationCallsign")
 
     def run(adb, dev, log):
+        staged = dict(entries)
         callsign = callsigns.get(dev.serial, "")
-        if not callsign:
-            return True, "skipped (none given)"
+        if callsign:
+            staged[callsign_key] = callsign
+        if not staged:
+            return True, "nothing to stage"
 
-        # ATAK's own escaping for the five characters that would otherwise
-        # break the XML - see encode()/decode() in PreferenceControl.
-        text = callsign
-        for ch, esc in (("&", "\\u0026"), ('"', "\\u0022"), ("'", "\\u0027"),
-                        ("<", "\\u003c"), (">", "\\u003e")):
-            text = text.replace(ch, esc)
-        doc = ("<?xml version='1.0' standalone='yes'?>\n"
-               "<preferences>\n"
-               f'<preference version="1" name="{group}">\n'
-               f'<entry key="{key}" class="class java.lang.String">{text}</entry>\n'
+        lines = "\n".join(_pref_entry(k, v) for k, v in staged.items())
+        doc = ("<?xml version='1.0' standalone='yes'?>\n<preferences>\n"
+               f'<preference version="1" name="{group}">\n{lines}\n'
                "</preference>\n</preferences>\n")
-        log.write(f"{key}={callsign}\n{doc}")
+        log.write(doc)
 
         tmp = Path(tempfile.mkdtemp(prefix="atak-hv-")) / "defaults"
         tmp.write_text(doc, encoding="utf-8")
         try:
-            parent = target.rsplit("/", 1)[0]
-            p = adb.shell(["mkdir", "-p", parent], dev.serial)
+            p = adb.shell(["mkdir", "-p", target.rsplit("/", 1)[0]], dev.serial)
             _logged(log, p)
             p = adb.run(["push", str(tmp), target], serial=dev.serial, timeout=120)
             _logged(log, p)
@@ -612,8 +636,11 @@ def task_callsign(callsigns: dict, cfg: dict) -> Task:
                 return False, detail[0] if detail else "see log"
         finally:
             shutil.rmtree(tmp.parent, ignore_errors=True)
-        return True, f"{callsign} - applies when ATAK next starts"
-    return Task("Stage callsign", run)
+
+        note = f"{len(staged)} settings"
+        note += f", callsign {callsign}" if callsign else ", no callsign"
+        return True, note + " - applied when ATAK next starts"
+    return Task("Stage ATAK preferences", run)
 
 
 def task_push(entry: dict, base: Path) -> Task:
@@ -759,8 +786,10 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
                                       cfg.get("appops", {}),
                                       cfg.get("battery", {}).get("exempt", [])))
     tasks += [task_push(e, base) for e in cfg["push"]]
-    if callsigns and cfg.get("callsign"):
-        tasks.append(task_callsign(callsigns, cfg["callsign"]))
+    prefs = cfg.get("prefs")
+    # Runs for the shared settings even when no callsign was given.
+    if prefs and (prefs.get("entries") or callsigns):
+        tasks.append(task_prefs(callsigns, prefs))
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean up after push"))

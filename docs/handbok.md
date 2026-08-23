@@ -528,6 +528,12 @@ rätt beslutsnivå.
 Heading, Mils, Grid North.
 Avvikelser skapar kritiska fel vid eldledning.
 
+På en telefon som provisionerats med verktyget är de här redan satta —
+se `[prefs.entries]` i `provision.toml`. Kontrollera ändå, och rätta för
+hand om något avviker. Observera att självmarkörens ruta alltid visar
+grader och `M` även när streck och gitternord är satta; den visningen
+säger ingenting om de två inställningarna.
+
 ![Anropssignaler](assets/handbok/hv-slide06-13.png)
 ![Teamfärger](assets/handbok/hv-slide06-14.png)
 ![Nivåmarkering](assets/handbok/hv-slide06-15.png)

@@ -98,8 +98,12 @@ change. Prefer extending the config over adding code.
 - **ATAK preferences can be staged, not just typed in.** ATAK reads
   `/sdcard/atak/config/prefs/defaults` at startup (`ingestDefaults()` in
   `PreferenceControl`, called early from `ATAKActivity`), applies every
-  entry and deletes the file. `task_callsign` uses it for `locationCallsign`.
-  Same XML shape as the `config.pref` inside `atak-box.zip`. The importer
+  entry and deletes the file. `task_prefs` writes it.
+  `[prefs.entries]` carries the settings that are identical on every device
+  (MGRS, MSL, mils, grid north). Same XML shape as the `config.pref` inside
+  `atak-box.zip`. Values that look numeric are **strings** — ATAK reads them
+  with `getString()` then `Integer.parseInt()`, so an Integer entry throws
+  `ClassCastException` inside the app. The importer
   applies any key — the blacklist naming `locationCallsign` is on the JSON
   path, not this one — and ATAK only invents a callsign when the pref is
   empty, so a staged value wins.

@@ -300,7 +300,8 @@ SUMMARY
 
 | Symptom | Orsak |
 |---|---|
-| `no authorized devices within ...` | Telefonen syns inte alls. Utvecklarläge och USB-felsökning påslagna? Se [Testa på en egen telefon](#testa-på-en-egen-telefon) |
+| `no device found in ...` | Telefonen syns inte alls för `adb`. Verktyget skriver ut en checklista efter några sekunder — följ den. Vanligast: USB-felsökning är inte påslagen |
+| `no device became ready ...` | Telefonen syns, men är inte användbar. Se varningen strax ovanför, oftast `unauthorized` |
 | `unauthorized` | Godkänn USB-felsökning på telefonen |
 | `offline` | Koppla ur och i kabeln |
 | `INSTALL_FAILED_USER_RESTRICTED` | Rutan på telefonens skärm hann inte godkännas. Vanligt på Xiaomi — kör om med telefonen framför dig |

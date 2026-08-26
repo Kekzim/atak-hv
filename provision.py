@@ -73,11 +73,21 @@ class Out:
         if not self.quiet:
             print(f"FAILED ({note})")
 
+    # stdout is block-buffered when the output is piped or redirected, while
+    # stderr is not. Without the flush, warnings and errors overtake the
+    # normal output they are supposed to comment on.
     def warn(self, text: str) -> None:
-        print(f"WARNING: {text}", file=sys.stderr)
+        sys.stdout.flush()
+        print(f"WARNING: {text}", file=sys.stderr, flush=True)
 
     def error(self, text: str) -> None:
-        print(f"ERROR: {text}", file=sys.stderr)
+        sys.stdout.flush()
+        print(f"ERROR: {text}", file=sys.stderr, flush=True)
+
+    def block(self, text: str) -> None:
+        """Multi-line guidance. Goes to stderr, and past -q, like warn()."""
+        sys.stdout.flush()
+        print(text, file=sys.stderr, flush=True)
 
 
 # --------------------------------------------------------------------------
@@ -841,10 +851,42 @@ def preflight(cfg: dict, base: Path, out: Out) -> bool:
     return not problems
 
 
+# Shown when adb can see nothing at all. Deliberately not shown when a
+# device is merely `unauthorized` - that already gets its own one-line hint,
+# and the cause is different.
+NO_DEVICE_HELP = """
+No device is visible to adb yet. A phone without USB debugging does not
+show up here at all - not even as "unauthorized" - so an empty list usually
+means the phone has never been set up for it:
+
+  1. Settings -> About phone: tap "Build number" seven times. On some
+     models it sits under About phone -> Software information.
+  2. Go back, search the settings for "USB" and turn on "USB debugging".
+  3. Reconnect the cable, unlock the screen, and accept the
+     "Allow USB debugging" prompt. Tick "Always allow from this computer".
+  4. If the phone asks what the USB connection is for, choose file
+     transfer (MTP), not charging only.
+
+Still nothing?
+
+  - Try another cable. Many charge only and carry no data.
+  - Windows: install the manufacturer's USB driver for the phone.
+  - Run "adb devices" yourself to see exactly what adb sees.
+
+Waiting - fix it on the phone and this picks it up by itself.
+"""
+
+# How long to wait before offering the help above. Long enough that a
+# normally-connected phone is already found, short enough to be useful.
+NO_DEVICE_HELP_AFTER = 8
+
+
 def wait_for_devices(adb: Adb, out: Out, timeout: int) -> list[Device]:
     out.info("Waiting for authorized devices (Ctrl-C to abort) ...")
     deadline = time.monotonic() + timeout
     warned: set[str] = set()
+    helped = False
+    help_at = time.monotonic() + min(NO_DEVICE_HELP_AFTER, timeout)
 
     while True:
         ready, pending = adb.list_devices()
@@ -859,8 +901,23 @@ def wait_for_devices(adb: Adb, out: Out, timeout: int) -> list[Device]:
                 warned.add(serial)
         if ready:
             return [adb.describe(s) for s in ready]
+
+        # Silence is the case that needs explaining, so say something well
+        # before the timeout rather than after it.
+        if not pending and not helped and time.monotonic() >= help_at:
+            out.block(NO_DEVICE_HELP)
+            helped = True
+
         if time.monotonic() > deadline:
-            raise SystemExit("ERROR: no authorized devices within %ds" % timeout)
+            if not pending:
+                if not helped:
+                    out.block(NO_DEVICE_HELP)
+                raise SystemExit(
+                    f"ERROR: no device found in {timeout}s. See the checklist "
+                    "above, or raise the wait with --wait.")
+            raise SystemExit(
+                f"ERROR: no device became ready within {timeout}s - see the "
+                "warnings above.")
         time.sleep(2)
 
 

@@ -4,23 +4,22 @@
 # so the kit can live anywhere - USB stick, home directory, C:\, /opt.
 
 # ---------------------------------------------------------------------
-# Apps sideloaded onto every device.
-# Paths are relative to this file. ATAK-CIV (Civil Use), ATAK Plugin:
-# Data Sync and ATAK Plugin: GeoCam are NOT here on
-# purpose - they are installed from Google Play by the operator, and
-# ATAK-CIV must be present before this tool runs. The names are exactly
-# as they read in the Play Store; see [requirements] below.
+# Appar som sidladdas.
 #
-# Data Sync sidladdades tidigare, men Play Store-versionen ar signerad med
-# en annan nyckel: en telefon som redan har den fran Play kan inte
-# uppdateras med vart paket (INSTALL_FAILED_UPDATE_INCOMPATIBLE). Play
-# Store ar dessutom nyare - 3.7.4 mot 3.7.0 i paketet.
+# Allt som ligger i katalogen sidladdas - bade .apk och .apks. Ingen
+# lista over filnamn: verktyget laser paketnamnet ur varje fils manifest,
+# sa en ny version laggs in och anvands utan att nagot har behover andras.
+#
+# En .apks ar ett app bundle, en zip med base.apk plus split_config.*.
+# adb kan inte installera den direkt; verktyget packar upp delarna och
+# ger dem till "adb install-multiple", vilket ar det Play gor sjalvt.
+#
+# ATAK-CIV och plugin-apparna ligger INTE i repot - de ar tredje parts
+# binarer. Forbandet lagger sjalvt in dem i katalogen fore utskick.
+# Ramsor och HVreports ar Hemvarnets egna och foljer med.
 # ---------------------------------------------------------------------
 [kit]
-apks = [
-    "payload/apks/Ramsor.apk",
-    "payload/apks/HVreports.apk",
-]
+apk_dir = "payload/apks"
 
 # Removed after pushing.
 # atak-box.zip - the folder push drags a stale copy along.
@@ -117,6 +116,26 @@ secure = [
 #     adb shell pm list packages | grep -i -E 'update|ota|fota'
 # ---------------------------------------------------------------------
 [packages]
+# Google Play och dess tjanster.
+#
+# Nar alla appar sidladdas behovs Play inte langre: enheten loggas inte in
+# med nagot Google-konto, sa uppdateringar via Play ar anda inte mojliga.
+# Att stanga av Play tar bort en bakgrundstjanst som annars soker efter
+# uppdateringar och hamtar dem over mobildata.
+#
+# PROVAT: com.google.android.gms och .gsf kan stangas av utan att GPS
+# slutar fungera - gps-provider forblir enabled med satellitfix. Priset ar
+# en permanent avisering, "Fel pa Google Play-tjanster", som inte gar att
+# stanga. Darfor ligger de har men utkommenterade: sla pa dem om ni vill
+# ha maximal nedlasning och kan leva med aviseringen.
+#
+# adb install paverkas inte - sidladdning fungerar utan Play.
+play = [
+    "com.android.vending",
+    # "com.google.android.gms",
+    # "com.google.android.gsf",
+]
+
 # Uppdateringstjanster. Att stanga av enskilda GMS-*komponenter* (till
 # skillnad fran hela paket) kan tyst misslyckas pa nyare Android/GMS -
 # installningarna ovan ar den primara kontrollen.
@@ -237,6 +256,10 @@ restore = []
 # leverantorernas standardnamn. Kontrollera med:
 #     adb shell pm list packages | grep -i <namn>
 # ---------------------------------------------------------------------
+# Appar som redan maste finnas pa enheten. Poster som sidladdas ur
+# payload/apks hoppas over automatiskt - verktyget jamfor mot
+# paketnamnen i katalogen - sa listan behover inte rensas nar en app
+# borjar folja med i paketet.
 [requirements.required]
 "com.atakmap.app.civ" = "ATAK-CIV (Civil Use)"
 

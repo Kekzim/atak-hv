@@ -36,7 +36,7 @@ atak-hv/
 ├── provision.sh            startar verktyget på Linux/macOS
 ├── platform-tools/         adb.exe för Windows (följer med)
 ├── payload/                det som hamnar på telefonen
-│   ├── apks/               appar som sidladdas
+│   ├── apks/               allt här sidladdas (.apk och .apks)
 │   ├── atak/               ATAK-konfiguration → /sdcard/atak
 │   └── ATAK-installation/  → /sdcard/ATAK-installation
 │       └── atak/           ren reservkopia, se nedan
@@ -72,7 +72,21 @@ upplåst, och *File transfer (MTP)* vald om den frågar.
 
 ## Appar
 
-**Installeras av användaren från Google Play, före körning:**
+Det finns två vägar. Båda fungerar; välj efter hur enheten ska användas.
+
+| | **Play Store** (standard) | **Full nedlåsning** |
+|---|---|---|
+| ATAK-CIV och plugin | installeras av användaren ur Play | sidladdas ur `payload/apks/` |
+| Google-konto | krävs | behövs inte |
+| Play Store efteråt | kvar och fungerar | avstängd med `--disable-play` |
+| Uppdateringar | manuellt ur Play när ni väljer | kräver ny provisionering |
+
+Verktyget känner av vilken väg som gäller **av sig självt**: ligger
+ATAK-apparna i `payload/apks/` sidladdas de, annars förväntas de komma
+ur Play. Ingen inställning behöver ändras. `--disable-play` är däremot
+alltid ett aktivt val.
+
+### Väg 1: Play Store
 
 Namnen nedan är precis som de står i Play Store. Sök hellre på
 paketnamnet eller följ länken — *ATAK* ensamt ger många träffar, och det
@@ -84,14 +98,41 @@ paketnamnet eller följ länken — *ATAK* ensamt ger många träffar, och det
 | **[ATAK Plugin: Data Sync](https://play.google.com/store/apps/details?id=com.atakmap.android.datasync.plugin)** | `com.atakmap.android.datasync.plugin` | Sidladdas inte längre — Play Store-versionen är signerad med en annan nyckel, så en telefon som redan har den därifrån kan inte uppdateras med paketets version. |
 | [ATAK Plugin: GeoCam](https://play.google.com/store/apps/details?id=com.atakmap.android.geocam.plugin) | `com.atakmap.android.geocam.plugin` | |
 
-**Sidladdas av verktyget** från `payload/apks/`:
-
-`Ramsor.apk` · `HVreports.apk`
-
 Verktyget **kontrollerar först att Play Store-apparna finns** och avbryter
 om ATAK saknas — det är ingen idé att lägga ut konfiguration på en telefon
 utan ATAK. Saknas någon av de övriga blir det en varning. Listan ligger
 under `[requirements]` i `provision.toml`.
+
+### Väg 2: sidladdning och full nedlåsning
+
+För en enhet som bara ska köra ATAK. Lägg ATAK-CIV och de två
+plugin-apparna i `payload/apks/` och kör med `--disable-play`.
+
+```
+provision.bat install --disable-play
+```
+
+**Filnamnen spelar ingen roll.** Verktyget läser paketnamnet ur varje
+fils manifest, så en ny version läggs bara in i katalogen — ingen
+konfiguration och ingen kod behöver ändras. Både `.apk` och `.apks`
+fungerar; en `.apks` är ett app bundle som packas upp och installeras med
+`install-multiple`, precis som Play gör.
+
+Ligger ATAK i katalogen slutar den vara ett krav — verktyget vet att den
+installeras om en stund och avbryter inte längre på att den saknas.
+
+> [!NOTE]
+> `--disable-play` stänger bara av `com.android.vending`. Google Play
+> **services** (`com.google.android.gms`) lämnas igång. De går att stänga
+> av också — GPS fortsätter fungera, provat med satellitfix — men
+> telefonen visar då en permanent avisering *”Fel på Google
+> Play-tjänster”* som inte går att stänga. Raderna ligger utkommenterade
+> under `[packages] play` i `provision.toml`.
+
+`restore` slår på Play Store igen, oavsett hur installationen kördes.
+
+**Hemvärnets egna appar** — `Ramsor.apk` och `HVreports.apk` — ligger i
+repot och sidladdas alltid, i båda vägarna.
 
 ## Enhetsinställningar som verktyget sätter
 
@@ -250,6 +291,7 @@ igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 | Flagga | Betydelse |
 |---|---|
 | `--callsign SIGNAL` | Endast `install`: anropssignal för enheten. Frågas efter om den utelämnas |
+| `--disable-play` | Endast `install`: stäng även av Play Store. Kräver att apparna sidladdas |
 | `--remarks TAGG` | Endast `install`: nivåtaggen i *Remarks*. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
@@ -355,11 +397,23 @@ allt återställs av `restore`.
 | Animationer | Kostar GPU och batteri för rent kosmetiska övergångar |
 | Adaptiv batterihantering | Lägger CPU på att lära sig vilka appar som ska strypas — meningslöst när enheten kör en app |
 | BLE-skanning för positionering | Android skannar efter beacons även med Bluetooth av |
+| Play Store, **endast med `--disable-play`** | Onödig när alla appar sidladdas; söker annars efter uppdateringar i bakgrunden |
 
-Orörda med avsikt: `com.google.android.gms`, `com.google.android.gsf`,
-Play Store och `com.android.location.fused` — de krävs för GPS, mobilnät,
-wifi och framtida appinstallationer. Detsamma gäller tillverkarnas
-OS-överlägg för tema, lagring och nätverk.
+Orörda med avsikt: `com.google.android.gms`, `com.google.android.gsf`
+och `com.android.location.fused`, samt tillverkarnas OS-överlägg för
+tema, lagring och nätverk.
+
+**Play Store rörs inte heller som standard**, utan bara med
+`--disable-play` — och det bara när apparna sidladdas, se
+[Appar](#appar).
+
+> [!NOTE]
+> Att Google Play **services** skulle krävas för GPS stämmer inte:
+> mätt på en OnePlus Nord N100 fortsatte gps-provider vara `enabled` med
+> satellitfix även med `com.google.android.gms` och `.gsf` avstängda.
+> Det som faktiskt händer är att telefonen visar en permanent avisering
+> *”Fel på Google Play-tjänster”*. Därför lämnas de igång, men av
+> aviseringens skull — inte för positioneringens.
 
 ### Vad optimeringen inte rör
 
@@ -449,7 +503,7 @@ markörer, ritverktyg, rapportering, feeds och felsökning.
 | Vad | Varför | Var man får tag på det |
 |---|---|---|
 | `atak-box.zip` | Serveradress + certifikat, förbandsspecifikt | Från er TAK-serveransvarige |
-| ATAK-CIV och de två plugin-apparna | Finns på Google Play | Google Play |
+| ATAK-CIV och de två plugin-apparna | Tredje parts binärer. Behövs i `payload/apks/` bara vid sidladdning | Google Play, eller er egen distribution |
 | `logs/` | Körloggar | Skapas vid körning |
 
 ## Att verifiera
@@ -458,6 +512,10 @@ Verktyget är utprovat mot riktiga telefoner: en Xiaomi 21051182G
 (Android 13) och en OnePlus Nord N100 (Android 11) — med och utan
 `--no-optimize`, samt en full `restore` med kontroll av att inställningar
 och avstängda paket kommer tillbaka.
+
+Sidladdning av alla fem apparna, inklusive `.apks`-buntar och
+`--disable-play`, är utprovat på OnePlus. En hel körning med lockdown och
+113 MB appar tog **23 sekunder**.
 
 `restore --wipe-media` är **inte** utprovat. Det är också det enda
 kommandot som raderar användarens egna filer.

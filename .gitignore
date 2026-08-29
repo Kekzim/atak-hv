@@ -30,12 +30,13 @@ atak-box.zip
 **/atak/tools/datapackage/files/**/*.apk
 
 # ---------------------------------------------------------------
-# Appar som installeras från Google Play (sidladdas inte längre)
+# ATAK-CIV och plugin-apparna sidladdas, men hamtas av forbandet
+# sjalvt - de ar tredje parts binarer och ligger inte i repot. Samma
+# princip som atak-box.zip. Ramsor.apk och HVreports.apk ar Hemvarnets
+# egna och foljer med.
 # ---------------------------------------------------------------
-payload/apks/ATAK.apk
-payload/apks/Geocam.apk
-payload/apks/Signal.apk
-payload/apks/FileManager.apk
+payload/apks/ATAK-*
+*.apks
 
 # ---------------------------------------------------------------
 # Tredjepartsbinärer — hämtas från leverantören, se README

@@ -71,6 +71,14 @@ the tool against a real phone over `adb`. Useful properties when doing that:
 manufacturer, an app, a permission, a debloat target or a setting is a config
 change. Prefer extending the config over adding code.
 
+**APKs are discovered, not listed.** `find_apks` scans `[kit] apk_dir` and
+reads the package id out of each binary `AndroidManifest.xml` (`apk_package`,
+a small AXML string-pool parser — no aapt, stdlib only). So a new version is
+dropped in and used with no config change. A `.apks` is an app bundle: unpack
+base.apk plus the `split_config.*` and hand them all to `adb install-multiple`.
+Anything found is treated as satisfying `[requirements]`, so sideloading ATAK
+does not trip the check that demands it be installed first.
+
 ### Invariants worth knowing before editing
 
 - **Task closures are shared across devices.** `build_*_tasks` runs once and

@@ -17,6 +17,7 @@ import argparse
 import concurrent.futures
 import os
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+import zipfile
 
 if sys.version_info < (3, 11):
     sys.exit(
@@ -88,6 +90,108 @@ class Out:
         """Multi-line guidance. Goes to stderr, and past -q, like warn()."""
         sys.stdout.flush()
         print(text, file=sys.stderr, flush=True)
+
+
+# --------------------------------------------------------------------------
+# APK inspection
+# --------------------------------------------------------------------------
+
+def _axml_strings(buf: bytes) -> tuple[list[str], int]:
+    """Read the string pool that opens a binary AndroidManifest.xml."""
+    off = 8                                   # past the file header
+    typ, _hdr, size = struct.unpack_from("<HHI", buf, off)
+    if typ != 0x0001:
+        raise ValueError("no string pool")
+    count, _styles, flags, strings_start, _ss = struct.unpack_from("<IIIII", buf, off + 8)
+    utf8 = bool(flags & 0x100)
+    offsets = struct.unpack_from("<%dI" % count, buf, off + 28)
+    base = off + strings_start
+    out = []
+    for o in offsets:
+        p = base + o
+        if utf8:
+            n = buf[p]
+            p += 2 if n & 0x80 else 1         # skip the character count
+            m = buf[p]
+            if m & 0x80:
+                m = ((m & 0x7F) << 8) | buf[p + 1]
+                p += 2
+            else:
+                p += 1
+            out.append(buf[p:p + m].decode("utf-8", "replace"))
+        else:
+            n = struct.unpack_from("<H", buf, p)[0]
+            out.append(buf[p + 2:p + 2 + n * 2].decode("utf-16-le", "replace"))
+    return out, off + size
+
+
+def apk_package(path: Path) -> str | None:
+    """The package id an APK declares, or None if it cannot be read.
+
+    Read straight out of the binary manifest, so the tool needs no aapt or
+    other SDK tool beyond adb. That is what lets the kit be driven by what
+    the files declare rather than by their names, which carry a version and
+    change every release.
+    """
+    try:
+        with zipfile.ZipFile(path) as z:
+            buf = z.read("AndroidManifest.xml")
+        pool, pos = _axml_strings(buf)
+        while pos < len(buf):
+            typ, _hdr, size = struct.unpack_from("<HHI", buf, pos)
+            if size <= 0:
+                break
+            if typ == 0x0102:                                  # START_TAG
+                name = struct.unpack_from("<I", buf, pos + 20)[0]
+                if pool[name] == "manifest":
+                    attr_start = struct.unpack_from("<H", buf, pos + 24)[0]
+                    count = struct.unpack_from("<H", buf, pos + 28)[0]
+                    for i in range(count):
+                        a = pos + 16 + attr_start + i * 20
+                        ns, key, raw = struct.unpack_from("<III", buf, a)
+                        if ns == 0xFFFFFFFF and pool[key] == "package":
+                            return pool[raw]
+            pos += size
+    except Exception:                                          # noqa: BLE001
+        return None
+    return None
+
+
+@dataclass
+class Payload:
+    """One installable file from the apk directory."""
+    path: Path
+    package: str | None
+
+    @property
+    def is_bundle(self) -> bool:
+        return self.path.suffix == ".apks"
+
+
+def find_apks(directory: Path) -> list[Payload]:
+    """Every installable file in `directory`, with the package it declares.
+
+    Picked up by extension, so a new version is dropped in and used without
+    touching the config. A .apks is an app bundle - a zip of split APKs -
+    and its package id comes from base.apk inside it.
+    """
+    found = []
+    if not directory.is_dir():
+        return found
+    for path in sorted(directory.iterdir()):
+        if path.suffix == ".apk":
+            found.append(Payload(path, apk_package(path)))
+        elif path.suffix == ".apks":
+            pkg = None
+            try:
+                with zipfile.ZipFile(path) as z:
+                    if "base.apk" in z.namelist():
+                        with tempfile.TemporaryDirectory() as tmp:
+                            pkg = apk_package(Path(z.extract("base.apk", tmp)))
+            except Exception:                                  # noqa: BLE001
+                pass
+            found.append(Payload(path, pkg))
+    return found
 
 
 # --------------------------------------------------------------------------
@@ -341,18 +445,25 @@ def task_settings(groups: dict) -> Task:
     return Task("Apply system settings", run)
 
 
-def task_packages(packages: dict, enable: bool) -> Task:
+def task_packages(packages: dict, enable: bool, include_play: bool = False) -> Task:
     """Disable (or re-enable) update services, unused apps and vendor bloat.
 
-    `core` and `debloat` apply everywhere. `vendor` is keyed by
+    `core`, `play` and `debloat` apply everywhere. `vendor` is keyed by
     ro.product.manufacturer, so an unknown handset simply gets the common
     lists and still works.
+
+    `play` is only touched when asked for - `--disable-play` on install,
+    and always on restore so a locked-down device can be handed back. It
+    is safe to disable once every app is sideloaded, and would strand a
+    device that still gets its apps from the Play Store.
     """
     verb = "enable" if enable else "disable-user"
     vendor = packages.get("vendor", {})
 
     def run(adb, dev, log):
         targets = list(packages.get("core", [])) + list(packages.get("debloat", []))
+        if include_play:
+            targets += list(packages.get("play", []))
         key = dev.manufacturer.lower()
         matched = next((v for k, v in vendor.items() if k.lower() == key), None)
         if matched:
@@ -392,24 +503,38 @@ def task_shell(commands: list[list[str]], label: str) -> Task:
     return Task(label, run)
 
 
-def task_requirements(required: dict, optional: dict) -> Task:
-    """Check that the Play Store apps are on the device before doing anything.
+def task_requirements(required: dict, optional: dict,
+                      provided: set[str] | None = None) -> Task:
+    """Check that the apps that must already be there really are.
 
     Pushing configuration to a phone without ATAK accomplishes nothing,
     and the failure only becomes visible much later, in the field.
+
+    `provided` is what the payload will sideload a moment later. Those are
+    not prerequisites - demanding them would abort a run that was about to
+    install them - so they are dropped from the check rather than having
+    to be deleted from [requirements] by hand.
     """
+    provided = provided or set()
+
     def run(adb, dev, log):
         installed = adb.shell(["pm", "list", "packages"], dev.serial, mutating=False).stdout
-        miss_req = [n for p, n in required.items() if f"package:{p}" not in installed]
-        miss_opt = [n for p, n in optional.items() if f"package:{p}" not in installed]
+        req = {p: n for p, n in required.items() if p not in provided}
+        opt = {p: n for p, n in optional.items() if p not in provided}
+        if provided:
+            log.write(f"sideloaded here, not required up front: {sorted(provided)}\n")
+        miss_req = [n for p, n in req.items() if f"package:{p}" not in installed]
+        miss_opt = [n for p, n in opt.items() if f"package:{p}" not in installed]
         log.write(f"missing required: {miss_req}\nmissing optional: {miss_opt}\n")
 
         if miss_req:
             return False, ("not installed: " + ", ".join(miss_req)
-                           + " - install from Google Play first")
+                           + " - install it before provisioning")
         if miss_opt:
             return True, f"WARNING: not installed: {', '.join(miss_opt)}"
-        return True, f"{len(required) + len(optional)} present"
+        if not req and not opt:
+            return True, "all apps come from the payload"
+        return True, f"{len(req) + len(opt)} present"
     return Task("Check required apps", run, fatal=True)
 
 
@@ -510,8 +635,39 @@ def task_doze_check(packages: list[str]) -> Task:
 VERIFIER_KEYS = ("package_verifier_enable", "verifier_verify_adb_installs")
 
 
-def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
+def _unpack_bundle(path: Path, into: Path, log) -> list[Path]:
+    """Extract base.apk and its splits from a .apks bundle.
+
+    Every split is handed to install-multiple, not just the ones matching
+    this device. Android takes the whole set, and picking per device would
+    mean reimplementing bundletool's device-spec matching for no gain on a
+    handful of files.
+    """
+    try:
+        with zipfile.ZipFile(path) as z:
+            names = [n for n in z.namelist()
+                     if n == "base.apk" or n.startswith("split_config.")]
+            if "base.apk" not in names:
+                log.write(f"{path.name}: no base.apk in the bundle\n")
+                return []
+            # base first - install-multiple wants the base before its splits
+            names.sort(key=lambda n: (n != "base.apk", n))
+            out = [Path(z.extract(n, into)) for n in names]
+        log.write(f"{path.name}: {len(out)} splits ({', '.join(names)})\n")
+        return out
+    except Exception as exc:                                   # noqa: BLE001
+        log.write(f"{path.name}: cannot read bundle - {exc}\n")
+        return []
+
+
+def task_install(payloads: list[Payload], restore_verifier: bool = False) -> Task:
     """Sideload the APKs.
+
+    Two formats. A plain .apk goes in with `adb install`. A .apks is an
+    app bundle - a zip holding base.apk plus split_config.* APKs - which
+    adb cannot install directly; the splits are unpacked and handed over
+    together with `adb install-multiple`, which is what Play does behind
+    the scenes.
 
     Android's package verifier blocks adb installs with
     INSTALL_FAILED_VERIFICATION_FAILURE, so it is turned off for the
@@ -530,8 +686,19 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
 
         failed, conflicts = [], []
         try:
-            for apk in apks:
-                p = adb.run(["install", "-r", "-g", str(apk)], serial=dev.serial, timeout=600)
+            for item in payloads:
+                if item.is_bundle:
+                    with tempfile.TemporaryDirectory(prefix="atak-hv-") as tmp:
+                        parts = _unpack_bundle(item.path, Path(tmp), log)
+                        if not parts:
+                            failed.append(item.path.name)
+                            continue
+                        p = adb.run(["install-multiple", "-r", "-g",
+                                     *[str(x) for x in parts]],
+                                    serial=dev.serial, timeout=900)
+                else:
+                    p = adb.run(["install", "-r", "-g", str(item.path)],
+                                serial=dev.serial, timeout=900)
                 _logged(log, p)
                 if adb.dry_run:
                     continue
@@ -539,9 +706,9 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
                 if p.returncode == 0 and "Success" in combined:
                     continue
                 if "INSTALL_FAILED_UPDATE_INCOMPATIBLE" in combined:
-                    conflicts.append(apk.name)
+                    conflicts.append(item.path.name)
                 else:
-                    failed.append(apk.name)
+                    failed.append(item.path.name)
         finally:
             if restore_verifier:
                 for key, value in previous.items():
@@ -570,7 +737,7 @@ def task_install(apks: list[Path], restore_verifier: bool = False) -> Task:
                 parts.append("already installed with a different signature, "
                              "uninstall first: " + ", ".join(conflicts))
             return False, "; ".join(parts)
-        return True, f"{len(apks)} apps" + (" (dry-run)" if adb.dry_run else "")
+        return True, f"{len(payloads)} apps" + (" (dry-run)" if adb.dry_run else "")
     return Task("Install apps", run)
 
 
@@ -767,31 +934,39 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 # --------------------------------------------------------------------------
 
 def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
-                        answers: dict | None = None) -> list[Task]:
+                        answers: dict | None = None,
+                        disable_play: bool = False) -> list[Task]:
     """Build the install sequence.
 
     `optimize` covers the lockdown steps - turning off system and app
     updates and disabling the manufacturers' update services. Wanted on an
     issued device, unwanted on someone's personal phone, so it can be
     skipped with --no-optimize.
+
+    `disable_play` additionally turns off the Play Store. Only makes sense
+    when every app is sideloaded from the payload, so it is opt-in and off
+    by default: the ordinary route, where the operator installs ATAK from
+    the Play Store, has to keep working untouched.
     """
-    apks = [(base / a).resolve() for a in cfg["kit"]["apks"]]
+    payloads = find_apks((base / cfg["kit"]["apk_dir"]).resolve())
+    provided = {p.package for p in payloads if p.package}
     answers = answers or {}
     req = cfg.get("requirements", {})
     tasks = []
     if req.get("required") or req.get("optional"):
-        tasks.append(task_requirements(req.get("required", {}), req.get("optional", {})))
+        tasks.append(task_requirements(req.get("required", {}),
+                                       req.get("optional", {}), provided))
     stay_awake, let_screen_sleep = tasks_stay_awake()
     tasks.append(stay_awake)
     if optimize:
         tasks += [
             task_settings(cfg["settings"]["install"]),
-            task_packages(cfg["packages"], enable=False),
+            task_packages(cfg["packages"], enable=False, include_play=disable_play),
         ]
         extra = cfg.get("commands", {}).get("install", [])
         if extra:
             tasks.append(task_shell(extra, "Apply extra settings"))
-    tasks += [task_install(apks, restore_verifier=not optimize)]
+    tasks += [task_install(payloads, restore_verifier=not optimize)]
     if cfg.get("permissions") or cfg.get("appops") or cfg.get("battery", {}).get("exempt"):
         tasks.append(task_permissions(cfg.get("permissions", {}),
                                       cfg.get("appops", {}),
@@ -825,7 +1000,7 @@ def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
         tasks.append(task_remove(r["wipe_paths"], "Wipe user media"))
     tasks += [
         task_settings(cfg["settings"]["restore"]),
-        task_packages(cfg["packages"], enable=True),
+        task_packages(cfg["packages"], enable=True, include_play=True),
     ]
     extra = cfg.get("commands", {}).get("restore", [])
     if extra:
@@ -835,9 +1010,20 @@ def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
 
 def preflight(cfg: dict, base: Path, out: Out) -> bool:
     problems = []
-    for apk in cfg["kit"]["apks"]:
-        if not (base / apk).exists():
-            problems.append(f"missing app: {apk}")
+    apk_dir = (base / cfg["kit"]["apk_dir"]).resolve()
+    payloads = find_apks(apk_dir)
+    if not payloads:
+        problems.append(
+            f"no .apk or .apks files in {cfg['kit']['apk_dir']}\n"
+            "    ATAK-CIV and the plugins are not in the repo - they are\n"
+            "    third-party binaries. Put them in that directory before\n"
+            "    provisioning; any version works, they are found by what\n"
+            "    they declare, not by file name."
+        )
+    unreadable = [p.path.name for p in payloads if not p.package]
+    if unreadable:
+        problems.append("cannot read a package name from: " + ", ".join(unreadable)
+                        + "\n    Corrupt download, or not an APK at all.")
     for entry in cfg["push"]:
         if entry.get("required") and not (base / entry["source"]).exists():
             problems.append(
@@ -981,6 +1167,10 @@ def main(argv: list[str] | None = None) -> int:
         help="ATAK remarks field - the level tag higher staff filter on, "
              "such as #Plut. Same rules as --callsign.")
     p_install.add_argument(
+        "--disable-play", action="store_true",
+        help="also disable the Play Store. Only for devices where every app "
+             "is sideloaded from the payload; restore turns it back on.")
+    p_install.add_argument(
         "--no-optimize", action="store_true",
         help="skip the lockdown steps: leave system and app updates, the "
              "package verifier and the manufacturer's update services alone. "
@@ -1098,9 +1288,29 @@ def main(argv: list[str] | None = None) -> int:
             out.info("Aborted.")
             return 1
 
+        if args.command == "install" and args.disable_play:
+            # The Play group is applied by the lockdown step, which
+            # --no-optimize skips entirely - the flag would do nothing.
+            if args.no_optimize:
+                out.error("--disable-play has no effect together with "
+                          "--no-optimize: the lockdown step is what disables it")
+                return 2
+            # Disabling the store on a device whose apps came from the store
+            # leaves no way to put them back.
+            in_payload = {p.package for p
+                          in find_apks((base / cfg["kit"]["apk_dir"]).resolve())
+                          if p.package}
+            outside = [n for p, n in cfg.get("requirements", {})
+                       .get("required", {}).items() if p not in in_payload]
+            if outside:
+                out.warn("--disable-play, but not in the payload: "
+                         + ", ".join(outside)
+                         + " - the device will have no way to reinstall them")
+
         if args.command == "install":
             tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,
-                                        answers=answers)
+                                        answers=answers,
+                                        disable_play=args.disable_play)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

@@ -1295,17 +1295,12 @@ def main(argv: list[str] | None = None) -> int:
                 out.error("--disable-play has no effect together with "
                           "--no-optimize: the lockdown step is what disables it")
                 return 2
-            # Disabling the store on a device whose apps came from the store
-            # leaves no way to put them back.
-            in_payload = {p.package for p
-                          in find_apks((base / cfg["kit"]["apk_dir"]).resolve())
-                          if p.package}
-            outside = [n for p, n in cfg.get("requirements", {})
-                       .get("required", {}).items() if p not in in_payload]
-            if outside:
-                out.warn("--disable-play, but not in the payload: "
-                         + ", ".join(outside)
-                         + " - the device will have no way to reinstall them")
+            # Nothing else to check here. Whether the apps came from the
+            # payload or from the Play Store, the requirements step runs
+            # first and aborts the device if a required app is missing -
+            # so the store is never disabled on a phone that lacks ATAK.
+            # That check knows what is actually installed; this one would
+            # only know what is in the payload.
 
         if args.command == "install":
             tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,

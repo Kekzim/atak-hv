@@ -129,6 +129,13 @@ installeras om en stund och avbryter inte längre på att den saknas.
 > Play-tjänster”* som inte går att stänga. Raderna ligger utkommenterade
 > under `[packages] play` i `provision.toml`.
 
+`--disable-play` fungerar även på **väg 1**: har användaren redan
+installerat de tre apparna ur Play kan Play stängas av efteråt, utan att
+något behöver sidladdas. Kravkontrollen körs före nedlåsningen och
+avbryter om en app saknas, så butiken stängs aldrig av på en telefon utan
+ATAK. Priset är att appar därefter bara kan uppdateras genom att slå på
+Play igen, eller genom att provisionera om med sidladdning.
+
 `restore` slår på Play Store igen, oavsett hur installationen kördes.
 
 **Hemvärnets egna appar** — `Ramsor.apk` och `HVreports.apk` — ligger i

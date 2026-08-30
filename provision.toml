@@ -186,6 +186,19 @@ debloat = [
     "com.google.android.dialer",
     "com.google.android.contacts",
     "com.google.android.apps.messaging",
+    # Telemetri, installationsguider och konton som inte anvands pa en
+    # enhet utan Google-konto.
+    #
+    # com.google.android.apps.work.oobconfig gar inte att stanga av:
+    # "Cannot disable a protected package". Den star darfor inte har.
+    "com.google.mainline.telemetry",
+    "com.google.android.apps.restore",
+    "com.google.android.onetimeinitializer",
+    "com.google.android.partnersetup",
+    "com.google.android.apps.setupwizard.searchselector",
+    # Kartor och filhanterare - ATAK har egna.
+    "com.google.android.apps.maps",
+    "com.google.android.apps.nbu.files",
 ]
 
 # Tillverkarspecifikt. Matchas mot ro.product.manufacturer, sa en okand
@@ -201,7 +214,41 @@ xiaomi = ["com.miui.updater"]
 # com.oneplus.providers.media, com.oneplus.dataoptimization - OS-niva for
 # tema, lagring och natverk. Att stanga av dem riskerar Installningar,
 # lagringsatkomst och wifi.
+# Diagnostik, fabrikstestverktyg och telemetri. Ingen av dem har nagon
+# funktion for anvandaren; flera har natverksrattigheter. net.oneplus.odm
+# och .push lag bland de storsta CPU-konsumenterna pa en vilande enhet.
+# Provat pa BE2013: telefonen, ATAK, wifi och GPS opaverkade.
+#
+# Backup, konton och ansiktslasning ar meningslosa pa en enhet utan
+# Google- eller OnePlus-konto, och lasupplasning sker med PIN.
+#
+# ORORDA med avsikt: com.oneplus.accessory, com.oneplus.geoiptime och
+# com.oneplus.carrierlocation ror tillbehor, tid och position - tre saker
+# den har enheten inte har rad att fa fel. com.oneplus.camera,
+# .filemanager och .screenshot behover operatoren. Alla *overlay*-paket
+# ar RRO-lager for tema och layout och ska inte rasas.
 oneplus = [
+    "com.oem.autotest",
+    "com.oem.rftoolkit",
+    "com.oneplus.factorymode",
+    "com.oneplus.factorymode.specialtest",
+    "com.oneplus.engmode",
+    "com.oneplus.bttestmode",
+    "com.oneplus.opbugreportlite",
+    "com.oneplus.minidumpoptimization",
+    "net.oneplus.commonlogtool",
+    "cn.oneplus.oemtcma",
+    "net.oneplus.odm",
+    "net.oneplus.odm.provider",
+    "net.oneplus.push",
+    "com.oneplus.brickmode",
+    "com.oneplus.backuprestore",
+    "com.oneplus.backuprestore.remoteservice",
+    "cn.oneplus.nvbackup",
+    "com.oneplus.account",
+    "com.oneplus.aod",
+    "com.oneplus.faceunlock",
+    "com.oneplus.sound.tuner",
     "cn.oneplus.photos",
     "com.oneplus.calculator",
     "com.oneplus.gallery",

@@ -398,7 +398,8 @@ allt återställs av `restore`.
 | Vad | Varför |
 |---|---|
 | Uppdateringar av system och appar, paketverifierare | En oplanerad uppdatering får inte ändra beteende eller kräva omstart mitt i ett uppdrag |
-| 25 Google-appar (mejl, video, assistent, plånbok, kalender, telefoni …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
+| 32 Google-appar (mejl, video, assistent, plånbok, kalender, kartor, telefoni …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
+| Tillverkarens diagnostik, fabrikstestverktyg och telemetri | Ingen funktion för användaren, flera med nätverksrättigheter |
 | Tillverkarens appar och telemetri | Samma sak — `[packages.vendor]`, matchas mot telefonens tillverkare |
 | Bakgrundssynk (`master_sync`) | ATAK använder inte Androids synkramverk |
 | Animationer | Kostar GPU och batteri för rent kosmetiska övergångar |

@@ -430,7 +430,11 @@ krav:
 
 * **Mobildata påverkas inte** av att telefoni-, kontakt- och SMS-apparna
   inaktiveras. Data bärs av telefoniramverket i systemet, inte av
-  uppringningsappen. Enheten är en dataenhet — inga röstsamtal går till
+  uppringningsappen. Kontrollerat efter nedlåsningen på en OnePlus Nord
+  N100: `com.android.phone`, `com.android.providers.telephony` (APN-listan),
+  `com.qualcomm.qti.telephonyservice`, `com.oneplus.telephonyoptimization`,
+  `com.oneplus.communication.data` och `com.google.android.networkstack`
+  var alla igång, och radiogränssnittet svarade. Enheten är en dataenhet — inga röstsamtal går till
   den — så de tre apparna stängs av. Ska era telefoner även användas för
   samtal, ta bort dem ur `debloat` i `provision.toml`.
 * **Bluetooth-radion stängs inte av.**
@@ -527,6 +531,17 @@ Sidladdning av alla fem apparna, inklusive `.apks`-buntar och
 
 `restore --wipe-media` är **inte** utprovat. Det är också det enda
 kommandot som raderar användarens egna filer.
+
+**Mobildata är inte utprovat med SIM.** Testenheten har inget SIM-kort, så
+kontrollen ovan visar att telefoniramverket är intakt efter nedlåsningen —
+inte att en dataförbindelse faktiskt kommer upp. Wifi är däremot utprovat
+och är det ATAK kör mot servern över. Kör en enhet med SIM innan ni
+förlitar er på mobildata i fält.
+
+`com.google.android.ims` (Carrier Services) är avstängd sedan tidigare,
+vilket innebär att VoLTE inte fungerar. Det spelar ingen roll för en
+dataenhet — uppringningsappen är ändå avstängd — men röstsamtal över 4G
+går alltså inte.
 
 Kör ändå `--dry-run` och en enskild enhet först på en modell ni inte
 provisionerat förut — tillverkarnas paketlistor skiljer sig åt.

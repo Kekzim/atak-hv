@@ -201,11 +201,28 @@ verktyg som visas under *Tools*. Paketet innehåller två:
 | **Grund** | Den avskalade soldatvyn. Döljer nitton verktyg — bland annat avstånd och bäring, rutter, resektion, eldledning, radiokontroller och spårhistorik |
 | **Planering** | Behåller planeringsverktygen. Döljer åtta — bland annat bloodhound, alert, CASEVAC och geofences |
 
-Båda läggs ut automatiskt, och `select_loadout` i `provision.toml` avgör
-vilken som är vald när ATAK startar. Den anges med **titel**, inte UID:
-UID:t byts varje gång loadouten exporteras om, så verktyget läser det ur
-filen. Står det en titel som inte finns bland filerna avbryts steget
-hellre än att telefonen tyst hamnar i fel vy.
+Båda läggs ut på varje telefon. **Grund är vald som standard** — det är
+`select_loadout` i `provision.toml`. Ska en enhet sättas upp för
+planeringsarbete väljs den andra vid körningen:
+
+```
+provision.bat install --loadout Planering
+```
+
+| Kommando | Vald loadout |
+|---|---|
+| `install` | Grund — standard för alla installationer |
+| `install --loadout Planering` | Planering |
+| `install --loadout ""` | ingen; telefonens nuvarande vy lämnas orörd |
+
+Loadouten anges med **titel**, inte UID: UID:t byts varje gång loadouten
+exporteras om, så verktyget läser det ur filen. Ett namn som inte finns
+bland filerna avbryter **innan** verktyget rör telefonen, och skriver ut
+vilka som finns:
+
+```
+ERROR: no loadout titled 'Plannering'. Available: Grund, Planering
+```
 
 Att bara lägga ut en loadout gör den tillgänglig — ATAK minns den valda
 separat. Det är därför `select_loadout` behövs och inte kan utelämnas om
@@ -323,6 +340,7 @@ igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 | Flagga | Betydelse |
 |---|---|
 | `--callsign SIGNAL` | Endast `install`: anropssignal för enheten. Frågas efter om den utelämnas |
+| `--loadout NAMN` | Endast `install`: vilken loadout som ska vara vald. Standard `Grund` |
 | `--disable-play` | Endast `install`: stäng även av Play Store. Kräver att apparna sidladdas |
 | `--remarks TAGG` | Endast `install`: nivåtaggen i *Remarks*. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |

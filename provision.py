@@ -788,6 +788,22 @@ def loadout_uid(entry_xml: str, title: str) -> str | None:
     return fields.get("uid") if fields.get("title") == title else None
 
 
+def loadout_titles(paths: list[Path]) -> dict[str, str]:
+    """Every loadout title found in `paths`, mapped to its uid."""
+    found = {}
+    for path in paths:
+        for _name, items in read_pref_blocks(path):
+            for item in items:
+                doc = minidom.parseString(item)
+                values = [(el.firstChild.nodeValue or "")
+                          for el in doc.getElementsByTagName("element")
+                          if el.firstChild is not None]
+                fields = dict(v.split("=", 1) for v in values if "=" in v)
+                if fields.get("title") and fields.get("uid"):
+                    found[fields["title"]] = fields["uid"]
+    return found
+
+
 def read_pref_blocks(path: Path) -> list[tuple[str, list[str]]]:
     """Pull the <preference> blocks out of a .pref file or a data package.
 
@@ -815,7 +831,8 @@ def read_pref_blocks(path: Path) -> list[tuple[str, list[str]]]:
     return blocks
 
 
-def task_prefs(answers: dict, cfg: dict, base: Path) -> Task:
+def task_prefs(answers: dict, cfg: dict, base: Path,
+               loadout: str | None = None) -> Task:
     """Stage the preference file ATAK reads for itself at startup.
 
     ATAK reads <mount>/atak/config/prefs/defaults when it starts, applies
@@ -824,6 +841,10 @@ def task_prefs(answers: dict, cfg: dict, base: Path) -> Task:
     that the values are in place before ATAK would fill anything in of
     its own accord - it only invents a callsign when locationCallsign is
     empty.
+
+    `loadout` overrides [prefs] select_loadout for this run. Grund is the
+    everyday view and the config default; Planering is picked per run with
+    --loadout when a device is being set up for planning work.
 
     Carries two kinds of setting. The entries from [prefs.entries] are
     the same on every device: coordinate format, altitude reference,
@@ -839,7 +860,8 @@ def task_prefs(answers: dict, cfg: dict, base: Path) -> Task:
     entries = dict(cfg.get("entries", {}))
     labels = {a["key"]: a.get("flag") or a["key"] for a in cfg.get("ask", [])}
     include = [(base / p).resolve() for p in cfg.get("include", [])]
-    select = cfg.get("select_loadout")
+    select = loadout if loadout is not None else cfg.get("select_loadout")
+    select = select or None                    # "" means leave it alone
 
     def run(adb, dev, log):
         asked = answers.get(dev.serial, {})
@@ -1022,7 +1044,8 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 
 def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
                         answers: dict | None = None,
-                        disable_play: bool = False) -> list[Task]:
+                        disable_play: bool = False,
+                        loadout: str | None = None) -> list[Task]:
     """Build the install sequence.
 
     `optimize` covers the lockdown steps - turning off system and app
@@ -1062,7 +1085,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
     prefs = cfg.get("prefs")
     # Runs for the shared settings even when nothing was asked for.
     if prefs and (prefs.get("entries") or answers):
-        tasks.append(task_prefs(answers, prefs, base))
+        tasks.append(task_prefs(answers, prefs, base, loadout))
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean up after push"))
@@ -1254,6 +1277,11 @@ def main(argv: list[str] | None = None) -> int:
         help="ATAK remarks field - the level tag higher staff filter on, "
              "such as #Plut. Same rules as --callsign.")
     p_install.add_argument(
+        "--loadout", metavar="NAMN",
+        help="ATAK loadout to select, by title. Defaults to [prefs] "
+             "select_loadout in the config; pass an empty string to leave "
+             "whatever the device already had.")
+    p_install.add_argument(
         "--disable-play", action="store_true",
         help="also disable the Play Store. Only for devices where every app "
              "is sideloaded from the payload; restore turns it back on.")
@@ -1375,6 +1403,23 @@ def main(argv: list[str] | None = None) -> int:
             out.info("Aborted.")
             return 1
 
+        # Checked here, against local files only, so a typo costs nothing.
+        # The staging step is step 10 - by then the apps are installed and
+        # the payload pushed, and failing there marks the whole device
+        # failed over a one-word mistake.
+        if args.command == "install" and args.loadout:
+            sources = [(base / p).resolve()
+                       for p in cfg.get("prefs", {}).get("include", [])]
+            try:
+                titles = loadout_titles(sources)
+            except Exception as exc:                           # noqa: BLE001
+                out.error(f"cannot read the loadout files: {exc}")
+                return 2
+            if args.loadout not in titles:
+                out.error(f"no loadout titled {args.loadout!r}. Available: "
+                          + (", ".join(sorted(titles)) or "none"))
+                return 2
+
         if args.command == "install" and args.disable_play:
             # The Play group is applied by the lockdown step, which
             # --no-optimize skips entirely - the flag would do nothing.
@@ -1392,7 +1437,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "install":
             tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,
                                         answers=answers,
-                                        disable_play=args.disable_play)
+                                        disable_play=args.disable_play,
+                                        loadout=args.loadout)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

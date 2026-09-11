@@ -25,6 +25,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+import xml.dom.minidom as minidom
 import zipfile
 
 if sys.version_info < (3, 11):
@@ -764,7 +765,57 @@ def _pref_entry(key: str, value) -> str:
     return f'<entry key="{key}" class="{class_name}">{text}</entry>'
 
 
-def task_prefs(answers: dict, cfg: dict) -> Task:
+# ATAK stores each loadout under this prefix and remembers the active one
+# separately - importing a loadout makes it available, it does not select
+# it. See LoadoutManager in the ATAK source.
+LOADOUT_SELECTED_KEY = "selected_loadout_key"
+
+
+def loadout_uid(entry_xml: str, title: str) -> str | None:
+    """The uid of a loadout entry whose title matches, else None.
+
+    Loadouts are a java.util.Set of "key=value" strings, among them
+    `title=` and `uid=`. Matching on the title means the config can name a
+    loadout the way a person does, and the uid - which changes whenever the
+    loadout is exported again - is read from the file.
+    """
+    doc = minidom.parseString(entry_xml)
+    values = []
+    for el in doc.getElementsByTagName("element"):
+        if el.firstChild is not None:
+            values.append(el.firstChild.nodeValue or "")
+    fields = dict(v.split("=", 1) for v in values if "=" in v)
+    return fields.get("uid") if fields.get("title") == title else None
+
+
+def read_pref_blocks(path: Path) -> list[tuple[str, list[str]]]:
+    """Pull the <preference> blocks out of a .pref file or a data package.
+
+    Returns each block's group name with its <entry> elements as raw XML,
+    copied rather than re-serialised. The loadout entries hold long button
+    strings and java.util.Set values with <element> children; copying them
+    verbatim keeps them exactly as ATAK wrote them.
+    """
+    if path.suffix == ".pref":
+        data = path.read_bytes()
+    else:                                    # a data package holding one
+        with zipfile.ZipFile(path) as z:
+            names = [n for n in z.namelist() if n.endswith(".pref")]
+            if not names:
+                raise ValueError(f"{path.name}: no .pref inside")
+            data = z.read(names[0])
+
+    doc = minidom.parseString(data)
+    blocks = []
+    for pref in doc.documentElement.getElementsByTagName("preference"):
+        name = pref.getAttribute("name")
+        entries = [e.toxml() for e in pref.getElementsByTagName("entry")]
+        if name and entries:
+            blocks.append((name, entries))
+    return blocks
+
+
+def task_prefs(answers: dict, cfg: dict, base: Path) -> Task:
     """Stage the preference file ATAK reads for itself at startup.
 
     ATAK reads <mount>/atak/config/prefs/defaults when it starts, applies
@@ -787,6 +838,8 @@ def task_prefs(answers: dict, cfg: dict) -> Task:
     group = cfg["group"]
     entries = dict(cfg.get("entries", {}))
     labels = {a["key"]: a.get("flag") or a["key"] for a in cfg.get("ask", [])}
+    include = [(base / p).resolve() for p in cfg.get("include", [])]
+    select = cfg.get("select_loadout")
 
     def run(adb, dev, log):
         asked = answers.get(dev.serial, {})
@@ -795,9 +848,39 @@ def task_prefs(answers: dict, cfg: dict) -> Task:
             return True, "nothing to stage"
 
         lines = "\n".join(_pref_entry(k, v) for k, v in staged.items())
+        body = f'<preference version="1" name="{group}">\n{lines}\n</preference>'
+
+        # Ready-made preference sets - ATAK loadouts and the like - are
+        # copied in beside ours, each keeping its own group name. They
+        # would otherwise need importing by hand on every device.
+        extra = 0
+        selected = None
+        for path in include:
+            try:
+                for name, items in read_pref_blocks(path):
+                    body += (f'\n<preference version="1" name="{name}">\n'
+                             + "\n".join(items) + "\n</preference>")
+                    extra += len(items)
+                    if select:
+                        for item in items:
+                            uid = loadout_uid(item, select)
+                            if uid:
+                                selected = uid
+                log.write(f"included {path.name}\n")
+            except Exception as exc:                        # noqa: BLE001
+                log.write(f"{path.name}: cannot read - {exc}\n")
+                return False, f"cannot read {path.name}: {exc}"
+
+        if select:
+            if not selected:
+                return False, f"no loadout titled {select!r} among the included files"
+            body += (f'\n<preference version="1" name="{group}">\n'
+                     + _pref_entry(LOADOUT_SELECTED_KEY, selected)
+                     + "\n</preference>")
+            log.write(f"selected loadout {select} = {selected}\n")
+
         doc = ("<?xml version='1.0' standalone='yes'?>\n<preferences>\n"
-               f'<preference version="1" name="{group}">\n{lines}\n'
-               "</preference>\n</preferences>\n")
+               + body + "\n</preferences>\n")
         log.write(doc)
 
         tmp = Path(tempfile.mkdtemp(prefix="atak-hv-")) / "defaults"
@@ -814,6 +897,10 @@ def task_prefs(answers: dict, cfg: dict) -> Task:
             shutil.rmtree(tmp.parent, ignore_errors=True)
 
         note = f"{len(staged)} settings"
+        if extra:
+            note += f" + {extra} from {len(include)} file(s)"
+        if selected:
+            note += f", loadout {select}"
         if asked:
             note += " (" + ", ".join(
                 f"{labels.get(k, k)} {v}" for k, v in asked.items()) + ")"
@@ -975,7 +1062,7 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
     prefs = cfg.get("prefs")
     # Runs for the shared settings even when nothing was asked for.
     if prefs and (prefs.get("entries") or answers):
-        tasks.append(task_prefs(answers, prefs))
+        tasks.append(task_prefs(answers, prefs, base))
     cleanup = cfg["kit"].get("cleanup_after_push", [])
     if cleanup:
         tasks.append(task_remove(cleanup, "Clean up after push"))

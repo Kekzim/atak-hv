@@ -381,6 +381,30 @@ exempt = ["com.atakmap.app.civ"]
 # ---------------------------------------------------------------------
 [prefs]
 target = "/sdcard/atak/config/prefs/defaults"
+# Fardiga preferensuppsattningar som kopieras in i defaults-filen.
+# Innehallet tillampas vid start som allt annat, sa operatoren slipper
+# importera dem for hand pa varje telefon.
+#
+# Grund och Planering ar ATAK-loadouts: vilka knappar som visas i
+# verktygsraden och vilka verktyg som doljs. Grund ar den avskalade
+# soldatvyn, Planering behaller planeringsverktygen.
+#
+# Filerna ligger kvar under payload/ATAK-installation/ och foljer darmed
+# med ut pa telefonen, sa de gar att importera for hand ocksa om nagon
+# vill byta loadout i efterhand.
+include = [
+    "payload/ATAK-installation/Grund.zip",
+    "payload/ATAK-installation/Planering.zip",
+]
+
+# Vilken loadout som ska vara vald nar ATAK startar. Att importera en
+# loadout gor den bara tillganglig - ATAK minns den valda separat.
+#
+# Anges med titel, inte UID. UID:t byts varje gang loadouten exporteras
+# om, och lases darfor ur filen. Star har en titel som inte finns bland
+# filerna ovan avbryts steget i stallet for att tyst lamna fel vy.
+# Kommentera bort raden for att lata operatoren valja sjalv.
+select_loadout = "Grund"
 # Preferensgruppen posterna skrivs i. ATAK mappar om det har namnet till
 # appens egna preferenser vid inlasning.
 group = "com.atakmap.app_preferences"

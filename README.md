@@ -191,6 +191,31 @@ Behöver ni andra värden ändrar ni dem under `[prefs.entries]`. Värdena
 skrivs som strängar även när de ser ut som siffror — ATAK läser dem så,
 och ett heltal får appen att kasta undantag.
 
+### Loadouts — vilka knappar och verktyg som syns
+
+En **loadout** styr vilka knappar som sitter i navigeringsraden och vilka
+verktyg som visas under *Tools*. Paketet innehåller två:
+
+| Loadout | Innehåll |
+|---|---|
+| **Grund** | Den avskalade soldatvyn. Döljer nitton verktyg — bland annat avstånd och bäring, rutter, resektion, eldledning, radiokontroller och spårhistorik |
+| **Planering** | Behåller planeringsverktygen. Döljer åtta — bland annat bloodhound, alert, CASEVAC och geofences |
+
+Båda läggs ut automatiskt, och `select_loadout` i `provision.toml` avgör
+vilken som är vald när ATAK startar. Den anges med **titel**, inte UID:
+UID:t byts varje gång loadouten exporteras om, så verktyget läser det ur
+filen. Står det en titel som inte finns bland filerna avbryts steget
+hellre än att telefonen tyst hamnar i fel vy.
+
+Att bara lägga ut en loadout gör den tillgänglig — ATAK minns den valda
+separat. Det är därför `select_loadout` behövs och inte kan utelämnas om
+en viss vy ska gälla.
+
+Vill ni byta loadout i efterhand ligger `Grund.zip` och `Planering.zip`
+kvar på telefonen under `/sdcard/ATAK-installation/` och kan importeras på
+vanligt sätt. Egna loadouts exporteras ur ATAK och läggs till under
+`[prefs] include`.
+
 ### Kontrollera på enheten
 
 Klicka på din egen markör och välj detaljer. Där står anropssignal,

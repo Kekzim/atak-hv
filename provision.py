@@ -18,6 +18,7 @@ import concurrent.futures
 import os
 import shutil
 import struct
+import re
 import subprocess
 import sys
 import tempfile
@@ -869,8 +870,19 @@ def task_prefs(answers: dict, cfg: dict, base: Path,
         if not staged:
             return True, "nothing to stage"
 
-        lines = "\n".join(_pref_entry(k, v) for k, v in staged.items())
-        body = f'<preference version="1" name="{group}">\n{lines}\n</preference>'
+        # One block per preference name, never two. ATAK's importer keys
+        # on the name, so a second block with a name already used replaces
+        # the first instead of adding to it - two loadout files, or a
+        # selected_loadout_key written on its own, silently took the
+        # [prefs.entries] settings with them. Entries are merged by key so
+        # a repeated key keeps its last value.
+        blocks: dict[str, dict[str, str]] = {}
+
+        def stage(name: str, key: str, entry: str) -> None:
+            blocks.setdefault(name, {})[key] = entry
+
+        for k, v in staged.items():
+            stage(group, k, _pref_entry(k, v))
 
         # Ready-made preference sets - ATAK loadouts and the like - are
         # copied in beside ours, each keeping its own group name. They
@@ -880,8 +892,9 @@ def task_prefs(answers: dict, cfg: dict, base: Path,
         for path in include:
             try:
                 for name, items in read_pref_blocks(path):
-                    body += (f'\n<preference version="1" name="{name}">\n'
-                             + "\n".join(items) + "\n</preference>")
+                    for item in items:
+                        found = re.search(r'key="([^"]+)"', item)
+                        stage(name, found.group(1) if found else item, item)
                     extra += len(items)
                     if select:
                         for item in items:
@@ -896,10 +909,14 @@ def task_prefs(answers: dict, cfg: dict, base: Path,
         if select:
             if not selected:
                 return False, f"no loadout titled {select!r} among the included files"
-            body += (f'\n<preference version="1" name="{group}">\n'
-                     + _pref_entry(LOADOUT_SELECTED_KEY, selected)
-                     + "\n</preference>")
+            stage(group, LOADOUT_SELECTED_KEY,
+                  _pref_entry(LOADOUT_SELECTED_KEY, selected))
             log.write(f"selected loadout {select} = {selected}\n")
+
+        body = "\n".join(
+            f'<preference version="1" name="{name}">\n'
+            + "\n".join(entries.values()) + "\n</preference>"
+            for name, entries in blocks.items())
 
         doc = ("<?xml version='1.0' standalone='yes'?>\n<preferences>\n"
                + body + "\n</preferences>\n")

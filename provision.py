@@ -18,6 +18,7 @@ import concurrent.futures
 import os
 import shutil
 import struct
+import hashlib
 import re
 import subprocess
 import sys
@@ -1141,6 +1142,44 @@ def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
     return tasks
 
 
+def mirror_differences(a: Path, b: Path,
+                      label_a: str = "", label_b: str = "") -> list[str]:
+    """Compare two payload trees that are meant to be identical.
+
+    `payload/atak/` is the working copy ATAK reads and writes on the
+    device; `payload/ATAK-installation/atak/` is the clean spare that
+    stays behind so a soldier can restore in the field without a
+    computer. They only serve that purpose while they match: a map
+    definition added to one and not the other disappears the moment
+    someone restores.
+
+    Returns one line per differing path - missing on either side, or
+    present in both with different bytes. Nothing here reads a device.
+    """
+    def index(root: Path) -> dict[str, str]:
+        found = {}
+        for f in sorted(root.rglob("*")):
+            if f.is_file():
+                digest = hashlib.md5(f.read_bytes()).hexdigest()
+                found[str(f.relative_to(root))] = digest
+        return found
+
+    left, right = index(a), index(b)
+    # Both trees are called "atak", so the directory name alone would not
+    # say which side a file is missing from - label with the configured
+    # path instead.
+    name_a, name_b = label_a or str(a), label_b or str(b)
+    out = []
+    for name in sorted(set(left) | set(right)):
+        if name not in right:
+            out.append(f"only in {name_a}: {name}")
+        elif name not in left:
+            out.append(f"only in {name_b}: {name}")
+        elif left[name] != right[name]:
+            out.append(f"differs: {name}")
+    return out
+
+
 def preflight(cfg: dict, base: Path, out: Out) -> bool:
     problems = []
     apk_dir = (base / cfg["kit"]["apk_dir"]).resolve()
@@ -1165,6 +1204,22 @@ def preflight(cfg: dict, base: Path, out: Out) -> bool:
                 "    distributed separately - add the package for your server\n"
                 "    before provisioning, or devices get no server contact."
             )
+    # The two atak trees drifting apart is not worth aborting a run over -
+    # it costs nothing on the device and only bites at a later field
+    # restore - so it is a warning, not a problem.
+    mirror = cfg["kit"].get("mirror", [])
+    if len(mirror) == 2:
+        a, b = ((base / m).resolve() for m in mirror)
+        if a.is_dir() and b.is_dir():
+            drift = mirror_differences(a, b, mirror[0], mirror[1])
+            if drift:
+                shown = "\n".join(f"    {d}" for d in drift[:10])
+                more = f"\n    ... and {len(drift) - 10} more" if len(drift) > 10 else ""
+                out.warn(f"{mirror[0]} and {mirror[1]} differ in "
+                         f"{len(drift)} file(s):\n{shown}{more}\n"
+                         "    The second is the spare a soldier restores from in the\n"
+                         "    field. What is missing there is lost at that restore.")
+
     for p in problems:
         out.error(p)
     return not problems

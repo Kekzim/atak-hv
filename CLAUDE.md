@@ -98,6 +98,13 @@ does not trip the check that demands it be installed first.
   package the same run would have sideloaded. Package ids can be read out
   of an APK's manifest when in doubt — that is how `com.atakmap.takcam`
   was confirmed.
+- **`payload/atak/` and `payload/ATAK-installation/atak/` must stay
+  identical.** The first is the working copy, the second the spare a
+  soldier restores from in the field without a computer; whatever is
+  missing from the spare is lost at that restore. `preflight` compares them
+  (`[kit] mirror`) and **warns without aborting** — the drift costs nothing
+  on the device, only later. They had already drifted once, by a file that
+  existed only in the spare.
 - **Leave no trace.** `install` must hand the device back as it found it.
   Anything it changes for the duration of the run — the package verifier,
   the stay-awake setting — gets saved and restored, and `restore` must undo

@@ -21,6 +21,13 @@
 [kit]
 apk_dir = "payload/apks"
 
+# Arbetskopia och reservkopia. De tva traden ska vara identiska: det forsta
+# ar det ATAK laser och skriver i pa enheten, det andra ar den rena kopian
+# som ligger kvar sa att en soldat kan aterstalla i falt utan dator. Vad
+# som saknas i det andra ar borta efter en sadan aterstallning.
+# Preflight jamfor dem och varnar - den avbryter inte korningen.
+mirror = ["payload/atak", "payload/ATAK-installation/atak"]
+
 # Removed after pushing.
 # atak-box.zip - the folder push drags a stale copy along.
 cleanup_after_push = ["/sdcard/ATAK-installation/atak-box.zip"]

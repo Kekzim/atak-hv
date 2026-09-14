@@ -579,6 +579,12 @@ Håll dem synkade. Läggs en ny kartdefinition till i `payload/atak/imagery/`
 måste den in i reservkopian också, annars försvinner den vid nästa
 återställning i fält.
 
+Verktyget kontrollerar det åt dig: skiljer sig träden skriver `install` ut
+en varning med vilka filer det gäller, innan någon enhet rörs. Det är en
+varning och inte ett fel — körningen fortsätter, eftersom skillnaden inte
+kostar något på enheten utan först vid en fältåterställning. Paret står
+under `[kit] mirror` i `provision.toml`.
+
 ## Dokumentation
 
 Handhavande och instruktioner finns i [docs/](docs/README.md) — bland annat

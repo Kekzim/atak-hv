@@ -481,34 +481,39 @@ samsung = [
     "com.google.audio.hearing.visualization.accessibility.scribe",
 ]
 # MIUI/HyperOS. Genomgangen pa en Xiaomi Pad 5 (21051182G, nabu),
-# Android 13, HyperOS 1.0. Bara det som ar sakert att stanga av star har -
-# reklam, telemetri, apptryckare och fabrikstestverktyg.
+# Android 13, HyperOS 1.0.
 #
-# PROVAT PA ENHET: com.miui.msa.global och com.xiaomi.discover stangdes av
-# och enheten anvandes efterat utan att nagot slutade fungera - inga
-# krascher, inga ANR. Ovriga rader ar klassade, inte provkorda.
+# PROVAT PA ENHET. Samtliga rader nedan stangdes av pa provenheten och
+# enheten anvandes efterat: inga krascher, inga ANR, skalet och
+# lasskarmen opaverkade. 26 paket avstangda totalt.
 #
 # com.xiaomi.discover ar inte bara en reklamyta: den hade sjalv installerat
 # com.miui.creation och com.miui.mediaeditor pa provenheten
 # (installerPackageName=com.xiaomi.discover, inte Play Store). MSA bar
-# dessutom PreinstallService och gor samma sak.
+# dessutom en PreinstallService och gor samma sak. Darfor star bada
+# apparna den lagt in ocksa i listan.
 #
 # ORORDA med avsikt, och de ska inte laggas till senare heller:
 # com.xiaomi.finddevice ar Xiaomis stoldskydd och hanger ihop med
 # Mi-kontot - samma kategori som Knox Guard pa Samsung och com.huawei.hwid
 # pa Huawei. Med den foljer com.xiaomi.account, com.xiaomi.devauth och
 # com.xiaomi.trustservice. com.lbe.security.miui ar rattighetshanteraren,
-# com.miui.home ar skalet, och com.miui.core, .rom, .system samt alla
-# *.overlay ar ramverk och RRO-lager. com.miui.powerkeeper ar MIUI:s
-# bakgrundsdodare - den stryper ATAK, men stangs av per app i
-# Installningar, inte harifran.
+# com.miui.home ar skalet, com.miui.miwallpaper bar bakgrunden, och
+# com.miui.core, .rom, .system samt alla *.overlay ar ramverk och
+# RRO-lager. com.miui.powerkeeper ar MIUI:s bakgrundsdodare - den stryper
+# ATAK, men stangs av per app i Installningar, inte harifran.
+#
+# Ororda for operatorens skull, samma resonemang som i samsung-listan:
+# com.miui.calculator och com.miui.screenrecorder. Pa HyperOS ar
+# skarminspelningen i snabbinstallningarna just det paketet - AOSP:s egen
+# inspelare finns inte exponerad.
 xiaomi = [
     # uppdateringstjanst. Namnet bytte mellan generationerna: aldre MIUI
     # har com.miui.updater, HyperOS har com.android.updater. Bada star
     # kvar - den som inte finns pa enheten raknas som n/a.
     "com.miui.updater",
     "com.android.updater",
-    # reklam och apptryckare - de tva som ar provade pa enhet
+    # reklam och apptryckare
     "com.miui.msa.global",
     "com.xiaomi.discover",
     # apparna som com.xiaomi.discover installerade av sig sjalv
@@ -525,6 +530,27 @@ xiaomi = [
     # forinstallerad tredjepart
     "cn.wps.xiaomi.abroad.lite",
     "com.mi.globalbrowser",
+    # Mi Cloud. En ATAK-enhet loggas inte in med nagot Mi-konto, sa de har
+    # ar rena bakgrundstjanster. Pa provenheten var molnsynken redan av
+    # (isGalleryCloudSyncable false) - star den pa nagonstans slutar den
+    # synka har.
+    "com.miui.cloudservice",
+    "com.miui.cloudbackup",
+    "com.miui.micloudsync",
+    "com.xiaomi.micloud.sdk",
+    # standardappar utan roll pa en ATAK-enhet. Kontrollera att enheten har
+    # nagot annat som oppnar bild och video innan de stangs av - efterat
+    # svarar systemet med valjardialogen MiuiResolverActivity i stallet
+    # for en trasig lank.
+    "com.miui.gallery",
+    "com.miui.notes",
+    "com.mi.android.globalFileexplorer",
+    "com.miui.player",
+    "com.miui.videoplayer",
+    "com.miui.weather2",
+    "com.miui.qr",
+    "com.xiaomi.scanner",
+    "com.miui.backup",
 ]
 
 # OxygenOS-appar och telemetri. Utprovat pa OnePlus Nord N100 (BE2013).

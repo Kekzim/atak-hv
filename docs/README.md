@@ -11,6 +11,7 @@ står i [repots README](../README.md#enhetsinställningar-som-verktyget-sätter)
 | [ATAK-handbok](handbok.md) | Handhavande: styrningar och färgsättning, layout, menyer, kartor, navigation, markörer, ritverktyg, data packages, 8S/PEDARS/FORS, feeds, uppdateringsintervall, tips och felsökning |
 | [Avrustning och uppstart](avrustning.md) | Återställ ATAK, fabriksåterställning, packlista för TAK-väskan, uppstart av en avrustad telefon |
 | [Video och kameror](video-och-kameror.md) | RTSP-streaming från ATAK och UAS |
+| [Bloatware: Huawei](bloatware-huawei.md) | Teknisk genomgång av Huawei-paket inför en framtida `[packages.vendor] huawei` — inte provkörd, inte införd |
 
 Dessutom:
 

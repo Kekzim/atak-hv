@@ -7,9 +7,8 @@ Play-tjänster och den gemensamma `debloat`-listan biter på den.
 > [!WARNING]
 > **Ingenting här är provkört.** Listan är klassad utifrån paketnamn,
 > `codePath` och vad som körde på enheten. Det finns ingen `huawei`-nyckel
-> i `[packages.vendor]`, och den ska inte läggas in förrän listan är
-> provad på en fungerande telefon. Se
-> [Läs det här först](#läs-det-här-först).
+> i `[packages.vendor]`, och den ska inte läggas in förrän listan körts
+> skarpt på en Huawei. Se [Läs det här först](#läs-det-här-först).
 
 ## Vad verktyget gör på en Huawei idag
 
@@ -192,12 +191,25 @@ finns därför inte i `provision.toml`.
 
 ## Om provenheten
 
-Telefonen hade **trasigt wifi** — drivrutinen slutförde varje sökning och
-lämnade tomt resultat till `wpa_supplicant`, 32 gånger i rad, genom
-omstart, radiocykel, återställning av nätverksinställningar och manuellt
-tillagt nät. Felet ligger under allt som `pm disable` eller `settings put`
-når, och har ingenting med provisioneringen att göra. Den saknade dessutom
-SIM, så den hade ingen nätverksväg alls.
+Telefonen såg inga wifi-nät under genomgången. Drivrutinen slutförde varje
+sökning och lämnade tomt resultat till `wpa_supplicant`, 32 gånger i rad,
+genom omstart, radiocykel, återställning av nätverksinställningar och
+manuellt tillagt nät.
 
-Det är skälet till att listan ovan inte är provkörd: den behöver en
-fungerande Huawei innan den förs in i `provision.toml`.
+**Det var inget hårdvarufel.** Enda accesspunkten inom räckhåll sände på
+5805 MHz — kanal 161 i UNII-3-bandet (5725–5875 MHz), som är en
+amerikansk tilldelning. Telefonen skickade landskoden `SE` till
+drivrutinen, och en enhet som följer den regulatoriska domänen varken
+söker eller ansluter på den kanalen. Sökningarna returnerade alltså
+ingenting därför att det inte fanns något telefonen *fick* se. Samma
+telefon ansluter utan problem till ett 2,4 GHz-nät.
+
+Lärdomen är att en Samsung i samma rum inte duger som kontroll: den såg
+nätet på −43 dBm, men olika kretsar hanterar UNII-3 olika, så jämförelsen
+sade ingenting om Huawei-enheten. Kontrollera kanalen innan tomma
+sökresultat tolkas som trasig radio.
+
+Telefonen saknade SIM, så wifi var dess enda nätverksväg.
+
+Listan ovan är ändå inte provkörd — den behöver köras skarpt innan den
+förs in i `provision.toml`.

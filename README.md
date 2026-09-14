@@ -70,6 +70,35 @@ USB-hub. Flera telefoner kan anslutas samtidigt.
 **På telefonen:** utvecklarläge och USB-felsökning aktiverat, skärmen
 upplåst, och *File transfer (MTP)* vald om den frågar.
 
+## Provade modeller
+
+Verktyget läser `ro.product.manufacturer` och kör bara den
+tillverkarlista som matchar, så **en okänd telefon fungerar ändå** — den
+får kärntjänsterna och den gemensamma debloat-listan. Tabellen säger
+alltså inte vad som går att provisionera, utan vad som är provat.
+
+| Modell | OS | Vad som är provat |
+|---|---|---|
+| OnePlus Nord N100 (BE2013) | Android 11 | `[packages.vendor] oneplus` utprövad på enheten |
+| Samsung Galaxy Tab A9+ (SM-X230) | Android 16, One UI 8.0.5 | `[packages.vendor] samsung` utprövad, 201 poster. Hela installationen verifierad, inklusive ATAK-start, GPS och staged inställningar |
+| Samsung Galaxy A40 (SM-A405FN) | Android 11 | Installationen körd. Se varningen nedan |
+| Samsung Galaxy A17 (SM-A176B) | — | Installationen körd |
+| Huawei P20 Lite (ANE-LX1) | Android 9, EMUI 9.1 | Körd på de gemensamma listorna. Ingen `huawei`-nyckel finns; genomgång i [Bloatware: Huawei](docs/bloatware-huawei.md) |
+
+Samsung-listan är utprövad på en **wifi-platta utan telefonihårdvara**.
+Telefoniraderna och raderna för cell broadcast är ofarliga där men träffar
+även Samsung-*telefoner*, eftersom listan matchas mot tillverkare och inte
+mot modell. Läs kommentarerna i `provision.toml` innan en telefon
+provisioneras.
+
+> [!WARNING]
+> **Stäng aldrig av paket som sköter inskrivning eller fjärrhantering.**
+> En Galaxy A40 som var ansluten till Knox Guard låste sig när
+> `com.samsung.android.kgclient` stängdes av — en avstängd agent läses som
+> manipulation. Samma sak gäller `com.huawei.hwid`, som bär Find My Phone.
+> En låst enhet måste dessutom nå sin server för att låsas upp, vilket är
+> precis vad en nyprovisionerad telefon saknar.
+
 ## Appar
 
 Det finns två vägar. Båda fungerar; välj efter hur enheten ska användas.

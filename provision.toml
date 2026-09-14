@@ -204,7 +204,132 @@ debloat = [
 # Tillverkarspecifikt. Matchas mot ro.product.manufacturer, sa en okand
 # telefon far bara core och debloat och fungerar anda.
 [packages.vendor]
-samsung = ["com.wssyncmldm", "com.sec.android.soagent"]
+# Samsung-appar, partnerpreloads och telemetri. Genomgangen pa Galaxy
+# Tab A9+ (SM-X230, One UI 8.0.5) - klassad, inte provkord i falt, till
+# skillnad fran oneplus-listan nedan.
+#
+# VARNING - TELEFONIRADERNA. SM-X230 ar en wifi-platta: den saknar
+# android.hardware.telephony helt och ROM:en bar overlayerna
+# ConnectivityOverlay_NoTelephony och DisableVoiceCapableOverlay. Pa den
+# modellen ar hela telefonistacken dod vikt. Listan matchas dock mot
+# ro.product.manufacturer, inte mot modell, sa den traffar aven Samsung-
+# TELEFONER. Ska era Samsung-enheter ringa eller bara mobildata: ta bort
+# blocket "telefoni och IMS" nedan. com.sec.imsservice bar VoLTE och
+# natregistrering pa en telefon.
+#
+# Cell broadcast bar VMA - viktigt meddelande till allmanheten. En platta
+# utan SIM kan anda inte ta emot det, men pa en telefon stangs varningarna
+# av harifran. Ta bort de tva raderna om enheten ska larma.
+#
+# ORORDA med avsikt: com.samsung.android.location, com.sec.location.nsflp2
+# och com.samsung.android.samsungpositioning bar GPS - ATAK star och faller
+# med dem. com.sec.android.app.camera och com.samsung.android.cameraxservice
+# behovs av GeoCam-plugin. com.samsung.android.honeyboard ar enda
+# tangentbordet pa enheten, com.sec.android.app.launcher ar skalet, och
+# com.samsung.android.mtp bar filoverforing over adb. Alla *overlay*- och
+# *.resources-paket ar RRO-lager - samma lardom som OnePlus-listan.
+samsung = [
+    # uppdateringstjanster
+    "com.wssyncmldm",
+    "com.sec.android.soagent",
+    "com.samsung.android.app.updatecenter",   # 36 mAh i batterihistoriken
+    # telefoni och IMS - se varningen ovan
+    "com.samsung.android.dialer",
+    "com.samsung.android.incallui",
+    "com.samsung.android.app.telephonyui",
+    "com.samsung.android.app.telephonyui.esimclient",
+    "com.samsung.android.callassistant",
+    "com.samsung.android.callbgprovider",
+    "com.samsung.android.smartcallprovider",
+    "com.hiya.star",                          # Smart Call, nummeruppslag
+    "com.samsung.android.app.contacts",
+    "com.sec.imsservice",
+    "com.sec.imslogger",
+    "com.samsung.ipservice",
+    "com.samsung.advp.imssettings",
+    "com.samsung.android.mdecservice",
+    "com.samsung.android.cidmanager",
+    "com.sec.mhs.smarttethering",
+    "com.samsung.android.mcf.autohotspot",
+    "com.google.android.cellbroadcastreceiver",
+    "com.google.android.cellbroadcastservice",
+    "com.google.android.apps.carrier.carrierwifi",
+    # telemetri och diagnostik. rubin.app ar Customization Service, som
+    # profilerar anvandandet; sdhms, sve och diagmonagent lag och korde
+    # vid genomgangen.
+    "com.sec.android.diagmonagent",
+    "com.samsung.android.dqagent",
+    "com.samsung.android.bbc.bbcagent",
+    "com.samsung.android.rubin.app",
+    "com.samsung.android.scs",
+    "com.samsung.android.smartsuggestions",
+    "com.samsung.android.sdm.config",
+    "com.samsung.android.scpm",
+    "com.samsung.sait.sohservice",
+    "com.samsung.android.knox.analytics.uploader",
+    "com.samsung.android.svcagent",
+    "com.samsung.android.da.daagent",
+    "com.sec.android.sdhms",
+    "com.sec.sve",
+    # Samsung-konto, moln och push - enheten loggas inte in nagonstans
+    "com.osp.app.signin",
+    "com.samsung.android.scloud",
+    "com.samsung.android.mobileservice",
+    "com.samsung.android.fmm",
+    "com.samsung.android.fast",
+    "com.sec.spp.push",
+    # butik, reklam och partnerpreloads. com.aura.oobe.samsung.gl ar
+    # AppCloud och installerar partnerappar i bakgrunden pa egen hand.
+    "com.aura.oobe.samsung.gl",
+    "com.sec.android.app.samsungapps",
+    "com.samsung.ecomm.global.gbr",
+    "com.samsung.sree",
+    "com.samsung.android.voc",
+    "com.sec.android.app.billing",
+    "com.sec.bcservice",
+    "com.netflix.mediaclient",
+    "com.spotify.music",
+    "com.microsoft.office.officehubrow",
+    "com.microsoft.office.outlook",
+    "com.microsoft.skydrive",
+    "com.microsoft.appmanager",
+    "com.samsung.android.mdx",
+    "com.samsung.android.mdx.kit",
+    # konsumentappar utan roll pa en ATAK-enhet
+    "com.samsung.android.app.spage",
+    "com.sec.android.app.sbrowser",
+    "com.samsung.android.app.notes",
+    "com.samsung.android.calendar",
+    "com.sec.android.daemonapp",
+    "com.sec.android.app.shealth",
+    "com.samsung.android.game.gamehome",
+    "com.samsung.android.game.gametools",
+    "com.samsung.android.game.gos",
+    "com.sec.android.app.kidshome",
+    "com.samsung.android.kidsinstaller",
+    "com.samsung.android.app.parentalcare",
+    "com.samsung.android.forest",
+    "com.samsung.android.oneconnect",
+    "com.samsung.android.homemode",
+    "com.samsung.android.app.find",
+    "com.samsung.android.galaxycontinuity",
+    "com.samsung.android.app.watchmanagerstub",
+    "com.samsung.accessory.budsunitemgr",
+    "com.sec.android.easyMover",
+    "com.sec.android.easyMover.Agent",
+    "com.samsung.android.smartswitchassistant",
+    "com.samsung.android.easysetup",
+    "com.samsung.android.beaconmanager",
+    "com.samsung.android.mapsagent",
+    "com.samsung.petservice",
+    # tema och bakgrundsbilder
+    "com.samsung.android.app.dressroom",
+    "com.samsung.android.themecenter",
+    "com.samsung.android.stickercenter",
+    "com.samsung.android.wallpaper.live",
+    "com.samsung.android.dynamiclock",
+    "com.samsung.android.widget.pictureframe",
+]
 xiaomi = ["com.miui.updater"]
 
 # OxygenOS-appar och telemetri. Utprovat pa OnePlus Nord N100 (BE2013).

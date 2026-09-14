@@ -480,7 +480,52 @@ samsung = [
     "com.google.android.apps.accessibility.voiceaccess",
     "com.google.audio.hearing.visualization.accessibility.scribe",
 ]
-xiaomi = ["com.miui.updater"]
+# MIUI/HyperOS. Genomgangen pa en Xiaomi Pad 5 (21051182G, nabu),
+# Android 13, HyperOS 1.0. Bara det som ar sakert att stanga av star har -
+# reklam, telemetri, apptryckare och fabrikstestverktyg.
+#
+# PROVAT PA ENHET: com.miui.msa.global och com.xiaomi.discover stangdes av
+# och enheten anvandes efterat utan att nagot slutade fungera - inga
+# krascher, inga ANR. Ovriga rader ar klassade, inte provkorda.
+#
+# com.xiaomi.discover ar inte bara en reklamyta: den hade sjalv installerat
+# com.miui.creation och com.miui.mediaeditor pa provenheten
+# (installerPackageName=com.xiaomi.discover, inte Play Store). MSA bar
+# dessutom PreinstallService och gor samma sak.
+#
+# ORORDA med avsikt, och de ska inte laggas till senare heller:
+# com.xiaomi.finddevice ar Xiaomis stoldskydd och hanger ihop med
+# Mi-kontot - samma kategori som Knox Guard pa Samsung och com.huawei.hwid
+# pa Huawei. Med den foljer com.xiaomi.account, com.xiaomi.devauth och
+# com.xiaomi.trustservice. com.lbe.security.miui ar rattighetshanteraren,
+# com.miui.home ar skalet, och com.miui.core, .rom, .system samt alla
+# *.overlay ar ramverk och RRO-lager. com.miui.powerkeeper ar MIUI:s
+# bakgrundsdodare - den stryper ATAK, men stangs av per app i
+# Installningar, inte harifran.
+xiaomi = [
+    # uppdateringstjanst. Namnet bytte mellan generationerna: aldre MIUI
+    # har com.miui.updater, HyperOS har com.android.updater. Bada star
+    # kvar - den som inte finns pa enheten raknas som n/a.
+    "com.miui.updater",
+    "com.android.updater",
+    # reklam och apptryckare - de tva som ar provade pa enhet
+    "com.miui.msa.global",
+    "com.xiaomi.discover",
+    # apparna som com.xiaomi.discover installerade av sig sjalv
+    "com.miui.creation",
+    "com.miui.mediaeditor",
+    # telemetri
+    "com.miui.analytics",
+    "com.miui.daemon",
+    "com.xiaomi.joyose",
+    "com.miui.bugreport",
+    # fabriks- och testverktyg
+    "com.miui.cit",
+    "com.xiaomi.mtb",
+    # forinstallerad tredjepart
+    "cn.wps.xiaomi.abroad.lite",
+    "com.mi.globalbrowser",
+]
 
 # OxygenOS-appar och telemetri. Utprovat pa OnePlus Nord N100 (BE2013).
 #

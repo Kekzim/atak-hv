@@ -263,12 +263,8 @@ samsung = [
     "com.samsung.android.rubin.app",
     "com.samsung.android.scs",
     "com.samsung.android.smartsuggestions",
-    "com.samsung.android.sdm.config",
     "com.samsung.android.scpm",
     "com.samsung.sait.sohservice",
-    "com.samsung.android.knox.analytics.uploader",
-    "com.samsung.android.svcagent",
-    "com.samsung.android.da.daagent",
     "com.sec.android.sdhms",
     "com.sec.sve",
     # Samsung-konto, moln och push - enheten loggas inte in nagonstans
@@ -365,30 +361,23 @@ samsung = [
     "com.samsung.android.service.peoplestripe",
     "com.samsung.android.service.stplatform",
     "com.samsung.android.service.tagservice",
-    # Knox. Enheten ar inte MDM-hanterad och har ingen Secure Folder.
-    # kgclient ar Knox Guard, fjarrlas for avbetalningsenheter.
+    # INGET KNOX I DEN HAR LISTAN - LAS INNAN NI LAGGER TILLBAKA NAGOT.
     #
-    # ORORDA: com.samsung.android.rampart, .dbsc, .kmxservice och
-    # .sm.devicesecurity ligger pa OS-niva och rors inte.
-    "com.samsung.klmsagent",
-    "com.samsung.knox.securefolder",
-    "com.skms.android.agent",
-    "com.knox.vpn.proxyhandler",
-    "com.sec.enterprise.knox.cloudmdm.smdms",
-    "com.samsung.android.knox.containercore",
-    "com.samsung.android.knox.attestation",
-    "com.samsung.android.knox.app.networkfilter",
-    "com.samsung.android.knox.er",
-    "com.samsung.android.knox.kfbp",
-    "com.samsung.android.knox.knnr",
-    "com.samsung.android.knox.kpecore",
-    "com.samsung.android.knox.pushmanager",
-    "com.samsung.android.knox.sandbox",
-    "com.samsung.android.kgclient",
-    "com.samsung.android.container",
-    "com.samsung.android.appseparation",
-    "com.samsung.android.mdm",
-    "com.samsung.android.dsms",
+    # com.samsung.android.kgclient ar Knox Guard. Pa en enhet som ar
+    # inskriven i Knox Guard raknas en avstangd klient som manipulation,
+    # och telefonen lases med Knox Guards egen lasskarm. Det hande skarpt
+    # pa en SM-A405FN. Pa SM-X230 vagrade paketet stangas av, sa felet
+    # syntes aldrig i provningen - franvaron av fel pa en modell sager
+    # ingenting om nasta.
+    #
+    # Samma resonemang galler allt som deltar i inskrivning eller
+    # fjarrhantering: klmsagent, skms.android.agent, cloudmdm.smdms, mdm,
+    # dsms, knox.* och container/appseparation. En agent som ar avstangd
+    # ser ut som en agent nagon har rort.
+    #
+    # En last enhet maste dessutom na sin server for att lasas upp igen,
+    # sa felet visar sig som svarast just nar telefonen ar nyprovisionerad
+    # och annu inte har natverk.
     # Samsung TTS-roster for sprak enheten inte kor. Sjalva motorn
     # (com.samsung.SMT) och svenska + brittisk engelska star kvar, sa
     # upplasning fortsatter fungera. com.google.android.tts finns ocksa.
@@ -466,7 +455,6 @@ samsung = [
     "com.samsung.safetyinformation",
     "com.samsung.android.emergency",
     "com.sec.android.app.parser",
-    "com.samsung.android.app.omcagent",
     "com.samsung.sec.android.application.csc",
     "com.samsung.android.app.earphonetypec",
     "com.samsung.android.setting.multisound",

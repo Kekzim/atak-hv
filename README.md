@@ -81,6 +81,7 @@ alltså inte vad som går att provisionera, utan vad som är provat.
 |---|---|---|
 | OnePlus Nord N100 (BE2013) | Android 11 | `[packages.vendor] oneplus` utprövad på enheten |
 | Samsung Galaxy Tab A9+ (SM-X230) | Android 16, One UI 8.0.5 | `[packages.vendor] samsung` utprövad, 201 poster. Hela installationen verifierad, inklusive ATAK-start, GPS och staged inställningar |
+| Xiaomi Pad 5 (21051182G) | Android 13, HyperOS 1.0 | `[packages.vendor] xiaomi` genomgången, 14 poster. Två av dem avstängda och kontrollerade på enheten; resten är klassade |
 | Samsung Galaxy A40 (SM-A405FN) | Android 11 | Installationen körd. Se varningen nedan |
 | Samsung Galaxy A17 (SM-A176B) | — | Installationen körd |
 | Huawei P20 Lite (ANE-LX1) | Android 9, EMUI 9.1 | Körd på de gemensamma listorna. Ingen `huawei`-nyckel finns; genomgång i [Bloatware: Huawei](docs/bloatware-huawei.md) |

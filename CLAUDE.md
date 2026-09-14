@@ -26,7 +26,8 @@ step, no package metadata. The kit must run from any directory — a USB stick,
 `provision.bat` is the Windows entry point; both are thin launchers around
 `python3 provision.py`. Common flags work before or after the subcommand.
 `--serial` targets one device, `-j N` provisions N in parallel, `-y` skips
-every confirmation including the `WIPE` word-prompt.
+every confirmation *except* the `--wipe-media` `WIPE` word-prompt, which is
+always asked - an unattended run hits EOF there and aborts.
 
 ## Testing
 
@@ -119,6 +120,14 @@ does not trip the check that demands it be installed first.
 - `restore` matches package ids by **substring**, so a broad term like
   `"atak"` is deliberate and `protected_prefixes` is the guard that keeps it
   from taking out system components.
+- **User data is gated behind `--wipe-media`, never a plain `restore`.**
+  `wipe_paths` covers the media directories; `wipe_uninstall_match` covers
+  apps that carry data the user made themselves, which today means Signal —
+  uninstalling it destroys the message history. `uninstall_match` is only
+  the kit's own apps. The old `Restore + delete files.bat` deleted DCIM,
+  Pictures, Documents and Download unconditionally behind a bare `pause`;
+  that is the failure this split exists to prevent, so do not move an
+  entry from the wipe lists into the plain ones.
 
 ## Payload and secrets
 

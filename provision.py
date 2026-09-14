@@ -1099,7 +1099,13 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
 
 def build_restore_tasks(cfg: dict, wipe_media: bool) -> list[Task]:
     r = cfg["restore"]
-    match = r["uninstall_match"]
+    match = list(r["uninstall_match"])
+    if wipe_media:
+        # Apps that carry data the user made themselves. Uninstalling
+        # Signal takes the message history with it, so they sit behind
+        # the same gate as the media paths rather than in the set every
+        # restore removes.
+        match += list(r.get("wipe_uninstall_match", []))
     protected = r.get("protected_prefixes", [])
     tasks = [
         task_uninstall(match, protected),
@@ -1254,7 +1260,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="show the plan without changing anything; the "
                              "adb commands go to the device log")
     common.add_argument("-y", "--yes", action="store_true", default=argparse.SUPPRESS,
-                        help="do not ask for confirmation")
+                        help="do not ask for confirmation (the --wipe-media "
+                             "WIPE prompt is still asked)")
     common.add_argument("-q", "--quiet", action="store_true", default=argparse.SUPPRESS)
 
     ap = argparse.ArgumentParser(
@@ -1371,7 +1378,7 @@ def main(argv: list[str] | None = None) -> int:
                     else:
                         out.warn(f"{d.serial}: {prompt} not set - left as it is")
 
-        if args.command == "restore" and args.wipe_media and not args.yes:
+        if args.command == "restore" and args.wipe_media:
             # Listed from the config, not hardcoded, so the warning cannot
             # drift away from what is actually deleted.
             print()
@@ -1380,9 +1387,18 @@ def main(argv: list[str] | None = None) -> int:
                   f"{len(devices)} device(s) above:")
             for path in cfg["restore"]["wipe_paths"]:
                 print(f"    {path}")
+            for term in cfg["restore"].get("wipe_uninstall_match", []):
+                print(f"    apps matching '{term}' - and everything they store")
             print("  Photos, downloads and documents included. Not reversible.")
             print("!" * 60)
+            # Deliberately NOT waived by -y. Every other prompt saves a
+            # keystroke; this one stands between a keystroke and someone's
+            # photos. An unattended run reaches EOF here and aborts, which
+            # is the right way for this particular question to fail.
             if not confirm_word("Proceed?", "WIPE"):
+                if args.yes:
+                    out.error("-y does not cover --wipe-media: the WIPE prompt "
+                              "has to be answered by a person.")
                 out.info("Aborted.")
                 return 1
         elif args.command == "install" and not args.yes:

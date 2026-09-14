@@ -747,12 +747,22 @@ verify = ["com.atakmap.app.civ"]
 # ---------------------------------------------------------------------
 [restore]
 # Packages whose name contains any of these are uninstalled.
-# Match against the package id, not the app's display name - Signal
-# ships as org.thoughtcrime.securesms, so "signal" alone never matched
-# it (a long-standing bug in the old .bat scripts).
+# Apparna har ar kitets egna - de installerades av `install` och bar
+# ingen data anvandaren skapat sjalv.
 uninstall_match = [
     "atak",
     "geocam",
+]
+
+# Appar som bar egen anvandardata. De avinstalleras BARA av
+# `restore --wipe-media`, samma grind som bilder och dokument: att
+# avinstallera Signal tar meddelandehistoriken med sig, och den gar inte
+# att fa tillbaka.
+#
+# Matchas mot paket-id, inte mot appens namn i menyn - Signal heter
+# org.thoughtcrime.securesms, sa "signal" ensamt traffade den aldrig
+# (ett gammalt fel i .bat-skripten).
+wipe_uninstall_match = [
     "securesms",   # Signal
 ]
 

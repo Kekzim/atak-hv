@@ -351,7 +351,7 @@ igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 | `--config FIL` | Använd en annan konfigurationsfil |
 | `--log-dir KATALOG` | Loggar hamnar här (standard `logs/`) |
 | `--wait SEK` | Hur länge verktyget väntar på enheter (standard 300) |
-| `-y` | Fråga inte om bekräftelse |
+| `-y` | Fråga inte om bekräftelse (utom `WIPE`, se nedan) |
 | `-q` | Skriv bara ut det nödvändiga |
 
 **Prova alltid med `--dry-run` först**, och kör en enskild telefon med
@@ -374,10 +374,12 @@ provision.bat install --dry-run --no-optimize
 Verktyget listar anslutna enheter och frågar innan det gör något.
 `restore --wipe-media` raderar användarens egna bilder och dokument och
 kräver därför att man skriver `WIPE` — `y` räcker inte. Sökvägarna som
-kommer att raderas listas före frågan.
+kommer att raderas listas före frågan, tillsammans med de appar som tas
+bort med sin egen data.
 
-`-y` hoppar över **alla** frågor, även `WIPE`. Använd den bara i skript där
-du redan vet vad som kommer att hända.
+`-y` hoppar över alla frågor **utom** `WIPE`. Den frågan ställs alltid, även
+i skript: en obevakad körning når filslut på den och avbryter i stället för
+att radera. Ska bilder bort får någon skriva ordet.
 
 ### Loggar och felsökning
 

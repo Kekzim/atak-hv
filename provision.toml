@@ -802,6 +802,21 @@ rab_north_ref_pref = "2"           # 0 = rattvisande, 1 = magnetisk, 2 = gittern
 # 1 utan citattecken ar for alt_unit_pref.
 volumemapswitcher = false
 
+# Startkarta. Utan den har hamnar en nyinstallerad enhet pa sjokortet,
+# som tacker kusten men inte inlandet. Namnet maste stamma exakt med
+# <name> i payload/atak/imagery/opentopo_opentopomap.xml.
+#
+# OBS: nycklarna innehaller punkt och maste darfor sta inom citattecken.
+# Utan dem laser TOML "lastViewedLayer.name" som tabellen lastViewedLayer
+# med nyckeln name, och da hamnar ingenting i preferensfilen.
+# autoselect maste vara av. Star den pa valjer ATAK karta sjalv vid
+# start, meddelar "Auto select map ON" och struntar i namnet nedan -
+# enheten hamnade da pa sjokortet anda. Boolean, inte strang.
+"lastViewedLayer.autoselect" = false
+"lastViewedLayer.name" = "OpenTopo - Opentopomap"
+"lastViewedLayer.active" = "Mobile"
+"MobileLayerSelectionAdapter.selected" = "OpenTopo - Opentopomap"
+
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).
 #

@@ -791,6 +791,17 @@ compass_heading_display = "Numeric"  # numerisk kurs, inte vaderstreck
 rab_brg_units_pref = "1"           # 0 = grader, 1 = streck (mils)
 rab_north_ref_pref = "2"           # 0 = rattvisande, 1 = magnetisk, 2 = gitternord
 
+# Volymknapparna ska hoja och sanka ljudet, inte flytta kartan.
+# default.zip och default-old.zip under
+# payload/atak/tools/datapackage/incoming/ satter den till true, sa en
+# enhet som importerar nagot av de paketen for hand far tillbaka
+# kartlaget. Raden har galler varje provisionering.
+#
+# OBS: Boolean, inte strang. Till skillnad fran raderna ovan laser ATAK
+# den med getBoolean(), sa "false" inom citattecken vore lika fel som
+# 1 utan citattecken ar for alt_unit_pref.
+volumemapswitcher = false
+
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).
 #

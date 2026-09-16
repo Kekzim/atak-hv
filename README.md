@@ -84,7 +84,13 @@ alltså inte vad som går att provisionera, utan vad som är provat.
 | Xiaomi Pad 5 (21051182G) | Android 13, HyperOS 1.0 | `[packages.vendor] xiaomi` utprövad, 27 poster — samtliga avstängda på enheten och kontrollerade efteråt. Som Samsung-listan är den prövad på en **surfplatta**, inte en telefon |
 | Samsung Galaxy A40 (SM-A405FN) | Android 11 | Installationen körd. Se varningen nedan |
 | Samsung Galaxy A17 (SM-A176B) | — | Installationen körd |
-| Huawei P20 Lite (ANE-LX1) | Android 9, EMUI 9.1 | Körd på de gemensamma listorna. Ingen `huawei`-nyckel finns; genomgång i [Bloatware: Huawei](docs/bloatware-huawei.md) |
+| Huawei P10 Plus (VKY-L29) | Android 9 | `[packages.vendor] huawei` utprövad, 60 poster — 55 avstängda på enheten och kontrollerade efteråt. Telefon **utan SIM**, se operatörsraderna i `provision.toml` |
+| Huawei P20 Lite (ANE-LX1) | Android 9, EMUI 9.1 | Modellen listan är genomgången på; se [Bloatware: Huawei](docs/bloatware-huawei.md) |
+
+Huawei-listan är utprövad på en telefon **utan SIM**. Fyra rader är
+operatörsrelaterade — `omacp`, `rcsserviceapplication`, `dsdscardmanager`
+och `wifiprobqeservice`. Mobildata bärs av telefoniramverket och påverkas
+inte, men ska enheterna köra med SIM är det de raderna man tar bort först.
 
 Samsung-listan är utprövad på en **wifi-platta utan telefonihårdvara**.
 Telefoniraderna och raderna för cell broadcast är ofarliga där men träffar

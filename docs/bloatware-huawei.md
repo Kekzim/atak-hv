@@ -4,19 +4,28 @@ Genomgången är gjord på en **Huawei P20 Lite (ANE-LX1)**, Android 9,
 EMUI 9.1.0 — en enhet från tiden före sanktionerna, så den har Google
 Play-tjänster och den gemensamma `debloat`-listan biter på den.
 
-> [!WARNING]
-> **Ingenting här är provkört.** Listan är klassad utifrån paketnamn,
-> `codePath` och vad som körde på enheten. Det finns ingen `huawei`-nyckel
-> i `[packages.vendor]`, och den ska inte läggas in förrän listan körts
-> skarpt på en Huawei. Se [Läs det här först](#läs-det-här-först).
+> [!NOTE]
+> **Listan är nu provkörd och ligger i `[packages.vendor] huawei`.**
+> 55 av 60 rader stängdes av på en **Huawei P10 Plus (VKY-L29, Android 9)**
+> och telefonen användes efteråt utan att något slutade fungera. Fyra rader
+> gick inte att pröva där — paketen finns inte på den modellen — och
+> `com.huawei.parentcontrol` vägrar stängas av. Klassningen nedan är
+> gjord på en P20 Lite (ANE-LX1).
+>
+> Läs ändå [Läs det här först](#läs-det-här-först) innan något läggs till:
+> `com.huawei.hwid` hör aldrig hemma i listan.
 
 ## Vad verktyget gör på en Huawei idag
 
-Eftersom `[packages.vendor]` saknar `huawei` faller `task_packages`
-tillbaka på de gemensamma listorna och loggar
-`no vendor entry for 'huawei' - common lists only`. **Inget
-Huawei-paket rörs.** På provenheten stängdes 16 paket av, samtliga
-`com.google.android.*`.
+`task_packages` matchar `ro.product.manufacturer` mot `huawei` och kör de
+60 raderna utöver de gemensamma listorna. På P10 Plus gick antalet aktiva
+paket från 197 till 142.
+
+Innan listan fanns hände ingenting Huawei-specifikt alls: verktyget
+loggade `no vendor entry for 'huawei' - common lists only` och stängde
+bara av de 16 `com.google.android.*`-paketen ur den gemensamma listan.
+Det gäller fortfarande varje tillverkare utan egen nyckel — en okänd
+telefon fungerar, den blir bara inte lika nedlåst.
 
 `com.google.android.webview` och `com.google.android.apps.work.oobconfig`
 låg redan avstängda från fabrik — inte verktygets verk. WebView levereras
@@ -211,5 +220,9 @@ sökresultat tolkas som trasig radio.
 
 Telefonen saknade SIM, så wifi var dess enda nätverksväg.
 
-Listan ovan är ändå inte provkörd — den behöver köras skarpt innan den
-förs in i `provision.toml`.
+Listan fördes in i `provision.toml` först efter att den körts skarpt på en
+annan Huawei, en P10 Plus (VKY-L29). Den enheten hade telefoni men inget
+SIM, vilket är värt att veta för de fyra operatörsraderna: `omacp`,
+`rcsserviceapplication`, `dsdscardmanager` och `wifiprobqeservice`.
+Mobildata bärs av telefoniramverket och påverkas inte, men ska enheterna
+köra med SIM är det de raderna man tar bort först.

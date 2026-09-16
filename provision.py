@@ -480,6 +480,11 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
     device that still gets its apps from the Play Store.
     """
     verb = "enable" if enable else "disable-user"
+    # What `pm` must report having left the package in. It answers with the
+    # resulting state, and that is the only trustworthy signal: a package
+    # can refuse the change, be left at "default", and still exit 0 - which
+    # used to be counted as a success. Seen on com.sec.android.sdhms.
+    want_state = "enabled" if enable else "disabled-user"
     vendor = packages.get("vendor", {})
 
     def run(adb, dev, log):
@@ -497,14 +502,23 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
         if dev.rom:
             log.write(f"custom ROM: {dev.rom}\n")
 
-        touched = absent = refused = 0
+        touched = absent = refused = unchanged = 0
         for pkg in targets:
             args = ["pm", verb] + ([] if enable else ["--user", "0"]) + [pkg]
             p = adb.shell(args, dev.serial)
             _logged(log, p)
             combined = p.stdout + p.stderr
             if p.returncode == 0 and "Exception" not in combined:
-                touched += 1
+                state = re.search(r"new state: (\S+)", combined)
+                if state and state.group(1) != want_state:
+                    # Exit 0, no exception, and the package is exactly as it
+                    # was. Counting this as done overstates the result and
+                    # hides a package that quietly stayed on.
+                    unchanged += 1
+                    log.write(f"{pkg}: asked for {want_state}, "
+                              f"left at {state.group(1)}\n")
+                else:
+                    touched += 1
             elif "Unknown package" in combined:
                 # Simply not installed on this ROM. Worth separating from a
                 # refusal: a stock handset missing a few Google apps looks
@@ -522,6 +536,8 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
             detail.append(f"{absent} not installed")
         if refused:
             detail.append(f"{refused} refused")
+        if unchanged:
+            detail.append(f"{unchanged} unchanged")
         if detail:
             note += " (" + ", ".join(detail) + ")"
         if matched:

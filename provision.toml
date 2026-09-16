@@ -560,6 +560,113 @@ xiaomi = [
     "com.miui.backup",
 ]
 
+# EMUI. Provkord pa en Huawei P10 Plus (VKY-L29, Android 9): 55 av
+# paketen nedan stangdes av pa enheten och telefonen anvandes efterat -
+# inga krascher, inga ANR, skal, tangentbord, kamera, wifi och hela
+# ATAK-stacken opaverkade. Listan ar dessutom genomgangen pa en P20 Lite
+# (ANE-LX1), se docs/bloatware-huawei.md.
+#
+# Fyra rader gick inte att prova pa VKY-L29 eftersom paketen inte finns
+# pa den modellen: com.ebay.carrier, com.netflix.partner.activation,
+# com.huawei.android.FMRadio och com.huawei.imedia.sws. De kommer ur
+# genomgangen av ANE-LX1 och raknas som n/a dar de saknas.
+#
+# com.huawei.parentcontrol vagrar stangas av - "not allowed to disable
+# this package". Den star kvar i listan; task_packages raknar den som n/a
+# och korningen faller inte.
+#
+# ORORDA med avsikt, och de ska inte laggas till senare heller:
+# com.huawei.hwid ar Huawei-ID och bar Find My Phone. Pa provenheten var
+# ett Huawei-konto inloggat. Det ar samma kategori som
+# com.samsung.android.kgclient, som laste en Galaxy A40, och
+# com.xiaomi.finddevice. Med den foljer com.huawei.hwasm (FIDO),
+# .behaviorauth, .trustagent, .trustcircle och .securitymgr.
+#
+# com.touchtype.swiftkey ar enda aktiverade tangentbord pa bada de provade
+# modellerna - det finns ingen Huawei-IME som reserv, sa en avstangning
+# later ingen skriva in PIN-koden. com.huawei.lbs, .msdp och
+# .motionservice bar positionen, com.huawei.camera behovs av
+# GeoCam-pluginet, och com.huawei.systemserver, .iaware, .nb.service samt
+# featurelayer.* ar systemramverk.
+#
+# com.huawei.powergenie och com.huawei.systemmanager star ocksa kvar.
+# PowerGenie stanger av bakgrundsappar oberoende av Doze-undantaget
+# verktyget satter, sa ATAK maste stallas in for hand i Telefonhanteraren
+# pa varje telefon - det gar inte over adb pa EMUI 9.
+#
+# OBS TELEFONI: omacp, rcsserviceapplication, dsdscardmanager och
+# wifiprobqeservice ar operatorsrelaterade. Provenheten hade telefoni men
+# inget SIM. Mobildata bars av telefoniramverket och paverkas inte, men
+# ska enheterna anvandas med SIM ar det de raderna man tar bort forst.
+huawei = [
+    # tredjepartspreloads
+    "com.ebay.carrier",
+    "com.facebook.appmanager",
+    "com.facebook.services",
+    "com.facebook.system",
+    "com.netflix.partner.activation",
+    # butik, media och konsumentappar
+    "com.example.android.notepad",
+    "com.huawei.android.FMRadio",
+    "com.huawei.android.thememanager",
+    "com.huawei.android.tips",
+    "com.huawei.android.totemweather",
+    "com.huawei.appmarket",
+    "com.huawei.compass",
+    "com.huawei.contactscamcard",
+    "com.huawei.gameassistant",
+    "com.huawei.health",
+    "com.huawei.hicard",
+    "com.huawei.hifolder",
+    "com.huawei.himovie.overseas",
+    "com.huawei.hitouch",
+    "com.huawei.intelligent",
+    "com.huawei.numberidentity",
+    "com.huawei.parentcontrol",
+    "com.huawei.pcassistant",
+    "com.huawei.phoneservice",
+    "com.huawei.printservice",
+    "com.huawei.recsys",
+    "com.huawei.scanner",
+    "com.huawei.screenrecorder",
+    "com.huawei.search",
+    "com.huawei.tips",
+    "com.huawei.vassistant",
+    "com.huawei.videoeditor",
+    # telemetri, uppdatering och diagnostik
+    "com.huawei.KoBackup",
+    "com.huawei.android.chr",
+    "com.huawei.android.hwouc",
+    "com.huawei.android.hwupgradeguide",
+    "com.huawei.autoinstallapkfrommcc",
+    "com.huawei.hiview",
+    "com.huawei.hiviewtunnel",
+    "com.huawei.hwdetectrepair",
+    # delning och spegling
+    "com.android.hwmirror",
+    "com.huawei.HwMultiScreenShot",
+    "com.huawei.android.FloatTasks",
+    "com.huawei.android.instantonline",
+    "com.huawei.android.instantshare",
+    "com.huawei.android.mirrorshare",
+    "com.huawei.android.wfdft",
+    "com.huawei.iconnect",
+    "com.huawei.nearby",
+    "com.huawei.synergy",
+    # AI, sprak och ljud
+    "com.huawei.hiaction",
+    "com.huawei.hiai",
+    "com.huawei.imedia.sws",
+    "com.huawei.languagedownloader",
+    # fabriks- och operatorsverktyg - se OBS TELEFONI ovan
+    "com.huawei.android.dsdscardmanager",
+    "com.huawei.android.projectmenu",
+    "com.huawei.mmitest",
+    "com.huawei.omacp",
+    "com.huawei.rcsserviceapplication",
+    "com.huawei.wifiprobqeservice",
+]
+
 # OxygenOS-appar och telemetri. Utprovat pa OnePlus Nord N100 (BE2013).
 #
 # ORORDA med avsikt: com.oneplus.coreservice, com.oneplus.security,

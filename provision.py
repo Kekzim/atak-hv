@@ -206,9 +206,13 @@ class Device:
     serial: str
     manufacturer: str = "?"
     model: str = "?"
+    # Name of a custom ROM, when the device is not running the
+    # manufacturer's own Android. Empty on a stock device.
+    rom: str = ""
 
     def __str__(self) -> str:
-        return f"{self.serial} ({self.manufacturer} {self.model})"
+        rom = f", {self.rom}" if self.rom else ""
+        return f"{self.serial} ({self.manufacturer} {self.model}{rom})"
 
 
 class Adb:
@@ -258,11 +262,26 @@ class Adb:
             )
         return ready, pending
 
+    # A custom ROM keeps ro.product.manufacturer from the original handset,
+    # so the vendor list still matches on "oneplus" or "samsung" while none
+    # of the manufacturer's packages are installed. Each of these is set by
+    # the ROM itself; the value is shown so the operator can see which.
+    ROM_PROPS = ("ro.lineage.version", "ro.modversion", "ro.omni.version",
+                 "org.pixelexperience.version", "ro.rr.version",
+                 "ro.crdroid.version", "ro.aicp.version")
+
     def describe(self, serial: str) -> Device:
         def prop(name: str) -> str:
             p = self.shell(["getprop", name], serial, timeout=30, mutating=False)
             return p.stdout.strip() or "?"
-        return Device(serial, prop("ro.product.manufacturer"), prop("ro.product.model"))
+        rom = ""
+        for name in self.ROM_PROPS:
+            value = prop(name)
+            if value and value != "?":
+                rom = value
+                break
+        return Device(serial, prop("ro.product.manufacturer"),
+                      prop("ro.product.model"), rom)
 
 
 def find_adb(config: dict, override: str | None, out: Out) -> Path:
@@ -475,7 +494,10 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
         else:
             log.write(f"no vendor entry for '{key}' - common lists only\n")
 
-        touched = failed = 0
+        if dev.rom:
+            log.write(f"custom ROM: {dev.rom}\n")
+
+        touched = absent = refused = 0
         for pkg in targets:
             args = ["pm", verb] + ([] if enable else ["--user", "0"]) + [pkg]
             p = adb.shell(args, dev.serial)
@@ -483,15 +505,29 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
             combined = p.stdout + p.stderr
             if p.returncode == 0 and "Exception" not in combined:
                 touched += 1
+            elif "Unknown package" in combined:
+                # Simply not installed on this ROM. Worth separating from a
+                # refusal: a stock handset missing a few Google apps looks
+                # nothing like a custom ROM where the whole vendor list is
+                # absent, but both used to print the same "n/a".
+                absent += 1
             else:
-                # A package not present on this ROM, or a GMS component the
-                # shell may not touch, is expected - not an error.
-                failed += 1
+                # Present but the shell may not touch it - a protected
+                # package, or a GMS component. Expected, not an error.
+                refused += 1
+
         note = f"{touched}/{len(targets)}"
-        if failed:
-            note += f" ({failed} n/a)"
+        detail = []
+        if absent:
+            detail.append(f"{absent} not installed")
+        if refused:
+            detail.append(f"{refused} refused")
+        if detail:
+            note += " (" + ", ".join(detail) + ")"
         if matched:
             note += f", vendor: {key}"
+        if dev.rom and not touched:
+            note += f" - {dev.rom}"
         return True, note
     return Task("Re-enable disabled packages" if enable else "Disable unused packages", run)
 

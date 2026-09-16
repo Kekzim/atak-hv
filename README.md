@@ -374,6 +374,7 @@ igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 | `--disable-play` | Endast `install`: stäng även av Play Store. Kräver att apparna sidladdas |
 | `--remarks TAGG` | Endast `install`: nivåtaggen i *Remarks*. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
+| `--wipe-media` | Endast `restore`: **raderar även användarens bilder, nedladdningar och dokument, och avinstallerar appar som bär egen data — Signal med sin meddelandehistorik.** Kräver att man skriver `WIPE`; `-y` hjälper inte. Går inte att ångra |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |
 | `-j N` | Provisionera N enheter parallellt (standard 1) |

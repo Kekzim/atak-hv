@@ -880,21 +880,31 @@ key = "locationCallsign"
 flag = "callsign"
 prompt = "Anropssignal (enligt FAL-A)"
 
-# Nivataggen som hogre staber filtrerar pa, t.ex. #Bat, #Komp, #Plut,
-# #Grp. Hamnar i CoT-meddelandets remarks-falt.
+# Nivataggen som hogre staber filtrerar pa: #Bat, #Komp, #Plut, #Grp
+# eller #Sold. Sjukvardsforare lagger till #sjvtp efter nivataggen.
+# Hamnar i CoT-meddelandets remarks-falt.
 [[prefs.ask]]
 key = "userRemarks"
 flag = "remarks"
 prompt = "Remarks (nivatagg)"
 
-# Kritiska enhetsinstallningar ur handboken: MGRS, MSL, meter, km/h,
-# numerisk kurs, streck och gitternord. "Avvikelser skapar kritiska fel
-# vid eldledning", sa de ska vara lika pa alla enheter och sattas har i
-# stallet for att knappas in per telefon.
+# Kritiska enhetsinstallningar. Metodanvisning ATAK Hemvarn 0.9 punkt
+# 2.6 raknar upp nio stycken, och alla nio star har. "Felaktiga
+# installningar kan leda till allvarliga missforstand vid eldledning,
+# sjukvardstransport eller samverkan med andra enheter", sa de ska vara
+# lika pa alla enheter och sattas har i stallet for att knappas in per
+# telefon. I ATAK ligger de under Settings -> Display Preferences ->
+# Basic Display Settings -> Unit Display Format.
+#
+# Tva av dem (rab_rng_units_pref, set_domain_pref) har redan ratt varde
+# som ATAK:s eget standardvarde. De star anda kvar: en telefon som varit
+# i bruk, eller som ateranvands efter en restore, behover inte ha kvar
+# standardvardet.
 #
 # VARDENA AR STRANGAR aven nar de ser ut som siffror. ATAK:s
 # ListPreference lagrar dem som String och gor Integer.parseInt() vid
-# lasning - skrivs de som heltal kastar appen ClassCastException.
+# lasning - skrivs de som heltal kastar appen ClassCastException. Det
+# galler aven set_domain_pref, dar sjalva vardet ar ordet "Ground".
 # Typen foljer TOML: "1" ger String, 1 ger Integer, true ger Boolean.
 [prefs.entries]
 coord_display_pref = "MGRS"        # koordinatformat
@@ -903,7 +913,9 @@ alt_unit_pref = "1"                # 0 = fot, 1 = meter
 speed_unit_pref = "1"              # 0 = mph, 1 = km/h, 2 = knop, 3 = m/s
 compass_heading_display = "Numeric"  # numerisk kurs, inte vaderstreck
 rab_brg_units_pref = "1"           # 0 = grader, 1 = streck (mils)
+rab_rng_units_pref = "1"           # 0 = fot/mil, 1 = meter/km, 2 = nautiska mil
 rab_north_ref_pref = "2"           # 0 = rattvisande, 1 = magnetisk, 2 = gitternord
+set_domain_pref = "Ground"         # Ground, Aviation eller Maritime
 
 # Volymknapparna ska hoja och sanka ljudet, inte flytta kartan.
 # default.zip och default-old.zip under

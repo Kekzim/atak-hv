@@ -1406,7 +1406,8 @@ def main(argv: list[str] | None = None) -> int:
     p_install.add_argument(
         "--remarks",
         help="ATAK remarks field - the level tag higher staff filter on, "
-             "such as #Plut. Same rules as --callsign.")
+             "one of #Bat, #Komp, #Plut, #Grp, #Sold. Same rules as "
+             "--callsign.")
     p_install.add_argument(
         "--loadout", metavar="NAMN",
         help="ATAK loadout to select, by title. Defaults to [prefs] "

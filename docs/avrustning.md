@@ -77,7 +77,8 @@ När du fått en avrustad telefon.
    FAL-A → *OK*.
 4. **My Team** → välj färg enligt
    [färgsättningen i handboken](handbok.md#färgsättning).
-5. Ange **Remarks**: nivåtaggen — `#Bat`, `#Komp`, `#Plut` eller `#Grp`.
+5. Ange **Remarks**: nivåtaggen — `#Bat`, `#Komp`, `#Plut`, `#Grp` eller
+   `#Sold`. Sjukvårdsförare lägger till `#sjvtp` efter nivåtaggen.
 6. Backa med pil bakåt tills du har ren kartbild.
 7. Klicka på kartikonen i överkant och välj din karta.
 8. Backa tillbaka till ren kartbild.

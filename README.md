@@ -179,7 +179,7 @@ repot och sidladdas alltid, i båda vägarna.
 
 ## Enhetsinställningar som verktyget sätter
 
-ATAK har tre inställningar som måste stämma per telefon, och sju som måste
+ATAK har tre inställningar som måste stämma per telefon, och nio som måste
 vara lika på alla. Verktyget lägger ut samtliga, så ingenting av det här
 behöver knappas in på enheten.
 
@@ -196,7 +196,7 @@ godkänner.
 | Vad | Flagga | Innebörd |
 |---|---|---|
 | **Anropssignal** | `--callsign` | Enligt FAL-A. Skilj på personliga enheter (t.ex. `QS1`) och funktionsenheter (t.ex. `QS`) |
-| **Remarks** | `--remarks` | Nivåtaggen högre staber filtrerar på: `#Bat`, `#Komp`, `#Plut`, `#Grp` |
+| **Remarks** | `--remarks` | Nivåtaggen högre staber filtrerar på: `#Bat`, `#Komp`, `#Plut`, `#Grp`, `#Sold`. Sjukvårdsförare lägger till `#sjvtp` |
 
 Tryck Enter för att hoppa över en fråga — då lämnas telefonens nuvarande
 värde orört. Med `-y` ställs inga frågor alls, och båda lämnas orörda om
@@ -209,9 +209,15 @@ enheten.
 
 ### Sätts alltid, lika på alla enheter
 
-Handboken kallar dem *kritiska enhetsinställningar* — ”avvikelser skapar
-kritiska fel vid eldledning”. De sätts vid varje `install`, även med `-y`
-och även med `--no-optimize`.
+*Metodanvisning ATAK Hemvärn 0.9* kallar dem **kritiska
+enhetsinställningar** och räknar upp nio stycken (punkt 2.6). Alla nio
+sätts vid varje `install`, även med `-y` och även med `--no-optimize`.
+Motivet enligt anvisningen: ”felaktiga inställningar kan leda till
+allvarliga missförstånd vid eldledning, sjukvårdstransport eller
+samverkan med andra enheter”.
+
+I ATAK ligger de under *Settings → Display Preferences → Basic Display
+Settings → Unit Display Format*.
 
 | Inställning | Värde | Nyckel i `provision.toml` |
 |---|---|---|
@@ -221,11 +227,18 @@ och även med `--no-optimize`.
 | Hastighet | km/h | `speed_unit_pref` |
 | Kurs | numerisk | `compass_heading_display` |
 | Bäring | streck (mils) | `rab_brg_units_pref` |
+| Räckvidd | meter/kilometer | `rab_rng_units_pref` |
 | Nordreferens | gitternord | `rab_north_ref_pref` |
+| Domän | Ground | `set_domain_pref` |
+
+Räckvidd och domän har redan rätt värde som ATAK:s standardvärde. De
+sätts ändå: en telefon som varit i bruk, eller som återanvänds efter en
+`restore`, behöver inte ha kvar standardvärdet.
 
 Behöver ni andra värden ändrar ni dem under `[prefs.entries]`. Värdena
 skrivs som strängar även när de ser ut som siffror — ATAK läser dem så,
-och ett heltal får appen att kasta undantag.
+och ett heltal får appen att kasta undantag. Det gäller även
+`set_domain_pref`, där värdet är ordet `Ground`.
 
 ### Loadouts — vilka knappar och verktyg som syns
 

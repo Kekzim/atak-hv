@@ -12,8 +12,11 @@ ATAKs uppbyggnad sätter vissa gränser. En av dem är färgsättning av team:
 standardfärgerna GUL, GRÖN, LJUSBLÅ och RÖD är reserverade eftersom de
 finns som standard i TAK för markörer.
 
-Funktionen `#` ger bredd i hanteringen — till exempel `#Sjukvårdare`,
-`#Ordonnans`.
+Funktionen `#` ger bredd i hanteringen. Varje enhet har **en
+nivåtagg** som är styrd — se [Nivåmarkering](#nivåmarkering) — och kan
+utöver den bära en funktionstagg. Den enda funktionstagg som är styrd är
+`#sjvtp` för sjukvårdsförare; övriga, som `#Ordonnans`, är fria att
+komma överens om inom förbandet.
 
 ### Färgsättning
 
@@ -87,7 +90,8 @@ Välj: Callsign and Device Preferences
 ![Bildobjekt 9](assets/handbok/slide23-27.jpg)
 ![Bildobjekt 17](assets/handbok/slide23-28.jpg)
 - Välj: Remarks
-- Ange en Hashtag (tex #Sjukvård)
+- Ange din nivåtagg: `#Bat`, `#Komp`, `#Plut`, `#Grp` eller `#Sold`
+- Sjukvårdsförare lägger till `#sjvtp` efter nivåtaggen
 - Backa 3ggr till ren kartbild
 Välj: Callsign Preferences
 ![Bildobjekt 18](assets/handbok/slide23-29.jpg)
@@ -520,13 +524,36 @@ eller nod, t.ex. RU).
 ställs in internt. Grupp och soldat följer plutonens färgkodning. Se
 [Färgsättning](#färgsättning) för hela schemat.
 
-**Nivåmarkering (filtreringstagg).** Använd `#Bat`, `#Komp`, `#Plut`,
-`#Grp` i fältet *Remarks*, så att högre staber snabbt kan filtrera fram
-rätt beslutsnivå.
+<a id="nivåmarkering"></a>
+**Nivåmarkering (filtreringstagg).** Varje enhet anger sin
+beslutsnivå som en hashtagg i fältet *Remarks*, så att högre staber
+snabbt kan filtrera fram rätt nivå. Taggarna är styrda:
 
-**Kritiska enhetsinställningar.** MGRS, MSL (meters), km/h, Numeric
-Heading, Mils, Grid North.
-Avvikelser skapar kritiska fel vid eldledning.
+| Tagg | Omfattar |
+|---|---|
+| `#Bat` | Bataljonsledning och ledningspluton |
+| `#Komp` | Kompaniledningar samt ledning för funktionsförband som båt och flyg |
+| `#Plut` | Plutonsledningar som inte redan ligger på kompaninivå |
+| `#Grp` | Gruppchefer och deras ställföreträdare |
+| `#Sold` | Alla övriga |
+
+Filtreringen görs under *Lager → hashtags*, och går att kombinera med
+teamfärg: väljer man bort `#Grp` och `#Plut` men tar tillbaka en enskild
+färg syns det kompaniet ända ner på soldatnivå medan övriga bara visas
+på kompaninivå.
+
+**Funktionstagg.** Förare i sjukvårdsomgångar och ambulanser lägger till
+`#sjvtp` **utöver** nivåtaggen. Utan den kan S4 inte filtrera fram och
+leda sjukvårdstransporterna.
+
+**Roll.** Chefer och ställföreträdare väljer *Team Lead* under *My
+Role*, så att högre chef snabbt kan få fram underställda chefer.
+
+**Kritiska enhetsinställningar.** MGRS, MSL, meter, km/h, Numeric
+Heading, Mils, meter/kilometer, Grid North och domän Ground — nio
+stycken, under *Settings → Display Preferences → Basic Display Settings
+→ Unit Display Format*. Felaktiga inställningar skapar allvarliga
+missförstånd vid eldledning, sjukvårdstransport och samverkan.
 
 ### Vad som redan är satt på en provisionerad telefon
 
@@ -538,7 +565,7 @@ redan gjort. Se
 |---|---|
 | Anropssignal | **Satt.** Verktyget frågar efter den vid installationen |
 | Remarks (nivåtagg) | **Satt.** Frågas efter vid installationen |
-| De sju kritiska enhetsinställningarna | **Satta.** Alltid, lika på alla enheter |
+| De nio kritiska enhetsinställningarna | **Satta.** Alltid, lika på alla enheter |
 | Teamfärg och roll | **Sätts för hand.** Alternativen är många och valet hänger på förband och befattning |
 
 Kontrollera ändå, och rätta för hand om något avviker: klicka på din egen

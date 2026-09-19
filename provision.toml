@@ -954,6 +954,30 @@ volumemapswitcher = false
 verify = ["com.atakmap.app.civ"]
 
 # ---------------------------------------------------------------------
+# Hojddata (DTED). Kontrolleras bara - verktyget lagger aldrig ut den.
+#
+# DTED2 over Sverige ar 1,7 GB och hor darmed till samma kategori som
+# atak-box.zip och apk-filerna: for stor for repot, hamtas av forbandet.
+# Steget sager vad telefonen faktiskt har, sa att en enhet utan
+# hojddata inte gar ut i tron att den har den.
+#
+# Nivan spelar roll. ATAK levereras med DTED0, ~900 m mellan punkterna.
+# Hojdrutan visar da ett varde och allt ser ratt ut, men siktlinjer och
+# terranganalys behover DTED1 eller DTED2 (~30 m) for att betyda nagot.
+# Darfor raknas nivaerna var for sig i stallet for att bara svara ja
+# eller nej pa om hojddata finns.
+# ---------------------------------------------------------------------
+[dted]
+target = "/sdcard/atak/DTED"
+
+# Platser att leta pa nar malkatalogen ar tom. Telefonens filsystem ar
+# skiftlagesokansligt, sa dted och DTED ar samma katalog och kan inte
+# bli fel - felet som intraffar ar att hela den utpackade leveransen
+# hamnar en niva for djupt, t.ex.
+# /sdcard/atak/DTED2-26072701/dted/e017/, dar ATAK aldrig letar.
+stray = ["/sdcard/atak", "/sdcard/Download"]
+
+# ---------------------------------------------------------------------
 # Restore behaviour
 # ---------------------------------------------------------------------
 [restore]

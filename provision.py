@@ -687,6 +687,77 @@ def task_doze_check(packages: list[str]) -> Task:
     return Task("Check Doze allowlist", run)
 
 
+DTED_LEVELS = {"dt0": "DTED0", "dt1": "DTED1", "dt2": "DTED2"}
+
+
+def task_dted_check(cfg: dict) -> Task:
+    """Report what elevation data the device has - checked, never pushed.
+
+    Hojddata foljer inte med i repot. DTED2 over Sverige ar 1,7 GB, alltsa
+    samma kategori som atak-box.zip och apk-filerna: forbandet hamtar den
+    sjalvt. Steget sager bara vad telefonen faktiskt har.
+
+    Vardet ligger i att skilja pa nivaerna. ATAK levereras med DTED0, som
+    ar ~900 m mellan punkterna - tillrackligt for att hojdrutan ska visa
+    ett varde, men inte for siktlinjer eller terranganalys. En telefon som
+    ser ut att ha hojddata kan alltsa sakna den som behovs, och skillnaden
+    syns inte i appen forran nagon forsoker anvanda den.
+    """
+    target = cfg.get("target", "/sdcard/atak/DTED")
+    stray = cfg.get("stray", [])
+
+    def run(adb, dev, log):
+        # En enda find per plats: katalogerna ar tusentals filer och varje
+        # adb-anrop kostar mer an sjalva sokningen.
+        p = adb.shell(["find", target, "-type", "f", "-name", "*.dt*"],
+                      dev.serial, mutating=False)
+        _logged(log, p)
+        counts: dict[str, int] = {}
+        for line in p.stdout.splitlines():
+            ext = line.rsplit(".", 1)[-1].strip().lower()
+            if ext in DTED_LEVELS:
+                counts[ext] = counts.get(ext, 0) + 1
+
+        # Filsystemet pa telefonen ar skiftlagesokansligt, sa dted och DTED
+        # ar samma katalog och kan inte bli fel. Det som faktiskt intraffar
+        # ar att hela den utpackade leveransen hamnar en niva for djupt,
+        # t.ex. /sdcard/atak/DTED2-26072701/dted/e017/n59.dt2, dar ATAK
+        # aldrig letar.
+        misplaced = []
+        for where in stray:
+            q = adb.shell(["find", where, "-maxdepth", "4", "-type", "d",
+                           "-iname", "dted*"], dev.serial, mutating=False)
+            _logged(log, q)
+            for line in q.stdout.splitlines():
+                path = line.strip()
+                if path and path.rstrip("/") != target.rstrip("/"):
+                    misplaced.append(path)
+
+        # Tipset om felplacerad data hor hemma i bada grenarna, och gor
+        # mest nytta i den grova: en telefon som bara har DTED0 och har
+        # leveransen liggande i Download ar precis det som hander nar
+        # nagon packar upp zip-filen och aldrig flyttar den vidare.
+        hint = f" - hojddata finns i {misplaced[0]}" if misplaced else ""
+        if misplaced:
+            log.write(f"also found: {misplaced}\n")
+
+        if counts:
+            note = ", ".join(f"{DTED_LEVELS[k]} {counts[k]}"
+                             for k in sorted(counts))
+            log.write(f"{target}: {note}\n")
+            if "dt2" not in counts and "dt1" not in counts:
+                return True, (f"{note} - bara grov hojddata, siktlinjer och "
+                              f"terranganalys saknar underlag{hint}")
+            return True, note + (f" (aven {misplaced[0]})" if misplaced else "")
+
+        if misplaced:
+            return True, (f"WARNING: ingen hojddata i {target} - "
+                          f"den ligger i {misplaced[0]}, dar ATAK inte letar")
+        log.write(f"{target}: empty or missing\n")
+        return True, f"ingen hojddata i {target}"
+    return Task("Check elevation data (DTED)", run)
+
+
 VERIFIER_KEYS = ("package_verifier_enable", "verifier_verify_adb_installs")
 
 
@@ -1162,6 +1233,9 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
     doze = cfg.get("doze", {}).get("verify", [])
     if doze:
         tasks.append(task_doze_check(doze))
+    dted = cfg.get("dted")
+    if dted:
+        tasks.append(task_dted_check(dted))
     # Last, so the screen stays lit for everything above it.
     tasks.append(let_screen_sleep)
     return tasks

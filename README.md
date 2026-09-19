@@ -38,6 +38,7 @@ atak-hv/
 ├── payload/                det som hamnar på telefonen
 │   ├── apks/               allt här sidladdas (.apk och .apks)
 │   ├── atak/               ATAK-konfiguration → /sdcard/atak
+│   │   └── overlays/       KML-lager, se Kartlager och överlägg
 │   └── ATAK-installation/  → /sdcard/ATAK-installation
 │       └── atak/           ren reservkopia, se nedan
 └── docs/                   handhavande och instruktioner
@@ -586,6 +587,60 @@ motorola = ["com.motorola.ccc.ota"]   # ny
 
 Ingen kodändring krävs — bidra gärna med fler tillverkare.
 
+## Kartlager och överlägg
+
+`payload/atak/overlays/` innehåller KML-lager som följer med varje
+installation. Just nu Trafikverkets kameror, hämtade ur deras öppna API:
+
+| Fil | Innehåll | Fungerar offline |
+|---|---|---|
+| `trafiksakerhetskameror_sverige.kml` | 2 790 fasta trafiksäkerhetskameror | **Ja** — rena punkter |
+| `trafikverket_kameror_sverige.kml` | 1 476 trafikflödes- och väglagskameror | Punkterna ja, bilderna nej |
+
+Den andra filen bäddar in länkar till kamerornas livebilder hos
+Trafikverket. På en enhet utan internet visas markören och texten, men
+inte bilden.
+
+Trafikverket publicerar också filerna var för sig. Lägg inte in
+`trafikflodeskameror` och `vaglagskameror` bredvid
+`trafikverket_kameror_sverige.kml` — den senare är summan av de två, och
+ATAK ritar då ut varje kamera dubbelt.
+
+> [!NOTE]
+> Telefoner som konfigurerats för hand kan ha äldre exportfiler liggande,
+> t.ex. `Trafikverket_Trafikkameror_v2_20250416.kml`. Filnamnen bär
+> exportdatum, så de skrivs inte över utan hamnar bredvid — och samma
+> kameror ritas ut två gånger. Verktyget raderar dem inte: filer som
+> någon lagt in själv tas inte bort automatiskt. Kontrollera
+> `/sdcard/atak/overlays/` vid första provisioneringen av en sådan enhet.
+
+## Höjddata (DTED)
+
+Höjddata ligger **inte** i repot. DTED2 över Sverige är 1,7 GB — samma
+kategori som `atak-box.zip` och apk-filerna: för stort för git, hämtas av
+förbandet. ATAK läser den ur `/sdcard/atak/DTED/`.
+
+`install` kontrollerar vad telefonen har och rapporterar nivån:
+
+| Nivå | Upplösning | Räcker till |
+|---|---|---|
+| DTED0 | ~900 m | höjdvärde i koordinatrutan |
+| DTED1 | ~90 m | grov terrängbedömning |
+| DTED2 | ~30 m | siktlinjer och terränganalys |
+
+Nivån är värd att skilja på, för ATAK levereras med DTED0. En telefon
+utan användbar höjddata ser därför ut att ha höjddata — hela skillnaden
+syns först när någon försöker dra en siktlinje.
+
+Steget flyttar aldrig något. Hittar det ingen höjddata på rätt plats
+letar det på de ställen där den brukar hamna i stället, och skriver ut
+var den ligger. Telefonens filsystem är skiftlägesokänsligt, så `dted`
+och `DTED` är samma katalog — felet som faktiskt inträffar är att hela
+den uppackade leveransen hamnar en nivå för djupt, exempelvis
+`/sdcard/atak/DTED2-26072701/dted/e017/`, där ATAK aldrig letar.
+
+Sökvägarna står under `[dted]` i `provision.toml`.
+
 ## De två atak-mapparna
 
 `payload/atak/` och `payload/ATAK-installation/atak/` innehåller samma
@@ -618,7 +673,8 @@ markörer, ritverktyg, rapportering, feeds och felsökning.
 | Vad | Varför | Var man får tag på det |
 |---|---|---|
 | `atak-box.zip` | Serveradress + certifikat, förbandsspecifikt | Från er TAK-serveransvarige |
-| ATAK-CIV och de två plugin-apparna | Tredje parts binärer. Behövs i `payload/apks/` bara vid sidladdning | Google Play, eller er egen distribution |
+| ATAK-CIV och de två plugin-apparna | Tredje parts binärer. Behövs i `payload/apks/` bara vid sidladdning | Google Play, tak.gov, eller er egen distribution |
+| Höjddata (DTED) | 1,7 GB för DTED2 över Sverige — för stort för git | Förbandets distribution. `install` säger vad telefonen har, se [Höjddata](#höjddata-dted) |
 | `logs/` | Körloggar | Skapas vid körning |
 
 ## Att verifiera

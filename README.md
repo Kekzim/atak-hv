@@ -174,8 +174,10 @@ Play igen, eller genom att provisionera om med sidladdning.
 
 `restore` slår på Play Store igen, oavsett hur installationen kördes.
 
-**Hemvärnets egna appar** — `Ramsor.apk` och `HVreports.apk` — ligger i
-repot och sidladdas alltid, i båda vägarna.
+**Hemvärnets egna appar** — Ramsor (`com.atakmap.android.hvmnemonics.plugin`)
+och HV Rapporter (`com.atakmap.android.hvreports.plugin`) — ligger i repot
+och sidladdas alltid, i båda vägarna. Övriga `.apk`-filer i `payload/apks/`
+är tredje parts och hålls utanför git.
 
 ## Enhetsinställningar som verktyget sätter
 

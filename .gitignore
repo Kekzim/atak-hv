@@ -32,10 +32,21 @@ atak-box.zip
 # ---------------------------------------------------------------
 # ATAK-CIV och plugin-apparna sidladdas, men hamtas av forbandet
 # sjalvt - de ar tredje parts binarer och ligger inte i repot. Samma
-# princip som atak-box.zip. Ramsor.apk och HVreports.apk ar Hemvarnets
-# egna och foljer med.
+# princip som atak-box.zip. Ramsor och HVreports ar Hemvarnets egna
+# och foljer med.
+#
+# Regeln ar medvetet omvand: allt under payload/apks/ ar utestangt och
+# de tva egna apparna slapps in igen. En namnprefixregel hade slappt
+# igenom varje ny leverantorsfil vars namn inte borjar pa ATAK-, och
+# filnamnen bestams inte av oss - tak.gov kallar t.ex. GeoCam-appen
+# camera-<version>-<hash>-release.apk. Verktyget letar anda upp
+# apk-filerna pa paket-id, inte pa filnamn, sa reglerna har paverkar
+# bara vad som hamnar i git.
 # ---------------------------------------------------------------
-payload/apks/ATAK-*
+payload/apks/*
+!payload/apks/Ramsor.apk
+!payload/apks/HVreports.apk
+!payload/apks/ATAK-Plugin-hvreports-*.apk
 *.apks
 
 # ---------------------------------------------------------------

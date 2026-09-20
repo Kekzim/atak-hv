@@ -607,12 +607,20 @@ Trafikverket publicerar också filerna var för sig. Lägg inte in
 ATAK ritar då ut varje kamera dubbelt.
 
 > [!NOTE]
-> Telefoner som konfigurerats för hand kan ha äldre exportfiler liggande,
-> t.ex. `Trafikverket_Trafikkameror_v2_20250416.kml`. Filnamnen bär
-> exportdatum, så de skrivs inte över utan hamnar bredvid — och samma
-> kameror ritas ut två gånger. Verktyget raderar dem inte: filer som
-> någon lagt in själv tas inte bort automatiskt. Kontrollera
-> `/sdcard/atak/overlays/` vid första provisioneringen av en sådan enhet.
+> Paketet innehöll tidigare samma kameror en gång till, som
+> datapaketen `Trafikkamror-hvss.zip` och `ATAK-väglagskamera-
+> default.zip` under `tools/datapackage/`. De är borttagna — den
+> kombinerade filen ovan är nyare och täcker samma kameror, och med båda
+> uppsättningarna på telefonen ritades varje kamera ut två gånger.
+>
+> Enheter som provisionerats före det har kvar de gamla filerna, med
+> exportdatum i namnet (`..._v2_20250416.kml`). De skrivs inte över, utan
+> hamnar bredvid de nya. Verktyget raderar dem inte: filer under
+> `overlays/` kan vara sådant förbandet lagt in själv, och att rensa där
+> automatiskt vore att slänga någon annans arbete. Ta bort dem för hand,
+> både i `/sdcard/atak/overlays/` och som källa under
+> `/sdcard/atak/tools/datapackage/`, annars kommer de tillbaka vid nästa
+> import.
 
 ## Höjddata (DTED)
 

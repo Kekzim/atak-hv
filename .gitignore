@@ -63,6 +63,15 @@ platform-tools/*
 !platform-tools/source.properties
 
 # ---------------------------------------------------------------
+# Leverantorsdokumentation - laddas ner, distribueras inte vidare
+# ---------------------------------------------------------------
+# TAK Product Centers egna dokument (serverguide, installationsskript,
+# utbildningsdeckar) ligger bakom inloggning pa tak.gov. Repot ar
+# publikt, sa de hamtas dar av den som behover dem i stallet for att
+# spridas harifran. Samma princip som apk-filerna.
+TakServerDocs/
+
+# ---------------------------------------------------------------
 # För stort för git
 # ---------------------------------------------------------------
 # Originaldokument (.pptx/.docx/.pdf) som konverterats till Markdown

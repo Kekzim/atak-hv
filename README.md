@@ -497,6 +497,7 @@ allt återställs av `restore`.
 | 32 Google-appar (mejl, video, assistent, plånbok, kalender, kartor, telefoni …) | Kör annars bakgrundstjänster, synk och uppdateringskontroller |
 | Tillverkarens diagnostik, fabrikstestverktyg och telemetri | Ingen funktion för användaren, flera med nätverksrättigheter |
 | Tillverkarens appar och telemetri | Samma sak — `[packages.vendor]`, matchas mot telefonens tillverkare |
+| En custom-ROM:s egna appar — på LineageOS telefon, SMS, kontakter, kalender, musik, webbläsare, uppdaterare och säkerhetskopiering | Samma sak — `[packages.rom]`, matchas mot vilken ROM telefonen kör |
 | Bakgrundssynk (`master_sync`) | ATAK använder inte Androids synkramverk |
 | Animationer | Kostar GPU och batteri för rent kosmetiska övergångar |
 | Adaptiv batterihantering | Lägger CPU på att lära sig vilka appar som ska strypas — meningslöst när enheten kör en app |
@@ -584,6 +585,23 @@ motorola = ["com.motorola.ccc.ota"]   # ny
 ```
 
 Ingen kodändring krävs — bidra gärna med fler tillverkare.
+
+### Telefoner med custom-ROM
+
+En telefon med t.ex. LineageOS rapporterar fortfarande sin ursprungliga
+tillverkare — en Sony med LineageOS säger `Sony` — men har inga av
+tillverkarens appar, bara ROM:ens egna. De ligger därför under
+`[packages.rom]`, med ROM:en som nyckel, och läggs ovanpå tillverkarens
+lista. Verktyget känner igen ROM:en på dess egen systemegenskap
+(`ro.lineage.version` → `lineage`) och visar den i enhetslistan.
+
+Listan för LineageOS är genomgången på en Sony Xperia X med LineageOS 20
+utan Google-appar. Kvar i appladan blir **ATAK, Kamera, Filer, Galleri och
+Inställningar**. Kameran får stå kvar med avsikt: ATAK:s QuickPic och Data
+Sync fotograferar via systemkameran, och utan den gör fotoknappen
+ingenting. Ljudeffektappen AudioFX försvinner ur appladan men dess tjänst
+fortsätter köra — den är persistent, och Android startar den vid uppstart
+även när den är avstängd.
 
 ## Kartlager och överlägg
 

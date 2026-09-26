@@ -116,6 +116,10 @@ secure = [
 # ro.product.manufacturer. Only the matching entry is applied, so an
 # unknown handset simply gets the core set.
 #
+# `rom` is per custom ROM and applied on top of the vendor entry. A
+# custom ROM keeps the handset's manufacturer string but none of the
+# manufacturer's apps, so its own apps need their own list.
+#
 # CONTRIBUTORS: adding a manufacturer is a config change, not a code
 # change. Add a table below, keyed by the lowercased manufacturer
 # string. Find yours with:
@@ -729,6 +733,63 @@ oneplus = [
     "com.oem.logkitsdservice",
     "com.oem.oemlogkit",
     "com.oneplus.diagnosemanager",
+]
+
+# Custom-ROM:ens egna appar. Matchas mot vilken ROM verktyget kanner igen
+# (ro.lineage.version -> lineage), inte mot tillverkaren - en Sony med
+# LineageOS rapporterar fortfarande Sony men har inga Sony-appar.
+[packages.rom]
+# LineageOS 20 utan Google-appar. Genomgangen pa Sony Xperia X (suzu,
+# inofficiell build 2024-01-29, Android 13). Allt som visas i appladan
+# utom Galleri, Filer, Kamera och Installningar, plus tjanster som kor
+# eller ringer hem i bakgrunden.
+#
+# ORORDA med avsikt:
+# - com.android.gallery3d och com.android.documentsui (Galleri, Filer).
+# - org.lineageos.aperture (Kamera). ATAK:s QuickPic och Data Sync
+#   fotograferar via systemkameran; utan den gor fotoknappen ingenting.
+#   TAK GeoCam har egen kamera och klarar sig utan.
+# - Tangentbordet (com.android.inputmethod.latin), hemskarmen
+#   (com.android.launcher3) och paketinstallatoren - den sista kravs for
+#   att installera plugins fran uppdateringsservern.
+# - Telefoniramverket (com.android.phone, IMS, Qualcomm) - det bar
+#   mobildata. Bluetooth, se [commands]. Cell broadcast och Emergency
+#   Info: myndighetsvarningar och nodinformation.
+# - com.android.webview - ATAK och plugins visar sidor med den.
+#
+# Telefon, Kontakter och SMS stangs av precis som Googles motsvarigheter
+# under debloat, och av samma skal. Ska telefonerna anvandas for samtal:
+# ta bort de tre raderna.
+lineage = [
+    # telefoni, kontakter och SMS - enheten tar inte emot samtal
+    "com.android.dialer",
+    "com.android.contacts",
+    "com.android.messaging",
+    # appar utan roll pa en ATAK-enhet
+    "com.android.calculator2",
+    "com.android.deskclock",
+    "org.lineageos.eleven",
+    "org.lineageos.etar",
+    "org.lineageos.jelly",
+    "org.lineageos.recorder",
+    # ljudeffekter. Forsvinner ur appladan och installningarna, men
+    # tjansten kor anda: appen ar persistent och Android startar den vid
+    # uppstart trots disable-user (provat, ca 70 MB).
+    "org.lineageos.audiofx",
+    # uppdateringar - en inofficiell build far inga, och en officiell ska
+    # inte uppdatera sig sjalv pa en utdelad enhet
+    "org.lineageos.updater",
+    # sakerhetskopiering - Seedvault och dess kontaktbackup
+    "com.stevesoltys.seedvault",
+    "org.calyxos.backup.contacts",
+    # skarmslackare, levande bakgrunder, utskrift och paskagget
+    "com.android.dreams.basic",
+    "com.android.dreams.phototable",
+    "com.android.wallpaper.livepicker",
+    "com.android.printspooler",
+    "com.android.bips",
+    "com.android.printservice.recommendation",
+    "com.android.egg",
 ]
 
 # ---------------------------------------------------------------------

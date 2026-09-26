@@ -69,8 +69,12 @@ the tool against a real phone over `adb`. Useful properties when doing that:
   `provision.toml`.
 
 **Behaviour lives in `provision.toml`, not in `provision.py`.** Adding a
-manufacturer, an app, a permission, a debloat target or a setting is a config
-change. Prefer extending the config over adding code.
+manufacturer, a custom ROM, an app, a permission, a debloat target or a
+setting is a config change. Prefer extending the config over adding code.
+`[packages.vendor]` is keyed by `ro.product.manufacturer`; `[packages.rom]`
+by the ROM family `Adb.describe` finds (`ro.lineage.version` → `lineage`),
+since a custom ROM keeps the handset's manufacturer string but none of its
+apps. Both are re-enabled by `restore`.
 
 **APKs are discovered, not listed.** `find_apks` scans `[kit] apk_dir` and
 reads the package id out of each binary `AndroidManifest.xml` (`apk_package`,

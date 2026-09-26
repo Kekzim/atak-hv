@@ -209,6 +209,9 @@ class Device:
     # Name of a custom ROM, when the device is not running the
     # manufacturer's own Android. Empty on a stock device.
     rom: str = ""
+    # Which ROM that is - "lineage", "omni" - the key [packages.rom] is
+    # matched on. The version string above changes with every build.
+    rom_family: str = ""
 
     def __str__(self) -> str:
         rom = f", {self.rom}" if self.rom else ""
@@ -265,23 +268,30 @@ class Adb:
     # A custom ROM keeps ro.product.manufacturer from the original handset,
     # so the vendor list still matches on "oneplus" or "samsung" while none
     # of the manufacturer's packages are installed. Each of these is set by
-    # the ROM itself; the value is shown so the operator can see which.
-    ROM_PROPS = ("ro.lineage.version", "ro.modversion", "ro.omni.version",
-                 "org.pixelexperience.version", "ro.rr.version",
-                 "ro.crdroid.version", "ro.aicp.version")
+    # the ROM itself; the value is shown so the operator can see which, and
+    # the family names the ROM's own list under [packages.rom]. Lineage
+    # comes first: ROMs built on it, crDroid among them, set its property
+    # too and ship its apps.
+    ROM_PROPS = (("ro.lineage.version", "lineage"),
+                 ("ro.modversion", "modversion"),
+                 ("ro.omni.version", "omni"),
+                 ("org.pixelexperience.version", "pixelexperience"),
+                 ("ro.rr.version", "rr"),
+                 ("ro.crdroid.version", "crdroid"),
+                 ("ro.aicp.version", "aicp"))
 
     def describe(self, serial: str) -> Device:
         def prop(name: str) -> str:
             p = self.shell(["getprop", name], serial, timeout=30, mutating=False)
             return p.stdout.strip() or "?"
-        rom = ""
-        for name in self.ROM_PROPS:
+        rom = family = ""
+        for name, fam in self.ROM_PROPS:
             value = prop(name)
             if value and value != "?":
-                rom = value
+                rom, family = value, fam
                 break
         return Device(serial, prop("ro.product.manufacturer"),
-                      prop("ro.product.model"), rom)
+                      prop("ro.product.model"), rom, family)
 
 
 def find_adb(config: dict, override: str | None, out: Out) -> Path:
@@ -472,7 +482,9 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
 
     `core`, `play` and `debloat` apply everywhere. `vendor` is keyed by
     ro.product.manufacturer, so an unknown handset simply gets the common
-    lists and still works.
+    lists and still works. `rom` is keyed by the custom ROM's family and
+    applies on top: a Sony running LineageOS carries Lineage's apps, not
+    Sony's, while still reporting Sony as its manufacturer.
 
     `play` is only touched when asked for - `--disable-play` on install,
     and always on restore so a locked-down device can be handed back. It
@@ -486,6 +498,7 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
     # used to be counted as a success. Seen on com.sec.android.sdhms.
     want_state = "enabled" if enable else "disabled-user"
     vendor = packages.get("vendor", {})
+    roms = packages.get("rom", {})
 
     def run(adb, dev, log):
         targets = list(packages.get("core", [])) + list(packages.get("debloat", []))
@@ -501,6 +514,10 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
 
         if dev.rom:
             log.write(f"custom ROM: {dev.rom}\n")
+        rom_list = roms.get(dev.rom_family) if dev.rom_family else None
+        if rom_list:
+            targets += rom_list
+            log.write(f"rom match: {dev.rom_family} -> {len(rom_list)} packages\n")
 
         touched = absent = refused = unchanged = 0
         for pkg in targets:
@@ -519,11 +536,13 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
                               f"left at {state.group(1)}\n")
                 else:
                     touched += 1
-            elif "Unknown package" in combined:
+            elif "Unknown package" in combined or "Unknown component" in combined:
                 # Simply not installed on this ROM. Worth separating from a
                 # refusal: a stock handset missing a few Google apps looks
                 # nothing like a custom ROM where the whole vendor list is
-                # absent, but both used to print the same "n/a".
+                # absent, but both used to print the same "n/a". A component
+                # entry (pkg/.Class) on a Google-free ROM answers "Unknown
+                # component" instead, and used to be counted as refused.
                 absent += 1
             else:
                 # Present but the shell may not touch it - a protected
@@ -542,6 +561,8 @@ def task_packages(packages: dict, enable: bool, include_play: bool = False) -> T
             note += " (" + ", ".join(detail) + ")"
         if matched:
             note += f", vendor: {key}"
+        if rom_list:
+            note += f", rom: {dev.rom_family}"
         if dev.rom and not touched:
             note += f" - {dev.rom}"
         return True, note

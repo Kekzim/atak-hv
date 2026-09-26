@@ -968,8 +968,9 @@ def task_prefs(answers: dict, cfg: dict, base: Path,
     empty.
 
     `loadout` overrides [prefs] select_loadout for this run. Grund is the
-    everyday view and the config default; Planering is picked per run with
-    --loadout when a device is being set up for planning work.
+    config default and the only loadout the kit ships; --loadout "" leaves
+    the device's current view alone, and a loadout added under
+    [prefs] include can be picked by its title.
 
     Carries two kinds of setting. The entries from [prefs.entries] are
     the same on every device: coordinate format, altitude reference,

@@ -845,16 +845,16 @@ target = "/sdcard/atak/config/prefs/defaults"
 # Innehallet tillampas vid start som allt annat, sa operatoren slipper
 # importera dem for hand pa varje telefon.
 #
-# Grund och Planering ar ATAK-loadouts: vilka knappar som visas i
-# verktygsraden och vilka verktyg som doljs. Grund ar den avskalade
-# soldatvyn, Planering behaller planeringsverktygen.
+# Grund ar en ATAK-loadout: vilka knappar som visas i verktygsraden och
+# vilka verktyg som doljs. Den ar den avskalade soldatvyn och den enda
+# loadouten i kitet - Planering togs bort eftersom soldaterna inte
+# anvande den.
 #
-# Filerna ligger kvar under payload/ATAK-installation/ och foljer darmed
-# med ut pa telefonen, sa de gar att importera for hand ocksa om nagon
-# vill byta loadout i efterhand.
+# Filen ligger kvar under payload/ATAK-installation/ och foljer darmed
+# med ut pa telefonen, sa den gar att importera for hand ocksa om nagon
+# har andrat vyn och vill tillbaka.
 include = [
     "payload/ATAK-installation/Grund.zip",
-    "payload/ATAK-installation/Planering.zip",
 ]
 
 # Vilken loadout som ska vara vald nar ATAK startar. Att importera en

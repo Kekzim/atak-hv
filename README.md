@@ -243,28 +243,21 @@ skrivs som strängar även när de ser ut som siffror — ATAK läser dem så,
 och ett heltal får appen att kasta undantag. Det gäller även
 `set_domain_pref`, där värdet är ordet `Ground`.
 
-### Loadouts — vilka knappar och verktyg som syns
+### Loadout — vilka knappar och verktyg som syns
 
 En **loadout** styr vilka knappar som sitter i navigeringsraden och vilka
-verktyg som visas under *Tools*. Paketet innehåller två:
+verktyg som visas under *Tools*. Paketet innehåller en: **Grund**, den
+avskalade soldatvyn. Den döljer nitton verktyg — bland annat rutter,
+resektion, eldledning, radiokontroller, spårhistorik, *Orientation* och
+*Link EUD* — och behåller *Range Tools* (avstånd och bäring) och
+*Plugins*.
 
-| Loadout | Innehåll |
-|---|---|
-| **Grund** | Den avskalade soldatvyn. Döljer nitton verktyg — bland annat avstånd och bäring, rutter, resektion, eldledning, radiokontroller och spårhistorik |
-| **Planering** | Behåller planeringsverktygen. Döljer åtta — bland annat bloodhound, alert, CASEVAC och geofences |
-
-Båda läggs ut på varje telefon. **Grund är vald som standard** — det är
-`select_loadout` i `provision.toml`. Ska en enhet sättas upp för
-planeringsarbete väljs den andra vid körningen:
-
-```
-provision.bat install --loadout Planering
-```
+Grund läggs ut på varje telefon och **är vald som standard** — det är
+`select_loadout` i `provision.toml`:
 
 | Kommando | Vald loadout |
 |---|---|
 | `install` | Grund — standard för alla installationer |
-| `install --loadout Planering` | Planering |
 | `install --loadout ""` | ingen; telefonens nuvarande vy lämnas orörd |
 
 Loadouten anges med **titel**, inte UID: UID:t byts varje gång loadouten
@@ -273,17 +266,22 @@ bland filerna avbryter **innan** verktyget rör telefonen, och skriver ut
 vilka som finns:
 
 ```
-ERROR: no loadout titled 'Plannering'. Available: Grund, Planering
+ERROR: no loadout titled 'Grudn'. Available: Grund
 ```
 
 Att bara lägga ut en loadout gör den tillgänglig — ATAK minns den valda
 separat. Det är därför `select_loadout` behövs och inte kan utelämnas om
 en viss vy ska gälla.
 
-Vill ni byta loadout i efterhand ligger `Grund.zip` och `Planering.zip`
-kvar på telefonen under `/sdcard/ATAK-installation/` och kan importeras på
-vanligt sätt. Egna loadouts exporteras ur ATAK och läggs till under
-`[prefs] include`.
+Vill ni återställa vyn i efterhand ligger `Grund.zip` kvar på telefonen
+under `/sdcard/ATAK-installation/` och kan importeras på vanligt sätt. Egna
+loadouts exporteras ur ATAK, läggs till under `[prefs] include` och väljs
+med `--loadout TITEL`.
+
+Tidigare fanns även loadouten **Planering**. Den är borttagen eftersom
+soldaterna inte använde den. En telefon som installerades medan den fanns
+behåller den tills någon tar bort den i ATAK — en ny installation lägger
+inte ut den, men raderar den inte heller.
 
 ### Kontrollera på enheten
 

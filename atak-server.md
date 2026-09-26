@@ -121,14 +121,18 @@ update server instead (§3).
 
 ### Loadouts need no zip
 
-`provision.py` reads the `<preference>` blocks out of `Grund.zip` /
-`Planering.zip` and stages them. Feed the same generator and upload one
-`.pref`: it both defines the loadouts and selects one via
-`selected_loadout_key`. The zips are only a source format.
+`provision.py` reads the `<preference>` blocks out of `Grund.zip` and
+stages them. Feed the same generator and upload one `.pref`: it both
+defines the loadout and selects it via `selected_loadout_key`. The zip is
+only a source format.
+
+The `.pref` can add or overwrite a loadout, never remove one. A loadout
+dropped from the kit — Planering was — stays on every phone that already
+has it until someone deletes it in ATAK.
 
 Selection is confirmed in Tools → pencil, which names the current loadout.
-Do **not** judge by the toolbar: `Grund` sets only `hidden=`, so it leaves the
-nav bar at default, and `Planering`'s `buttons=` renders almost identically.
+Do **not** judge by the toolbar, which looks almost the same with or without
+Grund; judge by what the Tools list shows and hides.
 
 ### Phones pull; nothing is pushed
 
@@ -144,7 +148,7 @@ The kit's ATAK state fits one Connection profile, 160 kB zipped:
 
 | File | Source |
 |---|---|
-| one `.pref`: the kit's 14 settings, both loadouts with Grund selected, the three update-server keys (§3) | `provision.task_prefs` |
+| one `.pref`: the kit's 14 settings, the Grund loadout selected, the three update-server keys (§3) | `provision.task_prefs` |
 | 27 map sources | `payload/atak/imagery/` |
 | 2 overlays | `payload/atak/overlays/` |
 
@@ -222,10 +226,11 @@ offered the new version.
 
 ### On the phone
 
-Settings → Tool Preferences → **Package Management**. (The Grund loadout
-hides the Plugins tool; this path always works.) The screen shows the
-update-server URL with a green check, then every product with its status.
-Per plugin: tap it, confirm Android's install prompt. ATAK loaded each
+Tools → **Plugins**, or Settings → Tool Preferences → **Package
+Management**; both open the same screen. It shows the update-server URL
+with a green check, then every product with its status. ATAK 5.8 lists
+seven plugins it bundles itself (HelmCam, Night Vision, …) beside the
+repo's. Per plugin: tap it, confirm Android's install prompt. ATAK loaded each
 plugin within a second of the install finishing — no separate "load plugin"
 tap was needed.
 
@@ -682,9 +687,6 @@ to re-enter them.
 **A single-file bind mount does not see `sed -i`.** It writes a new file and
 renames it over the old; the container keeps the old inode, so a reload
 reloads the old config. Recreate the container.
-
-**Grund hides ATAK's Plugins tool.** Settings → Tool Preferences → Package
-Management reaches the same screen.
 
 **No delivery confirmation for profiles.** Nothing records which device
 received which profile; the only evidence is the API log line `Returning

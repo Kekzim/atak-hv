@@ -354,7 +354,7 @@ files. Touch one file in a profile and every client re-pulls the whole thing.
 |---|---|---|
 | policy | units, reporting rates, loadouts | often, kB |
 | content | overlays, imagery | occasional, MB |
-| terrain | DTED, one per grupp | rare, 5–12 MB |
+| terrain | DTED, one per grupp | rare, 7–29 MB |
 
 On the test server this is now two profiles: the kit profile (policy and
 content, 160 kB) and one terrain profile per grupp (§5).
@@ -366,9 +366,29 @@ content, 160 kB) and one terrain profile per grupp (§5).
 Cells are 1°×1°, named by their south-west corner: `e015/n56` covers
 15–16°E, 56–57°N.
 
-### MR S coverage — 24 cells, 44.8 MB zipped (298 MB raw)
+### MR S coverage — 20 cells, 41.3 MB zipped (248 MB raw)
 
-Box `e012`–`e017` × `n55`–`n58`. Zipped MB per cell:
+Södra militärregionen supports the Hemvärn in six counties — Skåne,
+Blekinge, Kalmar, Kronoberg, Jönköping and Östergötland — through five
+militärregiongrupper. The cells a grupp needs are those holding **land of
+its counties**: an elevation post above 0 m inside the county outline
+(OpenStreetMap, which includes territorial sea), sampled every second post
+(~60 m) so islets like Utklippan count. That drops open-sea cells and cells
+that only hold a neighbouring county's coast.
+
+| Grupp | Counties | Cells | Zipped | Unpacked |
+|---|---|---|---|---|
+| Blekingegruppen | Blekinge | `e014`–`e015` × `n55`–`n56`, `e016/n56` — 5 | 6.9 MB | 62 MB |
+| Skånska gruppen | Skåne | `e012`–`e014` × `n55`–`n56` — 6 | 9.7 MB | 75 MB |
+| Kalmar- och Kronobergsgruppen | Kalmar, Kronoberg | `e013`–`e014` × `n56`–`n57`, `e015` × `n56`–`n58`, `e016` × `n56`–`n58`, `e017/n57` — 11 | 29.2 MB | 137 MB |
+| Norra Smålandsgruppen | Jönköping | `e013`–`e014` × `n56`–`n58`, `e015` × `n57`–`n58` — 8 | 24.1 MB | 100 MB |
+| Livgrenadjärgruppen | Östergötland | `e014` × `n57`–`n58`, `e015` × `n57`–`n59`, `e016` × `n57`–`n58`, `e017/n58` — 8 | 22.5 MB | 100 MB |
+
+Their union is MR S: 20 cells. An earlier estimate used the box `e012`–`e017`
+× `n55`–`n58` (24 cells, 44.8 MB); it held two cells of land in MR V
+(`e012/n57`, `e012/n58`, 6.6 MB) and three of open sea, and missed
+`e015/n59` — Östergötland reaches 59.02°N. Zipped MB per cell in that box,
+still valid per cell:
 
 ```
         n55    n56    n57    n58
@@ -380,25 +400,31 @@ e016      0    0.7    2.3    3.4
 e017      0      0      0    0.9
 ```
 
-Five cells are open Baltic and cost nothing — keep them.
+plus `e015/n59`, 3.0 MB. A "0" is rounding: `e015/n55` holds Utklippan and
+`e017/n57` the north tip of Öland.
 
 **Never ship all of MR S to every device.** One profile per
-militärregiongrupp, its own cells only, lands at 5–12 MB — comfortably in the
-regime that took 100 clients. A shared all-of-MR-S profile would fail when a
-unit reconnects after an exercise.
+militärregiongrupp, its own cells only. Coastal grupper land at 7–10 MB;
+**inland grupper at 22–29 MB**, because a land cell zips to about 3 MB and
+they cover eight to eleven of them. The server builds each package in RAM
+per request (§4), so a whole grupp reconnecting at once after an exercise
+is the load to plan for. Kalmar- och Kronobergsgruppen can be split per
+battalion, one county each: Kalmar about 16 MB, Kronoberg about 18.5 MB.
 
 Blekinge is the worked example: `e014/n55`, `e014/n56`, `e015/n55`,
-`e015/n56` — **6.1 MB**, four cells. Slightly more than the obvious two
-because the coast dips below 56°N (Utklippan ≈ 55.95°N). The two `n55` cells
-are 0.6 MB combined.
+`e015/n56` and `e016/n56` — **6.9 MB**, five cells. The `n55` cells are
+there because the coast dips below 56°N (Utklippan ≈ 55.95°N); `e016/n56`
+because the county's east corner, Kristianopel at 16.04°E, lies east of
+16°E. A first version with four cells missed that corner.
 
-**Verified on the test server, 2026-09-27.** Those four cells as their own
-Connection profile, `terrain-blekinge`, scoped to the test phones' groups
-and kept apart from the kit profile. Both phones had all four cells in
-`atak/DTED/` on their next connect, byte for byte, beside the DTED0 that
+**Verified on the test server, 2026-09-27.** Blekinge as its own Connection
+profile, kept apart from the kit profile: both test phones had all five cells
+in `atak/DTED/` on their next connect, byte for byte, beside the DTED0 that
 ATAK streams itself (see *ATAK streams DTED0 by itself* below). Kept
 separate because every save of a profile re-delivers all of it (§2): a
-settings change to the kit must not send terrain again.
+settings change to the kit must not send terrain again. The other four
+grupper's profiles are built and on the server too, each scoped to a group
+of its own; no phone has been in those groups yet.
 
 ### Delivery
 
@@ -411,8 +437,9 @@ and its extraction coexist before cleanup. 317 MB peaked at ~640 MB.
 
 Delivered in a profile, the zip is **not** cleaned up: ATAK keeps its copy
 under `atak/tools/datapackage/files/<uuid>/` after unpacking. Blekinge's
-6.1 MB became 50 MB in `atak/DTED/` plus the 6.1 MB zip left behind — small
-per grupp, 45 MB of dead weight per phone for all of MR S.
+first, four-cell 6.1 MB became 50 MB in `atak/DTED/` plus the 6.1 MB zip
+left behind — small for a coastal grupp, up to 29 MB of dead weight per
+phone for an inland one.
 
 Drop the GDAL `.aux.xml` sidecars; ATAK never reads them.
 
@@ -820,6 +847,10 @@ folder), `ProductInformation` (the `product.inf` columns),
   woke, an on-connect request got nothing though a profile was waiting. Not
   the streaming-group race (`useStreamingGroup` is unset). It did not recur
   in later deliveries.
+- **Inland terrain profiles unloaded.** The 22–29 MB grupp profiles are on
+  the test server but no phone has fetched one, and the group names they are
+  scoped to are placeholders that must match the real grupp groups. How many
+  phones can fetch one at once on a given heap is unmeasured.
 - **Does ATAK ever remove delivered zips?** The DTED zip stayed in
   `atak/tools/datapackage/files/` after unpacking (§5). Whether a later
   cleanup, a profile update or only `restore` removes it is untested.

@@ -216,8 +216,8 @@ och `--no-optimize` fungerar som vanligt.
 
 Provat 2026-09-27 på en OnePlus Nord N100 med LineageOS 22.2 utan
 Google-appar: verktyget installerade bara ATAK, servern levererade
-resten, och de fyra plugin-apparna var installerade och laddade en halv
-minut efter omstarten.
+resten, och efter omstarten var de fyra plugin-apparna hämtade,
+installerade och laddade inom en halv minut från första trycket.
 
 ### Hemvärnets egna appar
 

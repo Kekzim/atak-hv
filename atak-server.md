@@ -52,10 +52,13 @@ sources, overlays and plugins all came from the server (§2, §3).
 
 That USB step is now `provision.py install --atak-only`: ATAK from
 `payload/apks/` (`[atak_only] install`), permissions, Doze and the lockdown,
-and no plugins, payload push, `atak-box.zip` or staged settings. On
-2026-09-27 it built a second phone, a OnePlus Nord N100 on LineageOS 22.2:
-the bootstrap again landed 0.9 s before the first profile request, and the
-four plugins were installed and loaded half a minute after one ATAK restart.
+and no plugins, payload push, `atak-box.zip` or staged settings. The phone
+must then **enroll** (§7): only enrollment fetches the Enrollment profile, so
+a phone given a finished certificate — as `atak-box.zip` does — never gets
+the bootstrap. On 2026-09-27 this built a second phone, a OnePlus Nord N100
+on LineageOS 22.2: the bootstrap again landed 0.9 s before the first
+profile request, the kit profile's 30 files followed 3.6 s later, and after
+one ATAK restart the four plugins were installed and loaded (§3).
 
 ---
 
@@ -98,7 +101,9 @@ Body`: curl's default form content type. URL-quote `filename`; non-ASCII
 names such as `Sjökort-SFV-TS.xml` survive intact.
 
 `APPLY_TO_ALL_GROUPS` is resolved when a device asks, not when the profile is
-saved: a group created afterwards still received the profile.
+saved: a group created afterwards still received the profile. The profile
+list shows it expanded into the groups that exist at that moment — a
+display, not a fixed list.
 
 Fetch as a client would, which is how to test without a phone:
 
@@ -150,6 +155,12 @@ ATAK stores the start time of its last successful profile request
 since then. In daily use that is the next network drop, restart or morning;
 on issue day, one ATAK restart.
 
+**Any save counts as a change.** Saving a profile moves its `updated`
+timestamp even when only the group scope changed, so every phone in scope
+downloads all of it again at its next connect and re-applies its `.pref` —
+overwriting whatever a user changed in those keys, the selected loadout
+included. Widen or narrow a scope when a re-delivery is acceptable.
+
 ### The kit as one profile
 
 The kit's ATAK state fits one Connection profile, 160 kB zipped:
@@ -176,8 +187,10 @@ and `tools/vehicle_models` (ATAK ships its own), the maps package in
 
 ## 3. Plugins — ATAK's update server
 
-The plugin channel. Verified on a Google-free phone: four plugins installed
-in 48 s, one at a time, no ATAK restarts.
+The plugin channel. Verified on two Google-free phones, one plugin at a
+time with no ATAK restart between them: four plugins in 48 s on a Sony Xperia X
+(LineageOS 20), and on a OnePlus Nord N100 (LineageOS 22.2) all four
+downloaded, installed and loaded within 30 s of the first tap.
 
 ### How ATAK finds it
 
@@ -193,6 +206,12 @@ ATAK refuses plain HTTP (`Update Server must be HTTPs`). It first requests a
 version folder, `…/update/5.8.0/product.infz`, and falls back to
 `…/update/product.infz` on a 404 — so per-ATAK-version plugin sets are
 possible later, one folder each.
+
+**The first fetch waits for an ATAK start.** Delivered in the kit profile,
+the three keys land while ATAK is already running, and nothing reached the
+repository until the next start: on the N100 the index was fetched 17 s
+after one ATAK restart. On issue day that restart is also what applies the
+default map and the full loadout (§2), so it is one restart, not two.
 
 ### TAK Server does not host it
 
@@ -632,9 +651,15 @@ Plain `docker run` from one script: Unraid ships no Compose.
 ### Phones without Google
 
 ATAK-CIV 5.8.0.5 and all four plugins contain **zero** Google Play Services
-classes, checked in every `classes*.dex`. On LineageOS 20 with no Google apps
-at all, everything in this file worked: enrollment, profiles, and installs
-from the update server.
+classes, checked in every `classes*.dex`. With no Google apps at all —
+LineageOS 20 on the Sony, LineageOS 22.2 on the N100 — everything in this
+file worked: enrollment, profiles, and installs from the update server. The
+kit's lockdown has a LineageOS list of its own (`[packages.rom]`).
+
+The N100 has no official LineageOS build. Its 22.2 was built from the
+LineageOS project's own sources, and needed two fixes where its device tree,
+never built officially, had fallen behind — nothing server-side depends on
+them.
 
 An idle phone with its screen off let WiFi sleep, and ATAK could not
 reconnect until it was woken. Keep test phones awake on USB.
@@ -733,16 +758,18 @@ folder), `ProductInformation` (the `product.inf` columns),
   connections longer, so the true limit is likely lower than the table.
 - **Data Sync feeds untouched.** Metodanvisning §1.4 makes Feeds the core of
   how SLO, UPK and UND move, with per-role rights. Not explored at all.
-- **Two device models tested**: a OnePlus Nord N100 on stock Android 11, and
-  a Sony Xperia X on LineageOS 20.
+- **Two device models tested**: a OnePlus Nord N100 on stock Android 11 and
+  later on LineageOS 22.2, and a Sony Xperia X on LineageOS 20. No Samsung
+  or Xiaomi phone has been through the server route.
 - **One unexplained empty profile answer.** Once, just after a phone's WiFi
   woke, an on-connect request got nothing though a profile was waiting. Not
   the streaming-group race (`useStreamingGroup` is unset). It did not recur
   in later deliveries.
 - **Multi-select install untested.** Package Management was used one plugin
   at a time.
-- **Kit scope.** The kit profile is scoped to one test group. Real use needs
-  all groups, or one kit per grupp.
+- **Kit scope.** The kit profile now goes to all groups on the test server.
+  Real use may still want one kit per grupp — different overlays or DTED —
+  and every save re-delivers the whole profile (§2).
 - **No map licence read.** The FTP is open and the data free, but
   *Användningsvillkor för Topografisk webbkarta Nedladdning, raster* governs
   what may be done with an extract. Unread.

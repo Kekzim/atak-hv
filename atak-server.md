@@ -143,6 +143,13 @@ The `.pref` can add or overwrite a loadout, never remove one. A loadout
 dropped from the kit — Planering was — stays on every phone that already
 has it until someone deletes it in ATAK.
 
+A loadout can put a **plugin's tool on the nav bar**. The button refers to
+it as `plugin://<plugin package>/<tool class>` — Grund's camera button is
+`plugin://com.atakmap.android.geocam.plugin/com.atakmap.android.geocam.plugin.GeoCamTool`,
+the same form as the Data Sync button. ATAK builds that string in
+`AbstractPluginTool.getReference()`; the class name can be read out of the
+plugin's dex. On a phone without the plugin the slot stays empty.
+
 Selection is confirmed in Tools → pencil, which names the current loadout.
 Do **not** judge by the toolbar, which looks almost the same with or without
 Grund; judge by what the Tools list shows and hides.
@@ -171,7 +178,7 @@ The kit's ATAK state fits one Connection profile, 160 kB zipped:
 
 | File | Source |
 |---|---|
-| one `.pref`: the kit's 14 settings, the Grund loadout selected, the three update-server keys (§3) | `provision.task_prefs` |
+| one `.pref`: the kit's 15 settings, the Grund loadout selected, the three update-server keys (§3) | `provision.task_prefs` |
 | 27 map sources | `payload/atak/imagery/` |
 | 2 overlays | `payload/atak/overlays/` |
 
@@ -186,6 +193,29 @@ once; the default map and the complete loadout took **one more ATAK start**,
 because ATAK reads those at startup. Left out on purpose: `tools/bluetooth`
 and `tools/vehicle_models` (ATAK ships its own), the maps package in
 `tools/datapackage` (a duplicate of `imagery/`), licence files.
+
+### Changing the kit
+
+A kit change is a config change followed by one upload: edit
+`provision.toml` or `Grund.zip`, regenerate the `.pref`, diff it against the
+copy on the server, replace that one file and re-save the profile (API
+above). On 2026-09-27 this was done three times — Grund's camera button, the
+start map, keeping the screen on — each diff one or two lines, and each
+reached both test phones at their next connect. The same edit is what USB
+provisioning stages, so the two routes stay identical.
+
+When a delivered setting takes effect, as observed:
+
+| Setting | Takes effect |
+|---|---|
+| units, coordinate format | at once |
+| loadout: which tools are hidden | at once |
+| `atakScreenLock` | at once — ATAK's window had `KEEP_SCREEN_ON` seconds after delivery |
+| start map (`lastViewedLayer.*`) | next ATAK start |
+| update-server keys | next ATAK start (§3) |
+
+The start map is only a starting point: ATAK saves whatever map the user
+picks, and the profile resets it only when the profile is saved again.
 
 ---
 
@@ -740,6 +770,11 @@ to re-enter them.
 **A single-file bind mount does not see `sed -i`.** It writes a new file and
 renames it over the old; the container keeps the old inode, so a reload
 reloads the old config. Recreate the container.
+
+**ATAK lets the screen lock mid-use.** Its *Disable Screen Saver / Screen
+Lock* (`atakScreenLock`) is off by default, so the screen goes dark after
+Android's timeout — 60 s on stock settings, any ROM — with ATAK in front.
+The kit now sets it; it only holds the screen on while ATAK is in front.
 
 **No delivery confirmation for profiles.** Nothing records which device
 received which profile; the only evidence is the API log line `Returning

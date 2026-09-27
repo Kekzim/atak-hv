@@ -739,13 +739,16 @@ oneplus = [
 # (ro.lineage.version -> lineage), inte mot tillverkaren - en Sony med
 # LineageOS rapporterar fortfarande Sony men har inga Sony-appar.
 [packages.rom]
-# LineageOS 20 utan Google-appar. Genomgangen pa Sony Xperia X (suzu,
-# inofficiell build 2024-01-29, Android 13). Allt som visas i appladan
-# utom Galleri, Filer, Kamera och Installningar, plus tjanster som kor
-# eller ringer hem i bakgrunden.
+# LineageOS utan Google-appar. Genomgangen pa Sony Xperia X (suzu,
+# LineageOS 20, Android 13) och OnePlus Nord N100 (billie2, LineageOS
+# 22.2, Android 15). Allt som visas i appladan utom Galleri, Filer, Kamera
+# och Installningar, plus tjanster som kor eller ringer hem i bakgrunden.
+# Listan tacker bada versionerna; ett paket som inte finns hoppas over.
 #
 # ORORDA med avsikt:
-# - com.android.gallery3d och com.android.documentsui (Galleri, Filer).
+# - com.android.gallery3d, org.lineageos.glimpse (Galleri i 22.x) och
+#   com.android.documentsui (Filer). org.lineageos.camelot, PDF-visaren i
+#   22.x, syns inte i appladan och oppnar bland annat serverconnect.pdf.
 # - org.lineageos.aperture (Kamera). ATAK:s QuickPic och Data Sync
 #   fotograferar via systemkameran; utan den gor fotoknappen ingenting.
 #   TAK GeoCam har egen kamera och klarar sig utan.
@@ -768,7 +771,8 @@ lineage = [
     # appar utan roll pa en ATAK-enhet
     "com.android.calculator2",
     "com.android.deskclock",
-    "org.lineageos.eleven",
+    "org.lineageos.eleven",     # musik, LineageOS 20
+    "org.lineageos.twelve",     # musik, LineageOS 22
     "org.lineageos.etar",
     "org.lineageos.jelly",
     "org.lineageos.recorder",

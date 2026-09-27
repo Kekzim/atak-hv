@@ -293,10 +293,14 @@ och ett heltal får appen att kasta undantag. Det gäller även
 
 En **loadout** styr vilka knappar som sitter i navigeringsraden och vilka
 verktyg som visas under *Tools*. Paketet innehåller en: **Grund**, den
-avskalade soldatvyn. Den döljer nitton verktyg — bland annat rutter,
-resektion, eldledning, radiokontroller, spårhistorik, *Orientation* och
-*Link EUD* — och behåller *Range Tools* (avstånd och bäring) och
-*Plugins*.
+avskalade soldatvyn. Den döljer tjugo verktyg — bland annat rutter,
+resektion, eldledning, radiokontroller, spårhistorik, *Orientation*,
+*Link EUD* och *QuickPic* — och behåller *Range Tools* (avstånd och
+bäring) och *Plugins*.
+
+Kameraknappen i navigeringsraden öppnar **TAK GeoCam** i stället för
+ATAK:s QuickPic. Knappen pekar på GeoCam-pluginet, så den är tom på en
+telefon där pluginet saknas.
 
 Grund läggs ut på varje telefon och **är vald som standard** — det är
 `select_loadout` i `provision.toml`:
@@ -646,9 +650,9 @@ lista. Verktyget känner igen ROM:en på dess egen systemegenskap
 
 Listan för LineageOS är genomgången på en Sony Xperia X med LineageOS 20
 utan Google-appar. Kvar i appladan blir **ATAK, Kamera, Filer, Galleri och
-Inställningar**. Kameran får stå kvar med avsikt: ATAK:s QuickPic och Data
-Sync fotograferar via systemkameran, och utan den gör fotoknappen
-ingenting. Ljudeffektappen AudioFX försvinner ur appladan men dess tjänst
+Inställningar**. Kameran får stå kvar med avsikt: Data Sync fotograferar
+via systemkameran, liksom ATAK:s QuickPic, som Grund numera döljer. Grunds
+kameraknapp är TAK GeoCam, som har egen kamera och klarar sig utan. Ljudeffektappen AudioFX försvinner ur appladan men dess tjänst
 fortsätter köra — den är persistent, och Android startar den vid uppstart
 även när den är avstängd.
 

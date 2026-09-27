@@ -749,9 +749,9 @@ oneplus = [
 # - com.android.gallery3d, org.lineageos.glimpse (Galleri i 22.x) och
 #   com.android.documentsui (Filer). org.lineageos.camelot, PDF-visaren i
 #   22.x, syns inte i appladan och oppnar bland annat serverconnect.pdf.
-# - org.lineageos.aperture (Kamera). ATAK:s QuickPic och Data Sync
-#   fotograferar via systemkameran; utan den gor fotoknappen ingenting.
-#   TAK GeoCam har egen kamera och klarar sig utan.
+# - org.lineageos.aperture (Kamera). Data Sync fotograferar via
+#   systemkameran, liksom ATAK:s QuickPic (dold i Grund). Grunds
+#   kameraknapp ar TAK GeoCam, som har egen kamera och klarar sig utan.
 # - Tangentbordet (com.android.inputmethod.latin), hemskarmen
 #   (com.android.launcher3) och paketinstallatoren - den sista kravs for
 #   att installera plugins fran uppdateringsservern.

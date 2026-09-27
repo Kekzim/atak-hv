@@ -20,6 +20,8 @@ step, no package metadata. The kit must run from any directory — a USB stick,
 ./provision.sh devices                    # list attached devices and exit
 ./provision.sh install --dry-run          # print the plan, change nothing
 ./provision.sh install --no-optimize      # skip the lockdown steps
+./provision.sh install --atak-only        # ATAK + permissions + lockdown only;
+                                          # the TAK server delivers the rest
 ./provision.sh restore --wipe-media       # also delete user media (types WIPE)
 ```
 
@@ -151,8 +153,11 @@ aborts.
 
 `payload/ATAK-installation/atak-box.zip` carries the TAK server address and
 certificates. It is förbandsspecifik, gitignored, and required: preflight
-aborts `install` without it. `.gitignore` also blocks certificates and the
-Play Store APK filenames — check before adding anything under `payload/`.
+aborts `install` without it — except under `--atak-only`, which pushes
+nothing and leaves settings, loadout, maps and plugins to the TAK server
+(`[atak_only]` in the config, `atak-server.md` for the server side).
+`.gitignore` also blocks certificates and the Play Store APK filenames —
+check before adding anything under `payload/`.
 
 ## Conventions
 

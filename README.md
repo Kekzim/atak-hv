@@ -109,19 +109,21 @@ provisioneras.
 
 ## Appar
 
-Det finns två vägar. Båda fungerar; välj efter hur enheten ska användas.
+Det finns tre vägar. Alla fungerar; välj efter hur enheten ska användas.
 
-| | **Play Store** (standard) | **Full nedlåsning** |
-|---|---|---|
-| ATAK-CIV och plugin | installeras av användaren ur Play | sidladdas ur `payload/apks/` |
-| Google-konto | krävs | behövs inte |
-| Play Store efteråt | kvar och fungerar | avstängd med `--disable-play` |
-| Uppdateringar | manuellt ur Play när ni väljer | kräver ny provisionering |
+| | **Play Store** (standard) | **Full nedlåsning** | **Bara ATAK** (`--atak-only`) |
+|---|---|---|---|
+| ATAK-CIV | installeras av användaren ur Play | sidladdas ur `payload/apks/` | sidladdas ur `payload/apks/` |
+| Plugin | ur Play / sidladdas | sidladdas ur `payload/apks/` | hämtas från TAK-serverns uppdateringsserver |
+| Inställningar, kartor, loadout | läggs ut av verktyget | läggs ut av verktyget | skickas av TAK-servern |
+| Google-konto | krävs | behövs inte | behövs inte |
+| Play Store efteråt | kvar och fungerar | avstängd med `--disable-play` | som ni väljer |
+| Uppdateringar | manuellt ur Play när ni väljer | kräver ny provisionering | plugin från servern, ATAK med ny provisionering |
 
-Verktyget känner av vilken väg som gäller **av sig självt**: ligger
+Verktyget känner av väg 1 eller 2 **av sig självt**: ligger
 ATAK-apparna i `payload/apks/` sidladdas de, annars förväntas de komma
-ur Play. Ingen inställning behöver ändras. `--disable-play` är däremot
-alltid ett aktivt val.
+ur Play. Ingen inställning behöver ändras. `--disable-play` och
+`--atak-only` är däremot alltid aktiva val.
 
 ### Väg 1: Play Store
 
@@ -175,10 +177,54 @@ Play igen, eller genom att provisionera om med sidladdning.
 
 `restore` slår på Play Store igen, oavsett hur installationen kördes.
 
-**Hemvärnets egna appar** — Ramsor (`com.atakmap.android.hvmnemonics.plugin`)
-och HV Rapporter (`com.atakmap.android.hvreports.plugin`) — ligger i repot
-och sidladdas alltid, i båda vägarna. Övriga `.apk`-filer i `payload/apks/`
-är tredje parts och hålls utanför git.
+### Väg 3: bara ATAK — TAK-servern levererar resten
+
+För en telefon som hämtar sin ATAK-konfiguration från en TAK-server med
+enhetsprofiler och uppdateringsserver, uppsatt som i
+[atak-server.md](atak-server.md). Över USB görs bara det servern inte
+kommer åt: ATAK installeras, får sina rättigheter och undantas från
+Doze, och telefonen låses ner.
+
+```
+provision.bat install --atak-only
+```
+
+Allt annat hoppas över: plugin-apparna i `payload/apks/`, mapparna
+`atak/` och `ATAK-installation/`, `atak-box.zip` och de förinställda
+inställningarna — servern skickar sina egna, och en andra kopia från
+paketet kunde vara äldre. `atak-box.zip` behöver därför inte heller
+finnas i paketet. Vilka appar som installeras styrs av `[atak_only]
+install` i `provision.toml`; i dag bara ATAK-CIV.
+
+Därefter, på telefonen:
+
+1. Importera serverns anslutningspaket i ATAK och logga in med
+   användarnamn och lösenord. Paketet delas ut separat, som
+   `atak-box.zip`. **Telefonen måste skriva in sig på det här sättet** —
+   det är inskrivningen som hämtar profilen som slår på serverns
+   leveranser. Med ett färdigt certifikat, som i `atak-box.zip`, kommer
+   inga inställningar från servern.
+2. Servern skickar inställningar, loadouten Grund, kartkällor, överlägg
+   och adressen till uppdateringsservern.
+3. Starta om ATAK en gång. Installera sedan plugin-apparna under
+   **Tools → Plugins**; ATAK laddar dem själv, utan omstart.
+
+Anropssignal och *Remarks* frågas inte efter — de sätts i ATAK.
+`--callsign`, `--remarks` och `--loadout` avvisas ihop med
+`--atak-only`, eftersom de skulle försvinna utan verkan. `--disable-play`
+och `--no-optimize` fungerar som vanligt.
+
+Provat 2026-09-27 på en OnePlus Nord N100 med LineageOS 22.2 utan
+Google-appar: verktyget installerade bara ATAK, servern levererade
+resten, och de fyra plugin-apparna var installerade och laddade en halv
+minut efter omstarten.
+
+### Hemvärnets egna appar
+
+Ramsor (`com.atakmap.android.hvmnemonics.plugin`) och HV Rapporter
+(`com.atakmap.android.hvreports.plugin`) ligger i repot och sidladdas i
+väg 1 och 2. I väg 3 kommer de från serverns uppdateringsserver. Övriga
+`.apk`-filer i `payload/apks/` är tredje parts och hålls utanför git.
 
 ## Enhetsinställningar som verktyget sätter
 
@@ -318,6 +364,7 @@ Exemplen visar Windows-varianten; på Linux/macOS byter du
 provision.bat devices                Visa anslutna enheter och avsluta
 provision.bat install                Installera appar och lägg ut konfiguration
 provision.bat install --no-optimize  Samma, men rör inte telefonens uppdateringar
+provision.bat install --atak-only    Bara ATAK, rättigheter och nedlåsning; servern levererar resten
 provision.bat restore                Avinstallera appar, ta bort ATAK-filer
 provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 ```
@@ -325,7 +372,8 @@ provision.bat restore --wipe-media   Som restore, plus radera användarens filer
 **`install`** stänger av system-, appuppdateringar och bloatware, installerar apparna i
 `payload/apks/`, beviljar ATAK:s rättigheter, lägger ut `atak/` och
 `ATAK-installation/` under `/sdcard/`, och placerar `atak-box.zip` i
-`/sdcard/Download/`.
+`/sdcard/Download/`. Med `--atak-only` görs bara det första och ATAK:s
+rättigheter — se [Väg 3](#väg-3-bara-atak--tak-servern-levererar-resten).
 
 ### Testa på en egen telefon
 
@@ -394,6 +442,7 @@ igen. `--wipe-media` rensar dessutom Download, DCIM, Pictures och Documents.
 | `--disable-play` | Endast `install`: stäng även av Play Store. Kräver att apparna sidladdas |
 | `--remarks TAGG` | Endast `install`: nivåtaggen i *Remarks*. Frågas efter om den utelämnas |
 | `--no-optimize` | Endast `install`: hoppa över nedlåsningen, se nedan |
+| `--atak-only` | Endast `install`: bara ATAK, dess rättigheter och nedlåsningen. Inga plugin, ingen payload, ingen `atak-box.zip`, inga inställningar — TAK-servern levererar dem, se väg 3 |
 | `--wipe-media` | Endast `restore`: **raderar även användarens bilder, nedladdningar och dokument, och avinstallerar appar som bär egen data — Signal med sin meddelandehistorik.** Kräver att man skriver `WIPE`; `-y` hjälper inte. Går inte att ångra |
 | `--dry-run` | Visar vad som skulle köras, ändrar ingenting. Själva adb-kommandona hamnar i loggen, inte på skärmen |
 | `--serial SERIAL` | Kör bara mot en enhet; kan upprepas |

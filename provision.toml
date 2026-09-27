@@ -840,6 +840,21 @@ restore = []
 "com.atakmap.android.geocam.plugin" = "ATAK Plugin: GeoCam"
 
 # ---------------------------------------------------------------------
+# install --atak-only: for phones the TAK server provisions.
+#
+# Over USB only what the server cannot reach: the packages below,
+# Android permissions, Doze and the lockdown. Settings, loadout, map
+# sources, overlays and the plugin repository come from the server's
+# device profiles, and the plugins from its update server - see
+# atak-server.md. No [[push]], no [prefs], no atak-box.zip.
+# ---------------------------------------------------------------------
+[atak_only]
+# Paket ur payload/apks som installeras over USB. Ovriga APK-filer i
+# katalogen hoppas over - plugin hamtas fran serverns uppdateringsserver.
+# Utelamnas listan galler [requirements.required].
+install = ["com.atakmap.app.civ"]
+
+# ---------------------------------------------------------------------
 # Rattigheter for appar som installeras fran Google Play.
 #
 # De sidladdade apparna far allt via "adb install -g". ATAK kommer fran

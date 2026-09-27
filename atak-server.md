@@ -1,14 +1,15 @@
 # TAK Server — operations notes
 
-Working notes from testing TAK Server against the kit, 2026-09-20, 21 and
-26. Written to give a running start on a real server, not as a manual.
+Working notes from testing TAK Server against the kit, 2026-09-20, 21, 26
+and 27. Written to give a running start on a real server, not as a manual.
 
 **Rigs:** TAK Server 5.7-RELEASE-43 in Docker — first on a workstation, then
 on a home NAS reachable from the internet (§8). Clients: ATAK-CIV 5.8.0.5 on
-a OnePlus Nord N100 (Android 11), and on a Sony Xperia X running LineageOS
-20 with no Google services at all. Measurements were run, not read. The
-exceptions are flagged where they appear: the product fees and licence terms
-in §6 come from Geotorget's own listings.
+a OnePlus Nord N100 (OxygenOS 11, from 2026-09-27 LineageOS 22.2) and on a
+Sony Xperia X running LineageOS 20; on LineageOS neither has any Google
+services. Measurements were run, not read. The exceptions are flagged where
+they appear: the product fees and licence terms in §6 come from Geotorget's
+own listings.
 
 Two things this file deliberately leaves out: server addresses and
 credentials. Fill them in locally.
@@ -25,7 +26,7 @@ in its source, no `pm disable-user`, no `appops`. So the split is fixed:
 | Layer | Delivered by | Changes |
 |---|---|---|
 | Preferences, overlays, maps, loadouts, terrain | **Server**, any time | Often |
-| Android lockdown, debloat, permissions, Doze | **`provision.py` over USB** | Once, at issue |
+| Android lockdown, debloat, permissions, Doze | **`provision.py install --atak-only` over USB** | Once, at issue |
 | Identity, trust, `deviceProfileEnableOnConnect` | **USB or enrollment** | Once, bootstraps the rest |
 
 The last row is a chicken-and-egg: the server cannot bootstrap itself. A
@@ -48,6 +49,13 @@ on-connect profile request, which then went out instead of being skipped.
 On 2026-09-26 a phone was built entirely this way. USB installed ATAK and its
 Android permissions — nothing else. Enrollment, settings, loadouts, map
 sources, overlays and plugins all came from the server (§2, §3).
+
+That USB step is now `provision.py install --atak-only`: ATAK from
+`payload/apks/` (`[atak_only] install`), permissions, Doze and the lockdown,
+and no plugins, payload push, `atak-box.zip` or staged settings. On
+2026-09-27 it built a second phone, a OnePlus Nord N100 on LineageOS 22.2:
+the bootstrap again landed 0.9 s before the first profile request, and the
+four plugins were installed and loaded half a minute after one ATAK restart.
 
 ---
 

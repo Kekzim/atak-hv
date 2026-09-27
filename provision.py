@@ -1208,7 +1208,8 @@ def task_uninstall(match: list[str], protected: list[str]) -> Task:
 def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
                         answers: dict | None = None,
                         disable_play: bool = False,
-                        loadout: str | None = None) -> list[Task]:
+                        loadout: str | None = None,
+                        atak_only: bool = False) -> list[Task]:
     """Build the install sequence.
 
     `optimize` covers the lockdown steps - turning off system and app
@@ -1220,15 +1221,34 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
     when every app is sideloaded from the payload, so it is opt-in and off
     by default: the ordinary route, where the operator installs ATAK from
     the Play Store, has to keep working untouched.
+
+    `atak_only` is for a phone the TAK server provisions. ATAK's own state -
+    settings, loadouts, map sources, overlays, the plugin repository - comes
+    from the server's device profiles and plugins from its update server,
+    so over USB only what the server cannot reach is done: the packages in
+    [atak_only] install, Android permissions, Doze and the lockdown. No
+    plugins, no payload push, no atak-box.zip, no staged settings. Pushing
+    them anyway would put a second, possibly older copy beside what the
+    server delivers.
     """
     payloads = find_apks((base / cfg["kit"]["apk_dir"]).resolve())
+    req = cfg.get("requirements", {})
+    optional = req.get("optional", {})
+    if atak_only:
+        # Without an explicit list, the required apps are the ones USB
+        # must install - today that is ATAK-CIV alone.
+        keep = set(cfg.get("atak_only", {}).get("install")
+                   or req.get("required", {}))
+        payloads = [p for p in payloads if p.package in keep]
+        # The optional apps are plugins the update server installs later;
+        # warning that they are missing now would be noise.
+        optional = {}
     provided = {p.package for p in payloads if p.package}
     answers = answers or {}
-    req = cfg.get("requirements", {})
     tasks = []
-    if req.get("required") or req.get("optional"):
+    if req.get("required") or optional:
         tasks.append(task_requirements(req.get("required", {}),
-                                       req.get("optional", {}), provided))
+                                       optional, provided))
     stay_awake, let_screen_sleep = tasks_stay_awake()
     tasks.append(stay_awake)
     if optimize:
@@ -1244,19 +1264,22 @@ def build_install_tasks(cfg: dict, base: Path, optimize: bool = True,
         tasks.append(task_permissions(cfg.get("permissions", {}),
                                       cfg.get("appops", {}),
                                       cfg.get("battery", {}).get("exempt", [])))
-    tasks += [task_push(e, base) for e in cfg["push"]]
-    prefs = cfg.get("prefs")
-    # Runs for the shared settings even when nothing was asked for.
-    if prefs and (prefs.get("entries") or answers):
-        tasks.append(task_prefs(answers, prefs, base, loadout))
-    cleanup = cfg["kit"].get("cleanup_after_push", [])
-    if cleanup:
-        tasks.append(task_remove(cleanup, "Clean up after push"))
+    if not atak_only:
+        tasks += [task_push(e, base) for e in cfg["push"]]
+        prefs = cfg.get("prefs")
+        # Runs for the shared settings even when nothing was asked for.
+        if prefs and (prefs.get("entries") or answers):
+            tasks.append(task_prefs(answers, prefs, base, loadout))
+        cleanup = cfg["kit"].get("cleanup_after_push", [])
+        if cleanup:
+            tasks.append(task_remove(cleanup, "Clean up after push"))
     doze = cfg.get("doze", {}).get("verify", [])
     if doze:
         tasks.append(task_doze_check(doze))
     dted = cfg.get("dted")
-    if dted:
+    # The DTED check inspects what the payload push put down; with nothing
+    # pushed it could only report an absence the operator chose.
+    if dted and not atak_only:
         tasks.append(task_dted_check(dted))
     # Last, so the screen stays lit for everything above it.
     tasks.append(let_screen_sleep)
@@ -1328,7 +1351,7 @@ def mirror_differences(a: Path, b: Path,
     return out
 
 
-def preflight(cfg: dict, base: Path, out: Out) -> bool:
+def preflight(cfg: dict, base: Path, out: Out, atak_only: bool = False) -> bool:
     problems = []
     apk_dir = (base / cfg["kit"]["apk_dir"]).resolve()
     payloads = find_apks(apk_dir)
@@ -1344,7 +1367,10 @@ def preflight(cfg: dict, base: Path, out: Out) -> bool:
     if unreadable:
         problems.append("cannot read a package name from: " + ", ".join(unreadable)
                         + "\n    Corrupt download, or not an APK at all.")
-    for entry in cfg["push"]:
+    # --atak-only pushes nothing, so a missing atak-box.zip costs nothing:
+    # that phone learns its server from the connection package it enrolls
+    # with, not from the kit.
+    for entry in ([] if atak_only else cfg["push"]):
         if entry.get("required") and not (base / entry["source"]).exists():
             problems.append(
                 f"missing required file: {entry['source']}\n"
@@ -1518,6 +1544,12 @@ def main(argv: list[str] | None = None) -> int:
         help="skip the lockdown steps: leave system and app updates, the "
              "package verifier and the manufacturer's update services alone. "
              "Use this on a personal phone.")
+    p_install.add_argument(
+        "--atak-only", action="store_true",
+        help="for a phone the TAK server provisions: install ATAK only, grant "
+             "its permissions and apply the lockdown. No plugins, no payload, "
+             "no atak-box.zip and no staged settings - the server's device "
+             "profiles and update server deliver those.")
     p_restore = sub.add_parser("restore", parents=[common],
                                help="uninstall apps and remove ATAK files")
     p_restore.add_argument("--wipe-media", action="store_true",
@@ -1543,7 +1575,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         out.info("DRY RUN - no changes will be made")
 
-    if args.command == "install" and not preflight(cfg, base, out):
+    atak_only = args.command == "install" and args.atak_only
+    if atak_only:
+        # Each of these writes into the staged settings, which --atak-only
+        # does not stage. Accepting them would drop the value in silence.
+        given = [f"--{n}" for n in ("callsign", "remarks", "loadout")
+                 if getattr(args, n) is not None]
+        if given:
+            out.error(", ".join(given) + " has no effect together with "
+                      "--atak-only: settings come from the TAK server")
+            return 2
+
+    if args.command == "install" and not preflight(cfg, base, out, atak_only):
         return 2
 
     adb.start_server()
@@ -1567,7 +1610,8 @@ def main(argv: list[str] | None = None) -> int:
         # Asked before the confirmation, so the answers are on screen as
         # part of what is being agreed to.
         answers: dict[str, dict[str, str]] = {}
-        ask = cfg.get("prefs", {}).get("ask", []) if args.command == "install" else []
+        ask = (cfg.get("prefs", {}).get("ask", [])
+               if args.command == "install" and not atak_only else [])
         if ask:
             on_cli = {}
             for entry in ask:
@@ -1633,6 +1677,9 @@ def main(argv: list[str] | None = None) -> int:
                 print("    - package verifier turned OFF")
                 print("    - the manufacturer's update services disabled")
                 print("  Not what you want on a personal phone; use --no-optimize.")
+            if atak_only:
+                print("  ATAK ONLY: no plugins, payload, atak-box.zip or settings.")
+                print("  The phone gets those from the TAK server once it enrolls.")
             if not confirm(f"Run install on {len(devices)} device(s)?"):
                 out.info("Aborted.")
                 return 1
@@ -1675,7 +1722,8 @@ def main(argv: list[str] | None = None) -> int:
             tasks = build_install_tasks(cfg, base, optimize=not args.no_optimize,
                                         answers=answers,
                                         disable_play=args.disable_play,
-                                        loadout=args.loadout)
+                                        loadout=args.loadout,
+                                        atak_only=atak_only)
         else:
             tasks = build_restore_tasks(cfg, args.wipe_media)
 

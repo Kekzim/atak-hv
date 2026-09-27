@@ -1010,7 +1010,8 @@ volumemapswitcher = false
 
 # Startkarta. Utan den har hamnar en nyinstallerad enhet pa sjokortet,
 # som tacker kusten men inte inlandet. Namnet maste stamma exakt med
-# <name> i payload/atak/imagery/opentopo_opentopomap.xml.
+# <name> i payload/atak/imagery/google_hybrid.xml. Google - Hybrid
+# (flygfoto med vagar och namn) ersatte OpenTopo 2026-09-27.
 #
 # OBS: nycklarna innehaller punkt och maste darfor sta inom citattecken.
 # Utan dem laser TOML "lastViewedLayer.name" som tabellen lastViewedLayer
@@ -1019,9 +1020,9 @@ volumemapswitcher = false
 # start, meddelar "Auto select map ON" och struntar i namnet nedan -
 # enheten hamnade da pa sjokortet anda. Boolean, inte strang.
 "lastViewedLayer.autoselect" = false
-"lastViewedLayer.name" = "OpenTopo - Opentopomap"
+"lastViewedLayer.name" = "Google - Hybrid"
 "lastViewedLayer.active" = "Mobile"
-"MobileLayerSelectionAdapter.selected" = "OpenTopo - Opentopomap"
+"MobileLayerSelectionAdapter.selected" = "Google - Hybrid"
 
 # ---------------------------------------------------------------------
 # Doze-undantag som kontrolleras (aldrig andras).

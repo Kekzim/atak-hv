@@ -155,6 +155,10 @@ ATAK stores the start time of its last successful profile request
 since then. In daily use that is the next network drop, restart or morning;
 on issue day, one ATAK restart.
 
+Everything that changed since that time arrives in **one** delivery, the
+profiles merged: a phone that had missed a kit update got the kit's 30
+files and a new terrain profile's zip together, the zip as `file30`.
+
 **Any save counts as a change.** Saving a profile moves its `updated`
 timestamp even when only the group scope changed, so every phone in scope
 downloads all of it again at its next connect and re-applies its `.pref` —
@@ -322,6 +326,9 @@ files. Touch one file in a profile and every client re-pulls the whole thing.
 | content | overlays, imagery | occasional, MB |
 | terrain | DTED, one per grupp | rare, 5–12 MB |
 
+On the test server this is now two profiles: the kit profile (policy and
+content, 160 kB) and one terrain profile per grupp (§5).
+
 ---
 
 ## 5. DTED
@@ -355,6 +362,14 @@ Blekinge is the worked example: `e014/n55`, `e014/n56`, `e015/n55`,
 because the coast dips below 56°N (Utklippan ≈ 55.95°N). The two `n55` cells
 are 0.6 MB combined.
 
+**Verified on the test server, 2026-09-27.** Those four cells as their own
+Connection profile, `terrain-blekinge`, scoped to the test phones' groups
+and kept apart from the kit profile. Both phones had all four cells in
+`atak/DTED/` on their next connect, byte for byte, beside the DTED0 that
+ATAK streams itself (see *ATAK streams DTED0 by itself* below). Kept
+separate because every save of a profile re-delivers all of it (§2): a
+settings change to the kit must not send terrain again.
+
 ### Delivery
 
 Zip a directory named `DTED/` containing the `e0xx/` folders. ATAK recognises
@@ -363,6 +378,11 @@ Case doesn't matter — the phone's filesystem is case-insensitive, verified.
 
 Budget **2.5–3× the compressed size** in free space during transfer: the zip
 and its extraction coexist before cleanup. 317 MB peaked at ~640 MB.
+
+Delivered in a profile, the zip is **not** cleaned up: ATAK keeps its copy
+under `atak/tools/datapackage/files/<uuid>/` after unpacking. Blekinge's
+6.1 MB became 50 MB in `atak/DTED/` plus the 6.1 MB zip left behind — small
+per grupp, 45 MB of dead weight per phone for all of MR S.
 
 Drop the GDAL `.aux.xml` sidecars; ATAK never reads them.
 
@@ -765,6 +785,9 @@ folder), `ProductInformation` (the `product.inf` columns),
   woke, an on-connect request got nothing though a profile was waiting. Not
   the streaming-group race (`useStreamingGroup` is unset). It did not recur
   in later deliveries.
+- **Does ATAK ever remove delivered zips?** The DTED zip stayed in
+  `atak/tools/datapackage/files/` after unpacking (§5). Whether a later
+  cleanup, a profile update or only `restore` removes it is untested.
 - **Multi-select install untested.** Package Management was used one plugin
   at a time.
 - **Kit scope.** The kit profile now goes to all groups on the test server.

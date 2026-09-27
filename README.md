@@ -289,6 +289,23 @@ skrivs som strängar även när de ser ut som siffror — ATAK läser dem så,
 och ett heltal får appen att kasta undantag. Det gäller även
 `set_domain_pref`, där värdet är ordet `Ground`.
 
+### Övrigt som sätts
+
+Utöver de nio lägger verktyget ut tre inställningar som inte står i
+anvisningen, men som gör telefonen användbar i fält:
+
+| Inställning | Värde | Nyckel i `provision.toml` |
+|---|---|---|
+| Volymknapparna | ändrar ljudet, flyttar inte kartan | `volumemapswitcher` |
+| Startkarta | Google - Hybrid | `lastViewedLayer.name` m.fl. |
+| Skärmen | släcks inte så länge ATAK är öppen | `atakScreenLock` |
+
+Den sista är ATAK:s eget val *Disable Screen Saver / Screen Lock*, som
+annars är av: då släcks skärmen efter Androids skärmtid, 60 sekunder som
+standard, även mitt i ATAK. Androids skärmtid ändras inte — lämnar man
+ATAK, eller trycker på strömknappen, släcks och låses telefonen som
+vanligt.
+
 ### Loadout — vilka knappar och verktyg som syns
 
 En **loadout** styr vilka knappar som sitter i navigeringsraden och vilka

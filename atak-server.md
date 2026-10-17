@@ -1,10 +1,13 @@
 # TAK Server — operations notes
 
-Working notes from testing TAK Server against the kit, 2026-09-20, 21, 26
-and 27. Written to give a running start on a real server, not as a manual.
+Working notes from testing TAK Server against the kit, 2026-09-20, 21, 26,
+27 and 2026-10-17. Written to give a running start on a real server, not as
+a manual.
 
 **Rigs:** TAK Server 5.7-RELEASE-43 in Docker — first on a workstation, then
-on a home NAS reachable from the internet (§8). Clients: ATAK-CIV 5.8.0.5 on
+on a home NAS reachable from the internet (§8) — and, from 2026-10-17,
+5.8-RELEASE-92 from tak.gov's hardened Docker images beside it on the same
+NAS (§8, *Upgrading to 5.8*). Clients: ATAK-CIV 5.8.0.5 on
 a OnePlus Nord N100 (OxygenOS 11, from 2026-09-27 LineageOS 22.2) and on a
 Sony Xperia X running LineageOS 20; on LineageOS neither has any Google
 services. Measurements were run, not read. The exceptions are flagged where
@@ -472,11 +475,13 @@ the policy profile.
 
 The kit ships 27 map definitions in `payload/atak/imagery/`, 119 KB total.
 None of them is a map: each is a ~400-byte URL template (26 XYZ sources, one
-WMS — Sjöfartsverket's chart). **Everything streams.** The only offline map
-data on a device is `atak/imagecache/`, one SQLite per source holding tiles
-someone already looked at — 52 MB on the test phone from casual panning,
-against 1.6 GB of DTED. Terrain is offline and heavy; the map is online and
-weightless.
+WMS — Sjöfartsverket's chart). **Out of the box everything streams.** The
+only offline map data on a device is `atak/imagecache/`, one SQLite per
+source holding tiles someone already looked at — 52 MB on the test phone
+from casual panning, against 1.6 GB of DTED. A real offline map can be cut
+from Lantmäteriet's open topographic map and delivered by the server — one
+county, 270 MB, verified 2026-10-11 (*Offline map through the server*
+below).
 
 ### What ATAK accepts — verified on hardware
 
@@ -486,7 +491,13 @@ weightless.
 | GeoTIFF | mosaic dataset under `imagery/` | `ImageryScanner` recurses 3 deep |
 | GeoPackage | ATAK **moves** it to `imagery/mobile/` | `provider=gpkg` |
 
-`ImportGRGSort.MAX_GDAL_LENGTH` caps a single GDAL file at **256 MB**.
+These were pushed over `adb`. Delivered by the server, a bare GeoPackage
+does **not** land in imagery — see *Offline map through the server*.
+
+`ImportGRGSort.MAX_GDAL_LENGTH` (256 MB) is **not an import cap**, as an
+earlier version of this file said. It only decides whether a small GDAL file
+is tried as a GRG overlay. GeoPackages go through `ImportLayersSort`, which
+has no size limit; a 270 MB one imported in 3.6 s.
 
 A GeoTIFF in `imagery/nmk50/` produced `srid 3006` in the mosaic database —
 ATAK reads SWEREF99 TM directly, no reprojection step. It also stored the
@@ -518,7 +529,7 @@ The STAC catalogue is open and needs no account —
 | NMK50 (1:50k) | 409 sheets, 7.59 GB | 97, 1.67 GB | 18, 275 MB |
 | NMK250 (1:250k) | 88 sheets, 419 MB | 19, 99 MB | 6, 31 MB |
 
-Sheets average 18.6 MB, max 29.7 MB — comfortably under the 256 MB cap.
+Sheets average 18.6 MB, max 29.7 MB.
 
 **There is no NMK streaming product.** Geotorget lists only
 `nmk50-nedladdning-api` and `nmk250-nedladdning-api`. If the requirement is
@@ -527,26 +538,83 @@ treats civil NMK as something to print.
 
 ### Lantmäteriet's topographic map
 
-Open data, and the download route needs no account at all:
+Open data, free, no legal review — but **since 2026-10-06 no longer
+anonymous.** The FTP (`download-opendata.lantmateriet.se`) is gone. The
+map is now in the same STAC catalogue as NMK, collection `topowebb`:
 
 ```
-ftp://download-opendata.lantmateriet.se/Topografisk_webbkarta_raster/
+https://api.lantmateriet.se/stac-karta/v1/collections/topowebb
 ```
 
-Anonymous FTP. Four whole-Sweden GeoPackages, 139.3 GB (nedtonad/mercator)
-to 175.3 GB (färg/sweref). Standard Web Mercator pyramid, zoom 0–17, 256 px
-tiles, EPSG:3857.
+The catalogue is open; the files on `dl1.lantmateriet.se` need HTTP Basic
+auth. Access is ordered — free — on Geotorget, and a private person then
+authenticates with their own Geotorget login; an organization gets
+credentials of its own. Same four whole-Sweden GeoPackages as before
+(colour in Web Mercator: 156 GB). Standard Web Mercator pyramid, zoom 0–17,
+256 px tiles, EPSG:3857.
 
 The server honours byte ranges, and a GeoPackage is a SQLite tile pyramid,
 so a region can be carved out without downloading the file. Walking the
-B-tree over FTP, **Blekinge to zoom 12 took 369 tiles, 6.8 MB, 24 seconds,
-fetching 0.019% of the source.** Measured, not estimated; the result passed
-`integrity_check` and rendered on the phone. A prototype was written and
-then reverted — the technique is what matters, and it is sound.
+B-tree over the old FTP, **Blekinge to zoom 12 took 369 tiles, 6.8 MB, 24
+seconds, fetching 0.019% of the source.** Over HTTPS the same technique
+cut **a whole county with its islands, colour, zoom 0–14 (~5 m/px): 22 552
+tiles, 270 MB, in 149 s**. Both results passed `integrity_check` and
+rendered on the phone. The HTTPS server rate-limits bursts with `429 Too
+Many Requests`; honour `Retry-After` and it completes. The extraction tool
+is a short standard-library Python script, kept outside this repository
+because it handles a personal login.
 
-Scaling from measurement: z13 = 966 tiles/16.1 MB, z14 = 3 818/48.4 MB, so
-z15 lands near 180 MB for one county. **z13 is the server-pushable tier**;
-anything deeper is USB, which is why this route was set aside.
+Scaling from measurement: z13 = 966 tiles/16.1 MB and z14 = 3 818/48.4 MB
+for Blekinge; a large county at z14 is 270 MB, and z15 would be about four
+times that. **z14 per county goes through the server** (next section);
+deeper is USB territory.
+
+### Offline map through the server — verified
+
+**A bare `.gpkg` in a profile lands in the wrong place.** ATAK's
+`GeoPackageImportResolver` — the *feature* importer — claims every
+GeoPackage first, moves it to the `atak/` root and fails with "no feature
+sets". Converted to `.mbtiles`, the `ImportGRGResolver` claims it instead
+and files it under `atak/grg/` as an overlay. Neither is a base map.
+
+**Fix: wrap the GeoPackage in a data package that names its content type.**
+The manifest can give each file a `contentType`, and the package importer
+then only offers it to the matching sorters:
+
+```xml
+<MissionPackageManifest version="2">
+   <Configuration>
+      <Parameter name="uid" value="<new uuid>"/>
+      <Parameter name="name" value="<name>.zip"/>
+      <Parameter name="onReceiveImport" value="true"/>
+      <Parameter name="onReceiveDelete" value="true"/>
+   </Configuration>
+   <Contents>
+      <Content ignore="false" zipEntry="<name>.gpkg">
+         <Parameter name="contentType" value="External Native Data"/>
+      </Content>
+   </Contents>
+</MissionPackageManifest>
+```
+
+`External Native Data` is `LayersMapComponent.IMPORTER_CONTENT_TYPE`, the
+imagery importer's own type. Store the GeoPackage uncompressed (PNG tiles do
+not shrink). Put the zip in its own profile, scoped to the groups that need
+that area — never in the kit profile, which re-delivers everything on every
+save (§2).
+
+Measured on the N100, home WiFi: **270 MB delivered in 45 s, imported as
+imagery in 3.6 s**, selectable in the map list beside the streamed sources.
+
+Costs:
+
+- **Server heap.** The upload goes through the API JVM in memory. At the
+  1331 MB API heap of §8 a 270 MB upload is not safe; it ran with the API
+  heap raised to 4 GB (container ~5.7 GiB), and the upload itself took ~3
+  minutes. Lower the heap again afterwards.
+- **Phone storage ×3.** ATAK leaves two more copies of the map under
+  `atak/tools/datapackage/files/` beside the imported one — 569 MB of
+  leftovers for a 270 MB map.
 
 ### Streaming Lantmäteriet costs money
 
@@ -723,7 +791,77 @@ Plain `docker run` from one script: Unraid ships no Compose.
   so anything dated after extraction is state an earlier run created —
   certificates, generated configs, `work/`, logs.
 - `makeCert.sh server <fqdn>` puts the name in both CN and SAN, which ATAK's
-  hostname check needs.
+  hostname check needs. Yet in the 5.8 test a phone connected, enrolled and
+  fetched profiles by the server's **LAN IP address**, which is in neither —
+  so the check is skipped for IP literals or not enforced. Do not build on
+  either; use the name in anything that leaves the lab.
+
+### Upgrading to 5.8 (hardened images)
+
+5.7-RELEASE-43 was five months old when 5.8-RELEASE-92 came out, and tak.gov
+ships 5.8 for Docker **only** as `takserver-docker-hardened-<version>.zip`.
+Tested side by side with the running 5.7 on 2026-10-17: own containers, own
+network, ports 18089/18443/18446 on the LAN address only. 5.7 was not
+touched.
+
+**What changes against the 5.7 images:**
+
+- **No Iron Bank account needed**, whatever the bundled README says. The
+  Dockerfiles default to public bases: Temurin 17 on UBI 10 minimal from
+  Docker Hub for the server, Red Hat's UBI 10 for the database, plus Rocky,
+  EPEL, PGDG and Adoptium repositories. Built on a workstation, moved with
+  `docker save | ssh … docker load` (§8 above) — 2.4 GB server, 2.1 GB
+  database.
+- **The server image bakes `tak/` in and runs as uid 1001, gid 0.** Mounting a
+  full `tak/` tree over `/opt/tak`, as with 5.7, still works and keeps
+  `CoreConfig.xml`, `UserAuthenticationFile.xml` and `certs/` writable in
+  place — but the tree must be owned `1001:0`.
+- **Postgres 15 → 18** (PostGIS 3.6, UBI's `postgres` is uid 26). The image
+  runs `initdb` at build time into `/var/lib/postgresql/data` and declares it
+  a volume; an empty bind mount hides that, so seed the host directory from
+  the image once (`cp -a` in a throwaway container).
+- **No `ps` in the server image.** Count the JVMs from `/proc/*/cmdline`.
+- **`CoreConfig.xsd` only adds** — 20 optional attributes (OpenID, nested LDAP
+  groups, CA download, bulk import, hostname verification), nothing removed.
+  The 5.7 `CoreConfig.xml` loads unchanged; only the JDBC host name needed
+  changing for the new database container.
+
+**Migrating the data — the path that worked:** `pg_dump -Fc cot` from the 5.7
+container (as `postgres`) → in the new database, drop the freshly created
+`cot`, recreate it owned by `martiuser` → `pg_restore` as `postgres` →
+`java -jar SchemaManager.jar upgrade` in `/opt/tak/db-utils`. It applied 7
+migrations (94 → 101). Profiles with their stored files (kit, terrain, a
+270 MB map), groups and scopes then read back identical through the API. The
+README's data-only `--column-inserts` route is unnecessary: the schema
+manager upgrades a full restore the same way an RPM upgrade does. 384 MB of
+database dumped in 26 s.
+
+**Certificates carry over as files.** Copy `certs/files/`, the user file and
+`CoreConfig.xml`; the bundled CA container is for new installations only.
+Phones keep their 5.7-issued certificates, and new enrollments are signed by
+the same intermediate.
+
+**Verified on a phone** (Sony, LineageOS 20, ATAK 5.8.0.5): a connection
+package pointing at the test ports — `apiSecureServerPort` and
+`apiCertEnrollmentPort` set to match — gave fresh enrollment, the stream,
+and a full first profile sync (kit's 30 files plus the grupp's DTED, 31
+files in 0.6 s) applied on the phone. Those two port prefs are **global**,
+not per connection: every other server on that phone now uses them too.
+
+**Container behaviour:**
+
+- 5.8 under the same pinned heaps used about the same memory as 5.7: 2.7–3.8
+  GiB server, 0.6–0.75 GiB database. Both side by side fit a 16 GB NAS
+  with ~3.7 GB to spare.
+- Restarting the database container is safe. Its setup script finds `cot`,
+  asks for the word `erase`, reads EOF and aborts, then runs the schema
+  upgrade.
+
+**Switching over** is the same dump/restore once more with 5.7 stopped,
+then 5.8 takes the standard ports — only the host side of `-p` changes,
+since the container ports are already the standard ones. Phones reconnect
+without re-enrolling. The plugin repository (§3) does not depend on the TAK
+version and stays.
 
 ### Phones without Google
 
@@ -755,7 +893,25 @@ the vendor Dockerfile and build from a patched copy.
 **Use the tak.gov docker zip, not Iron Bank.** The deck shows only
 `registry1.dso.mil`, which needs a Platform One account. Guide §6.2 documents
 building from `takserver-docker-<version>.zip`, and its Dockerfiles use plain
-public bases.
+public bases. For 5.8 the only Docker download is the *hardened* zip; its
+README asks for Iron Bank too, and its Dockerfiles do not need it either.
+
+**The 5.8 hardened server Dockerfile no longer builds.** It excludes
+`openssl*` from `microdnf update`, and UBI's newer `curl` requires the newer
+`openssl-libs`: "Could not depsolve transaction". Dropping the exclusion
+entirely fails differently — the new `openssl-fips-provider` conflicts on
+`fips.so` with the image's certified `openssl-fips-provider-so`. Build from a
+copy that excludes only `openssl-fips-provider*`; OpenSSL itself then
+updates. The database Dockerfile builds as shipped, though a Rocky mirror's
+download timeouts failed it once; just re-run.
+
+**The 5.8 images' health checks cannot pass as shipped.** The database's
+runs `pg_isready` and then a file-integrity list naming
+`crypto-policies/back-ends/LEGACY/openssl.config`, which UBI 10 does not
+have — the container stays "starting", then "unhealthy". Override with
+`--health-cmd 'pg_isready -U postgres'`. The server's logs in with the admin
+`.p12`, whose password it wants as `ADMIN_CERT_PASS` in the container
+environment; run with `--no-healthcheck` and count JVMs instead.
 
 **`certmod` must run after the API is up.** Too early and it dies with an
 `InvocationTargetException` from `OnlineFileAuthModule.getUsers`. Same command
@@ -854,12 +1010,16 @@ folder), `ProductInformation` (the `product.inf` columns),
 - **Does ATAK ever remove delivered zips?** The DTED zip stayed in
   `atak/tools/datapackage/files/` after unpacking (§5). Whether a later
   cleanup, a profile update or only `restore` removes it is untested.
+- **5.8 soak and switch-over.** The 5.8 test has run with one phone for
+  minutes, not days. Plugin installs on a phone connected to it and the 5.8
+  web admin are untested, as is ATAK 5.8.0.6 against it (on Android 15 that release cannot
+  load its certificates at all, whatever the server).
 - **Multi-select install untested.** Package Management was used one plugin
   at a time.
 - **Kit scope.** The kit profile now goes to all groups on the test server.
   Real use may still want one kit per grupp — different overlays or DTED —
   and every save re-delivers the whole profile (§2).
-- **No map licence read.** The FTP is open and the data free, but
+- **No map licence read.** The download is free once ordered, but
   *Användningsvillkor för Topografisk webbkarta Nedladdning, raster* governs
   what may be done with an extract. Unread.
 - **Who holds the Lantmäteriet agreement?** The streaming product is the

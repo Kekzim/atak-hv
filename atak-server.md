@@ -1006,6 +1006,13 @@ reloads the old config. Recreate the container.
 Lock* (`atakScreenLock`) is off by default, so the screen goes dark after
 Android's timeout — 60 s on stock settings, any ROM — with ATAK in front.
 The kit now sets it; it only holds the screen on while ATAK is in front.
+**In 5.8.0.7 the setting does nothing.** 5.8.0.5 and 5.8.0.6 have a
+`checkScreenLock` that adds `FLAG_KEEP_SCREEN_ON` to ATAK's window when the
+pref is on; in 5.8.0.7 it is gone (compared in the dex of all three), and
+the pref only stops the flag from being *cleared* — only route navigation
+and Bloodhound still set it, temporarily. Not in the release notes. The kit
+works around it with Android's screen timeout at 30 min
+(`screen_off_timeout`), which covers every app, not just ATAK.
 
 **ATAK 5.8.0.6 cannot load certificates on Android 15.** Every keystore
 load fails with `KeyStoreException: PKCS12 not found — no such algorithm:

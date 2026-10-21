@@ -83,6 +83,14 @@ secure = [
     ["auto_update_apps", "0"],
     ["ota_disable_automatic_update", "1"],
 ]
+system = [
+    # Skarmtid 30 min (ms). ATAK 5.8.0.7 satter inte langre
+    # FLAG_KEEP_SCREEN_ON for atakScreenLock (se [prefs.entries]), sa
+    # Androids skarmtid - 60 s pa LineageOS - slacker skarmen mitt i
+    # ATAK. Galler alla appar; 30 min ar Androids langsta vanliga val och
+    # slacker anda en telefon nagon glomt olast.
+    ["screen_off_timeout", "1800000"],
+]
 
 [settings.restore]
 global = [
@@ -105,6 +113,10 @@ global = [
 secure = [
     ["auto_update_apps", "1"],
     ["ota_disable_automatic_update", "0"],
+]
+system = [
+    # AOSP:s standard; den ursprungliga tiden sparas inte.
+    ["screen_off_timeout", "60000"],
 ]
 
 # ---------------------------------------------------------------------
@@ -1010,9 +1022,10 @@ volumemapswitcher = false
 
 # Skarmen ska vara pa sa lange ATAK ar i forgrunden. ATAK:s eget val
 # "Disable Screen Saver / Screen Lock" - av som standard - satter
-# FLAG_KEEP_SCREEN_ON pa ATAK:s fonster. Androids skarmtid (60 s som
-# standard, aven pa LineageOS) ror vi inte: lamnar man ATAK eller trycker
-# pa strombrytaren slacks och lases telefonen som vanligt.
+# FLAG_KEEP_SCREEN_ON pa ATAK:s fonster i 5.8.0.5 och 5.8.0.6. I 5.8.0.7
+# ar den koden borta: valet hindrar bara att flaggan rensas, och ingen
+# satter den. Darfor hojer [settings.install] Androids skarmtid till
+# 30 min; raden har ligger kvar till en ATAK-version som fungerar igen.
 # Boolean, som raden ovan.
 atakScreenLock = true
 

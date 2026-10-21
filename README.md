@@ -302,9 +302,14 @@ anvisningen, men som gör telefonen användbar i fält:
 
 Den sista är ATAK:s eget val *Disable Screen Saver / Screen Lock*, som
 annars är av: då släcks skärmen efter Androids skärmtid, 60 sekunder som
-standard, även mitt i ATAK. Androids skärmtid ändras inte — lämnar man
-ATAK, eller trycker på strömknappen, släcks och låses telefonen som
-vanligt.
+standard, även mitt i ATAK.
+
+**ATAK 5.8.0.7 struntar i det valet.** Koden som håller skärmen tänd är
+borta i den versionen (den finns i 5.8.0.5 och 5.8.0.6). Därför sätter
+paketet också Androids skärmtid till **30 minuter** (`screen_off_timeout`
+under `[settings.install]`). Den gäller alla appar, inte bara ATAK —
+tryck på strömknappen för att låsa telefonen när du lägger undan den.
+`restore` sätter tillbaka 60 sekunder.
 
 ### Loadout — vilka knappar och verktyg som syns
 

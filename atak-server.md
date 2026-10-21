@@ -1,13 +1,15 @@
 # TAK Server — operations notes
 
 Working notes from testing TAK Server against the kit, 2026-09-20, 21, 26,
-27 and 2026-10-17. Written to give a running start on a real server, not as
-a manual.
+27, 2026-10-17 and 21, plus a four-day field exercise (2026-10-18–21) run
+against it. Written to give a running start on a real server, not as a
+manual.
 
 **Rigs:** TAK Server 5.7-RELEASE-43 in Docker — first on a workstation, then
-on a home NAS reachable from the internet (§8) — and, from 2026-10-17,
-5.8-RELEASE-92 from tak.gov's hardened Docker images beside it on the same
-NAS (§8, *Upgrading to 5.8*). Clients: ATAK-CIV 5.8.0.5 on
+on a home NAS reachable from the internet (§8). From 2026-10-17
+5.8-RELEASE-92 from tak.gov's hardened Docker images ran beside it on the
+same NAS, and on 2026-10-21 it replaced 5.7 (§8, *Upgrading to 5.8*).
+Clients: ATAK-CIV 5.8.0.5, from 2026-10-21 5.8.0.7, on
 a OnePlus Nord N100 (OxygenOS 11, from 2026-09-27 LineageOS 22.2) and on a
 Sony Xperia X running LineageOS 20; on LineageOS neither has any Google
 services. Measurements were run, not read. The exceptions are flagged where
@@ -765,6 +767,32 @@ still wins.
 From a phone on a carrier network (Telenor, via a hotspot), enrollment,
 stream and profiles all worked.
 
+### Four days in the field
+
+During an exercise (2026-10-18–21) one phone (the N100) used the server
+over mobile data the whole time. What the server logs showed:
+
+- **The connection held, with many short reconnects.** When the network
+  changes, ATAK opens a new stream before the old one dies; the server then
+  logs `Connection reset by peer` on the old one. Every reconnect was back
+  within the same minute. A few ended with `Connection timed out` instead
+  (−110), and those recovered too. The only long gaps were nights, phone
+  asleep.
+- **6 178 position reports, 7 drawings and 5 markers** stored over the four
+  days — one phone's normal traffic, no load at all.
+- **The server restarted every night at 00:00.** Most likely the NAS's
+  nightly appdata backup, which stops containers while it copies them —
+  other containers restarted at the same moment; not confirmed. The phone that was online reconnected within a
+  minute, but in real use that is a nightly outage — schedule backups
+  around the exercise, or exclude the TAK containers and dump the database
+  instead.
+- **A password-protected Data Sync mission fails on every reconnect.** A
+  mission created from the phone with a password worked, but after each
+  reconnect ATAK re-subscribes *without* the password and the server
+  answers 403, `Illegal attempt to subscribe to mission! No token role
+  provided.` 5.7 and 5.8 behave the same. The member has to open the
+  mission and enter the password again; use passwords only where needed.
+
 ### The containers
 
 Plain `docker run` from one script: Unraid ships no Compose.
@@ -857,16 +885,36 @@ not per connection: every other server on that phone now uses them too.
   asks for the word `erase`, reads EOF and aborts, then runs the schema
   upgrade.
 
-**Switching over** is the same dump/restore once more with 5.7 stopped,
-then 5.8 takes the standard ports — only the host side of `-p` changes,
-since the container ports are already the standard ones. Phones reconnect
-without re-enrolling. The plugin repository (§3) does not depend on the TAK
-version and stays.
+**Switching over — done 2026-10-21.** The same dump/restore once more with
+5.7 stopped, then 5.8 on the standard ports — only the host side of `-p`
+changes, since the container ports are already the standard ones. In order:
+
+1. Stop the 5.7 server, `pg_dump` its still-running database (109 MB once a
+   270 MB map profile had been deleted), stop the database.
+2. Copy `CoreConfig.xml` (JDBC host changed), the user file and
+   `certs/files/` into the 5.8 tree again — they may have changed since the
+   side-by-side copy.
+3. Restore into Postgres 18, `SchemaManager.jar upgrade` (7 migrations).
+4. Start 5.8 with the standard ports.
+
+**Downtime: 1 min 34 s.** Both phones reconnected with their 5.7-issued
+certificates — no re-enrollment — and their profile checks answered 204:
+the profiles' update times carry over in the dump, so nothing was sent
+again. The plugin repository (§3) does not depend on the TAK version and
+was not touched.
+
+Keep the old version for rollback: its containers stay, stopped, with
+`docker update --restart no` so a NAS reboot or a backup job that restarts
+containers cannot start 5.7 on top of 5.8 — both want the same ports.
+Make the old start script refuse to run while the new server is up.
+
+**Moving a test phone back** means undoing what its test connection package
+did, and **deleting the package is part of it** (§9).
 
 ### Phones without Google
 
-ATAK-CIV 5.8.0.5 and all four plugins contain **zero** Google Play Services
-classes, checked in every `classes*.dex`. With no Google apps at all —
+ATAK-CIV 5.8.0.5 and 5.8.0.7 and all four plugins contain **zero** Google
+Play Services classes, checked in every `classes*.dex`. With no Google apps at all —
 LineageOS 20 on the Sony, LineageOS 22.2 on the N100 — everything in this
 file worked: enrollment, profiles, and installs from the update server. The
 kit's lockdown has a LineageOS list of its own (`[packages.rom]`).
@@ -959,6 +1007,22 @@ Lock* (`atakScreenLock`) is off by default, so the screen goes dark after
 Android's timeout — 60 s on stock settings, any ROM — with ATAK in front.
 The kit now sets it; it only holds the screen on while ATAK is in front.
 
+**ATAK 5.8.0.6 cannot load certificates on Android 15.** Every keystore
+load fails with `KeyStoreException: PKCS12 not found — no such algorithm:
+PKCS12 for provider BC`; with no truststore, enrollment crashes and the
+phone never connects, and re-enrolling cannot help. Seen on LineageOS 22.2.
+5.8.0.7 (2026-10-18) reverts the change (ATAK-21168, "Invalid TLS
+Certificate Error introduced in 5.8.0.6") and works on Android 13 and 15
+with existing certificates. All three share one signing key, so a
+userdebug ROM can roll back with `adb install -r -d`, data kept.
+
+**A connection package stays on the phone after import.** ATAK keeps the
+zip in `atak/tools/datapackage/` and an extracted copy under `files/<uuid>/`.
+Restoring a phone's ATAK settings from a backup taken before the import
+also restores the file index that did not know the package yet — so at the
+next start ATAK finds it, imports it again, and the connection and its
+global port prefs (§8) are back. Delete both copies before restoring.
+
 **No delivery confirmation for profiles.** Nothing records which device
 received which profile; the only evidence is the API log line `Returning
 connection profile for <uid>`. Certificates *are* tracked —
@@ -989,13 +1053,17 @@ folder), `ProductInformation` (the `product.inf` columns),
 
 ## 11. Open
 
-- **One carrier tested.** Telenor (via a hotspot) works end to end; Telia,
-  Tele2 and Tre are untested. Terrain distribution over mobile data is
-  unmeasured — the throughput table is LAN and loopback.
+- **Carriers.** Telenor (via a hotspot) works end to end, and the phone's
+  own mobile data held the stream for four days in the field (§8; which
+  carrier was not recorded). The others are untested. Terrain distribution
+  over mobile data is unmeasured — the throughput table is LAN and loopback.
 - **Concurrency measured with simulated clients.** Real phones hold
   connections longer, so the true limit is likely lower than the table.
-- **Data Sync feeds untouched.** Metodanvisning §1.4 makes Feeds the core of
-  how SLO, UPK and UND move, with per-role rights. Not explored at all.
+- **Data Sync feeds barely touched.** Metodanvisning §1.4 makes Feeds the
+  core of how SLO, UPK and UND move, with per-role rights. Only one
+  password-protected mission has been used, from one phone in the field
+  (§8: it fails to re-subscribe after each reconnect). Roles, several
+  members and feeds for real are unexplored.
 - **Two device models tested**: a OnePlus Nord N100 on stock Android 11 and
   later on LineageOS 22.2, and a Sony Xperia X on LineageOS 20. No Samsung
   or Xiaomi phone has been through the server route.
@@ -1003,17 +1071,18 @@ folder), `ProductInformation` (the `product.inf` columns),
   woke, an on-connect request got nothing though a profile was waiting. Not
   the streaming-group race (`useStreamingGroup` is unset). It did not recur
   in later deliveries.
-- **Inland terrain profiles unloaded.** The 22–29 MB grupp profiles are on
-  the test server but no phone has fetched one, and the group names they are
-  scoped to are placeholders that must match the real grupp groups. How many
-  phones can fetch one at once on a given heap is unmeasured.
+- **Large terrain profiles barely loaded.** One phone has fetched the
+  largest grupp profile (Kalmar–Kronoberg, 11 cells, 29 MB) over WiFi —
+  all cells landed. The group names the profiles are scoped to are
+  placeholders that must match the real grupp groups, and how many phones
+  can fetch one at once on a given heap is unmeasured.
 - **Does ATAK ever remove delivered zips?** The DTED zip stayed in
   `atak/tools/datapackage/files/` after unpacking (§5). Whether a later
   cleanup, a profile update or only `restore` removes it is untested.
-- **5.8 soak and switch-over.** The 5.8 test has run with one phone for
-  minutes, not days. Plugin installs on a phone connected to it and the 5.8
-  web admin are untested, as is ATAK 5.8.0.6 against it (on Android 15 that release cannot
-  load its certificates at all, whatever the server).
+- **5.8 in use for hours, not weeks.** The switch-over is done (§8) and
+  both phones are on it with ATAK 5.8.0.7, but the field exercise ran on
+  5.7. Plugin installs through the update server while on 5.8, and 5.8's
+  web admin, are untested.
 - **Multi-select install untested.** Package Management was used one plugin
   at a time.
 - **Kit scope.** The kit profile now goes to all groups on the test server.

@@ -9,7 +9,8 @@ manual.
 on a home NAS reachable from the internet (§8). From 2026-10-17
 5.8-RELEASE-92 from tak.gov's hardened Docker images ran beside it on the
 same NAS, and on 2026-10-21 it replaced 5.7 (§8, *Upgrading to 5.8*).
-Clients: ATAK-CIV 5.8.0.5, from 2026-10-21 5.8.0.7, on
+Clients: ATAK-CIV 5.8.0.5, from 2026-10-21 5.8.0.7 (5.8.0.8 on the N100
+from 2026-10-25), on
 a OnePlus Nord N100 (OxygenOS 11, from 2026-09-27 LineageOS 22.2) and on a
 Sony Xperia X running LineageOS 20; on LineageOS neither has any Google
 services. Measurements were run, not read. The exceptions are flagged where
@@ -289,6 +290,25 @@ the index. ATAK checks the SHA-256 before handing the APK to Android.
 lists a higher one. hvreports and Ramsor both ship with `versionCode 1` —
 whoever builds them must raise it with every release, or no phone is ever
 offered the new version.
+
+**Updating a plugin — done once, 2026-10-25** (Data Sync 5.0.2 → 5.2.0):
+
+1. Check the new APK before it goes anywhere: same package, **same signing
+   key** as the installed one (Android refuses an update signed
+   differently), a higher `versionCode`, and a plugin API (`plugin-api`
+   meta-data) matching the ATAK in use. `aapt2 dump badging` and
+   `keytool -printcert -jarfile` show all of it.
+2. Replace the APK in the repo, and in its `product.inf` line the version
+   name, `versionCode`, file name, SHA-256 and size.
+3. Rebuild `product.infz` (`zip -X product.infz product.inf`) and copy the
+   directory to the server. nginx serves files as they are — no restart.
+4. On the phone, ATAK reads the new index at its next start and offers the
+   update in Plugins; the user taps it and confirms Android's prompt. The
+   4.3 MB APK came down in ~4 s on WiFi; ATAK verified signature and API,
+   and the plugin loaded cleanly after an ATAK restart.
+
+Keep exactly one version per plugin in the repo and in the kit's
+`payload/apks`: the kit's APK scan does not deduplicate.
 
 ### On the phone
 
@@ -970,8 +990,8 @@ did, and **deleting the package is part of it** (§9).
 
 ### Phones without Google
 
-ATAK-CIV 5.8.0.5 and 5.8.0.7 and all four plugins contain **zero** Google
-Play Services classes, checked in every `classes*.dex`. With no Google apps at all —
+ATAK-CIV 5.8.0.5, 5.8.0.7 and 5.8.0.8 and all four plugins (Data Sync
+5.0.2 and 5.2.0) contain **zero** Google Play Services classes, checked in every `classes*.dex`. With no Google apps at all —
 LineageOS 20 on the Sony, LineageOS 22.2 on the N100 — everything in this
 file worked: enrollment, profiles, and installs from the update server. The
 kit's lockdown has a LineageOS list of its own (`[packages.rom]`).
@@ -1067,9 +1087,11 @@ The kit now sets it; it only holds the screen on while ATAK is in front.
 `checkScreenLock` that adds `FLAG_KEEP_SCREEN_ON` to ATAK's window when the
 pref is on; in 5.8.0.7 it is gone (compared in the dex of all three), and
 the pref only stops the flag from being *cleared* — only route navigation
-and Bloodhound still set it, temporarily. Not in the release notes. The kit
-works around it with Android's screen timeout at 30 min
-(`screen_off_timeout`), which covers every app, not just ATAK.
+and Bloodhound still set it, temporarily. Not in the release notes, and
+**still so in 5.8.0.8** — same code, and on the N100 its window has no
+`KEEP_SCREEN_ON` either. The kit works around it with Android's screen
+timeout at 30 min (`screen_off_timeout`), which covers every app, not just
+ATAK.
 
 **ATAK 5.8.0.6 cannot load certificates on Android 15.** Every keystore
 load fails with `KeyStoreException: PKCS12 not found — no such algorithm:
@@ -1077,8 +1099,10 @@ PKCS12 for provider BC`; with no truststore, enrollment crashes and the
 phone never connects, and re-enrolling cannot help. Seen on LineageOS 22.2.
 5.8.0.7 (2026-10-18) reverts the change (ATAK-21168, "Invalid TLS
 Certificate Error introduced in 5.8.0.6") and works on Android 13 and 15
-with existing certificates. All three share one signing key, so a
-userdebug ROM can roll back with `adb install -r -d`, data kept.
+with existing certificates. 5.8.0.8 (tested 2026-10-25 on the N100,
+Android 15) keeps the fix: upgraded in place, no keystore errors, existing
+certificate accepted, all plugins loaded. All four share one signing key,
+so a userdebug ROM can roll back with `adb install -r -d`, data kept.
 
 **A connection package stays on the phone after import.** ATAK keeps the
 zip in `atak/tools/datapackage/` and an extracted copy under `files/<uuid>/`.
@@ -1148,10 +1172,10 @@ folder), `ProductInformation` (the `product.inf` columns),
 - **Does ATAK ever remove delivered zips?** The DTED zip stayed in
   `atak/tools/datapackage/files/` after unpacking (§5). Whether a later
   cleanup, a profile update or only `restore` removes it is untested.
-- **5.8 in use for hours, not weeks.** The switch-over is done (§8) and
-  both phones are on it with ATAK 5.8.0.7, but the field exercise ran on
-  5.7. Plugin installs through the update server while on 5.8, and 5.8's
-  web admin, are untested.
+- **5.8 in use for days, not weeks.** The switch-over is done (§8) and
+  both phones are on it (ATAK 5.8.0.8 on the N100, 5.8.0.7 on the Sony),
+  but the field exercise ran on 5.7. A plugin update through the update
+  server has worked while on 5.8 (§3); 5.8's web admin is untested.
 - **Multi-select install untested.** Package Management was used one plugin
   at a time.
 - **Kit scope.** The kit profile now goes to all groups on the test server.

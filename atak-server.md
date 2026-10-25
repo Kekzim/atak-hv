@@ -1,7 +1,7 @@
 # TAK Server — operations notes
 
 Working notes from testing TAK Server against the kit, 2026-09-20, 21, 26,
-27, 2026-10-17 and 21, plus a four-day field exercise (2026-10-18–21) run
+27, 2026-10-17, 21 and 25, plus a four-day field exercise (2026-10-18–21) run
 against it. Written to give a running start on a real server, not as a
 manual.
 
@@ -483,7 +483,8 @@ source holding tiles someone already looked at — 52 MB on the test phone
 from casual panning, against 1.6 GB of DTED. A real offline map can be cut
 from Lantmäteriet's open topographic map and delivered by the server — one
 county, 270 MB, verified 2026-10-11 (*Offline map through the server*
-below).
+below). Since 2026-10-25 the military map (NMK) goes out the same way, one
+profile per grupp (*NMK per grupp* below).
 
 ### What ATAK accepts — verified on hardware
 
@@ -537,6 +538,11 @@ Sheets average 18.6 MB, max 29.7 MB.
 `nmk50-nedladdning-api` and `nmk250-nedladdning-api`. If the requirement is
 streaming, NMK is out regardless of who holds the login. MSB's own guidance
 treats civil NMK as something to print.
+
+**An ATAK-ready NMK package exists anyway** — it reached this rig as a
+shared download, not from Geotorget (*NMK per grupp* below). Who may hold
+and pass it on is a question for whoever issued it; nothing of it belongs
+in this repository.
 
 ### Lantmäteriet's topographic map
 
@@ -610,13 +616,64 @@ imagery in 3.6 s**, selectable in the map list beside the streamed sources.
 
 Costs:
 
-- **Server heap.** The upload goes through the API JVM in memory. At the
-  1331 MB API heap of §8 a 270 MB upload is not safe; it ran with the API
-  heap raised to 4 GB (container ~5.7 GiB), and the upload itself took ~3
-  minutes. Lower the heap again afterwards.
+- **Server heap.** The upload goes through the API JVM in memory, and so
+  does every delivery: TAK assembles the profile package in RAM each time a
+  phone fetches it. At the 1331 MB API heap of §8 a 270 MB profile is not
+  safe; it ran with the API heap at 4 GB (container ~5.7 GiB), and the
+  upload took ~3 minutes. Keep 4 GB for as long as map profiles are served
+  (*NMK per grupp*).
 - **Phone storage ×3.** ATAK leaves two more copies of the map under
   `atak/tools/datapackage/files/` beside the imported one — 569 MB of
   leftovers for a 270 MB map.
+
+### NMK per grupp through the server — verified
+
+**What the package is.** One MBTiles file, `atakmaps-<release>` (here
+26072701 — the same release tag as the DTED2 of §5), 7.5 GB, 663 649 PNG
+tiles, marked as a base layer. Two map series in one pyramid:
+
+| Zoom | Area | Tiles |
+|---|---|---|
+| 3–11 | Nordic overview, 2.8–32°E, 54–72°N | 33 799 |
+| 12–14 | Sweden only, 10.8–25°E, 55.2–69.1°N | 629 850 |
+
+So z12 holds barely more tiles than z11 — it covers a much smaller area,
+it is not a gap. From z12 each level is ×4 as it should be. z14 is ~5 m per
+pixel at these latitudes, and three quarters of the tiles.
+
+**Cutting it per grupp.** A short standard-library script copies the tiles
+that touch the grupp's county outlines — the same OSM outlines §5 uses for
+the DTED cells — plus a 5 km margin, from z10 up; below that the whole
+bounding box, since an overview cut to a county's shape looks broken. MBTiles
+counts rows from the south and GeoPackage from the north, so the row is
+flipped on the way (check one known tile by eye). The result is a tile
+GeoPackage, wrapped exactly like the Lantmäteriet map above.
+
+| Profile | Counties | Tiles | Size |
+|---|---|---|---|
+| Blekinge | Blekinge | 6 606 | 65 MB |
+| Skåne | Skåne | 13 839 | 158 MB |
+| Kalmar och Kronoberg | Kalmar, Kronoberg | 27 288 | 315 MB |
+| Norra Småland | Jönköping | 12 626 | 199 MB |
+| Livgrenadjär | Östergötland | 15 427 | 210 MB |
+
+**A grupp's ground is not only its counties.** Exercise areas across a
+county border need adding by hand. The script takes any further OSM outline
+with its own margin — a firing range from OpenStreetMap (`danger_area`)
+plus 10 km added 8 MB to one profile. Such an area is an island in the map;
+the land between is not included unless it is added too.
+
+**Measured on the N100, home WiFi:** the 65 MB profile fetched in 2.3 s,
+unpacked into `atak/imagery/` and imported as a layer in ~1 s, ~11 s from
+request to map. A second delivery (after a scope change or a new cut)
+replaces it cleanly: ATAK removes the old layer, overwrites the file and
+imports again — one file, one layer.
+
+**Server side:** uploads of 158–315 MB took 85–154 s each with the API heap
+at 4 GB; the server container then used ~6.7 GiB. The same heap is needed
+whenever a phone fetches one (*Server heap* above), so 4 GB is the
+default, not a temporary setting. Each profile is scoped to its grupp's
+group only.
 
 ### Streaming Lantmäteriet costs money
 
@@ -1030,6 +1087,11 @@ also restores the file index that did not know the package yet — so at the
 next start ATAK finds it, imports it again, and the connection and its
 global port prefs (§8) are back. Delete both copies before restoring.
 
+**A profile created through the API is an Enrollment profile.**
+`POST /device/profile/<name>?group=X` makes it active, type Enrollment.
+Upload its files first, then `PUT` the profile JSON with `"type":
+"Connection"` and the groups — the other order lets a phone fetch it empty.
+
 **No delivery confirmation for profiles.** Nothing records which device
 received which profile; the only evidence is the API log line `Returning
 connection profile for <uid>`. Certificates *are* tracked —
@@ -1095,6 +1157,14 @@ folder), `ProductInformation` (the `product.inf` columns),
 - **Kit scope.** The kit profile now goes to all groups on the test server.
   Real use may still want one kit per grupp — different overlays or DTED —
   and every save re-delivers the whole profile (§2).
+- **NMK in the field untested.** The grupp map profiles have reached one
+  phone, on WiFi. Fetching 158–315 MB over mobile data, several phones at
+  once, and how much the leftover copies (§6, *Phone storage ×3*) cost with
+  a map this size are all unmeasured. The grupp groups they are scoped to
+  are placeholders, as for the DTED.
+- **NMK distribution rights unclear.** The package came as a shared
+  download; whether it may be redistributed through a unit's own TAK
+  server is for whoever issued it to say.
 - **No map licence read.** The download is free once ordered, but
   *Användningsvillkor för Topografisk webbkarta Nedladdning, raster* governs
   what may be done with an extract. Unread.
